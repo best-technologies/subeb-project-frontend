@@ -27,14 +27,15 @@ const SchoolsTab: React.FC = () => {
   const { data: dashboardData, loading, error } = useAdminDashboard();
 
   const schoolStats = useMemo(() => {
-    if (!dashboardData?.schools) return [];
+    const schools = dashboardData?.data?.schools || dashboardData?.schools || [];
+    if (schools.length === 0) return [];
 
-    const stats: SchoolStats[] = dashboardData.schools.map(school => {
+    const stats: SchoolStats[] = schools.map(school => {
       // For now, we'll use the school data directly since we don't have student data per school
       // In a real implementation, you'd want to fetch students per school
       return {
         name: school.name,
-        lga: 'Unknown', // API doesn't provide LGA per school yet
+        lga: school.lga || 'Unknown',
         totalStudents: school.totalStudents,
         averageScore: 0, // Would need to calculate from student data
         topPerformer: 'N/A',
@@ -136,7 +137,7 @@ const SchoolsTab: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Enhanced Header */}
+      {/* Enhanced Header
       <div className="bg-gradient-to-r from-green-600/20 to-blue-600/20 backdrop-blur-sm rounded-xl p-8 border border-white/10">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
@@ -154,7 +155,7 @@ const SchoolsTab: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Top Performing Schools */}
       {topSchools.length > 0 && (
@@ -194,47 +195,8 @@ const SchoolsTab: React.FC = () => {
         </div>
       )}
 
-      {/* Enhanced Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-xl p-6 border border-blue-500/20">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">🏫</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-300">Total Schools</p>
-              <p className="text-3xl font-bold text-blue-400">{schoolStats.length}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-xl p-6 border border-green-500/20">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">👥</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-300">Total Students</p>
-              <p className="text-3xl font-bold text-green-400">{totalStudents}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-xl p-6 border border-purple-500/20">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">📊</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-300">Overall Average</p>
-              <p className={`text-3xl font-bold ${getScoreColor(overallAverage)}`}>{overallAverage}%</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Enhanced Search and Filters */}
-      <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+       {/* Enhanced Search and Filters */}
+       <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">Search Schools</label>
@@ -260,7 +222,7 @@ const SchoolsTab: React.FC = () => {
               className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
             >
               <option value="">All LGAs</option>
-              {dashboardData?.lgas.map(lga => (
+              {(dashboardData?.data?.lgas || dashboardData?.lgas || []).map(lga => (
                 <option key={lga.id} value={lga.name}>{lga.name}</option>
               )) || (
                 <>
@@ -304,6 +266,47 @@ const SchoolsTab: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Enhanced Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-xl p-6 border border-blue-500/20">
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">🏫</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-300">Total Schools</p>
+              <p className="text-3xl font-bold text-blue-400">{schoolStats.length}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-xl p-6 border border-green-500/20">
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">👥</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-300">Total Students</p>
+              <p className="text-3xl font-bold text-green-400">{totalStudents}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-xl p-6 border border-purple-500/20">
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">📊</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-300">Overall Average</p>
+              <p className={`text-3xl font-bold ${getScoreColor(overallAverage)}`}>{overallAverage}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+     
 
       {/* Enhanced Schools Table */}
       <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden shadow-2xl">

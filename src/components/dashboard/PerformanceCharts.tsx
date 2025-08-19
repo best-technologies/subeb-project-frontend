@@ -1,5 +1,5 @@
 import React from 'react';
-import { Student, subjectNames } from '@/data/mockData';
+import { Student, subjectNames } from '@/types/student';
 
 interface PerformanceChartsProps {
   students: Student[];

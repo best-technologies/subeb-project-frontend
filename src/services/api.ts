@@ -1,4 +1,5 @@
 import { AdminDashboardResponse, ApiErrorResponse } from './types/adminDashboardResponse';
+import { StudentsDashboardResponse, StudentsFilters } from './types/studentsDashboardResponse';
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
@@ -75,8 +76,13 @@ class ApiClient {
   }
 
   // GET request helper
-  private async get<T>(endpoint: string, headers?: HeadersInit): Promise<T> {
-    return this.request<T>(endpoint, {
+  private async get<T>(endpoint: string, queryParams?: Record<string, string>, headers?: HeadersInit): Promise<T> {
+    let url = endpoint;
+    if (queryParams && Object.keys(queryParams).length > 0) {
+      const params = new URLSearchParams(queryParams);
+      url = `${endpoint}?${params.toString()}`;
+    }
+    return this.request<T>(url, {
       method: 'GET',
       headers,
     });
@@ -85,7 +91,7 @@ class ApiClient {
   // POST request helper
   private async post<T>(
     endpoint: string,
-    data?: any,
+    data?: unknown,
     headers?: HeadersInit
   ): Promise<T> {
     return this.request<T>(endpoint, {
@@ -98,7 +104,7 @@ class ApiClient {
   // PUT request helper
   private async put<T>(
     endpoint: string,
-    data?: any,
+    data?: unknown,
     headers?: HeadersInit
   ): Promise<T> {
     return this.request<T>(endpoint, {
@@ -117,14 +123,68 @@ class ApiClient {
   }
 
   // Admin Dashboard API Methods
-  async getAdminDashboard(): Promise<AdminDashboardResponse> {
-    console.log('API Client - Making request to:', `${this.baseURL}/admin/dashboard`);
+  async getAdminDashboard(params?: {
+    session?: string;
+    term?: string;
+    page?: number;
+    limit?: number;
+    search?: string;
+    schoolId?: string;
+    classId?: string;
+    gender?: string;
+    schoolLevel?: string;
+    lgaId?: string;
+    sortBy?: string;
+    sortOrder?: string;
+    includeStats?: boolean;
+    includePerformance?: boolean;
+  }): Promise<AdminDashboardResponse> {
+    console.log('🔍 API Client - Admin Dashboard Request with params:', params);
+    
     try {
-      const response = await this.get<AdminDashboardResponse>('/admin/dashboard');
-      console.log('API Client - Response received:', response);
+      // Convert params to query string
+      const queryParams: Record<string, string> = {};
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            queryParams[key] = String(value);
+          }
+        });
+      }
+      
+      const response = await this.get<AdminDashboardResponse>('/admin/dashboard', queryParams);
+      console.log('✅ API Client - Admin Dashboard Response:', response);
       return response;
     } catch (error) {
-      console.error('API Client - Error in getAdminDashboard:', error);
+      console.error('❌ API Client - Error in getAdminDashboard:', error);
+      throw error;
+    }
+  }
+
+  // Students Dashboard API Methods
+  async getStudentsDashboard(filters: StudentsFilters = {}): Promise<StudentsDashboardResponse> {
+    console.log('🔍 API Client - Students Dashboard Request:');
+    console.log('  📋 Filters being sent to backend:', filters);
+    console.log('  🎯 Active filters:', Object.entries(filters).filter(([, value]) => value && value !== '').map(([key, value]) => `${key}: ${value}`));
+    
+    // Build query parameters
+    const queryParams: Record<string, string> = {};
+    if (filters.session) queryParams.session = filters.session;
+    if (filters.lga) queryParams.lga = filters.lga;
+    if (filters.school) queryParams.school = filters.school;
+    if (filters.class) queryParams.class = filters.class;
+    if (filters.gender) queryParams.gender = filters.gender;
+    if (filters.subject) queryParams.subject = filters.subject;
+    
+    console.log('  🌐 Endpoint:', '/admin/students/dashboard');
+    console.log('  📊 Query parameters:', queryParams);
+    
+    try {
+      const response = await this.get<StudentsDashboardResponse>('/admin/students/dashboard', queryParams);
+      console.log('✅ API Client - Students dashboard response received:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ API Client - Error in getStudentsDashboard:', error);
       throw error;
     }
   }
@@ -138,6 +198,7 @@ class ApiClient {
   }
 
   // Method to set auth token (for future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setAuthToken(token: string): void {
     // TODO: Implement when authentication is added
     // localStorage.setItem('authToken', token);
@@ -159,7 +220,8 @@ const apiClient = new ApiClient();
 export default apiClient;
 
 // Export individual methods for direct use
-export const getAdminDashboard = () => apiClient.getAdminDashboard();
+export const getAdminDashboard = (params?: Parameters<typeof apiClient.getAdminDashboard>[0]) => apiClient.getAdminDashboard(params);
+export const getStudentsDashboard = (filters?: StudentsFilters) => apiClient.getStudentsDashboard(filters);
 export const setAuthToken = (token: string) => apiClient.setAuthToken(token);
 export const clearAuthToken = () => apiClient.clearAuthToken();
 

@@ -1,10 +1,46 @@
 // Types for Admin Dashboard API Response
 
+export interface Session {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  isCurrent: boolean;
+  isActive?: boolean;
+}
+
+export interface Term {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  isCurrent: boolean;
+  isActive?: boolean;
+}
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface Summary {
+  totalStudents: number;
+  totalMale: number;
+  totalFemale: number;
+  totalSchools: number;
+  totalClasses: number;
+  totalLgas: number;
+}
+
 export interface School {
   id: string;
   name: string;
   code: string;
   level: string;
+  address?: string;
+  lga?: string;
   totalStudents: number;
   totalTeachers: number;
 }
@@ -44,28 +80,57 @@ export interface Subject {
 
 export interface TopStudent {
   id: string;
-  position: number;
   studentName: string;
   examNumber: string;
-  gender: 'MALE' | 'FEMALE';
-  totalScore: number;
   school: string;
+  schoolCode: string;
   class: string;
+  gender: 'MALE' | 'FEMALE';
+  // Optional fields for backward compatibility
+  position?: number;
+  totalScore?: number;
 }
 
 export interface AdminDashboardData {
-  session: string;
-  term: string;
-  totalStudents: number;
-  totalMale: number;
-  totalFemale: number;
-  schools: School[];
-  lgas: LGA[];
-  classes: Class[];
-  genders: GenderCount[];
-  subjects: Subject[];
-  topStudents: TopStudent[];
-  lastUpdated: string;
+  currentSession: Session;
+  currentTerm: Term;
+  availableSessions: Session[];
+  availableTerms: Term[];
+  pagination: Pagination;
+  summary: Summary;
+  filters: Record<string, unknown>;
+  data: {
+    schools: School[];
+    lgas: LGA[];
+    classes: Class[];
+    students: TopStudent[];
+    subjects: Subject[];
+  };
+  statistics: {
+    genderDistribution: Array<{
+      gender: string;
+      _count: { gender: number };
+    }>;
+    schoolLevelDistribution: Array<{
+      level: string;
+      _count: { level: number };
+    }>;
+    classGradeDistribution: Array<{
+      grade: string;
+      _count: { grade: number };
+    }>;
+  };
+  performance: {
+    topStudents: TopStudent[];
+  };
+  // Legacy fields for backward compatibility
+  schools?: School[];
+  lgas?: LGA[];
+  classes?: Class[];
+  genders?: GenderCount[];
+  subjects?: Subject[];
+  topStudents?: TopStudent[];
+  lastUpdated?: string;
 }
 
 export interface AdminDashboardResponse {

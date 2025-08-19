@@ -1,13 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { CheckCircleIcon, ExclamationCircleIcon, TrashIcon, PlusIcon, AcademicCapIcon } from "@heroicons/react/24/outline";
-import { useAdminDashboard } from "@/services";
+import { useGlobalAdminDashboard } from "@/services";
 import { subjectNames } from "@/types/student";
 
 const ACCESS_PIN = "2024ASUBEB"; // Change this to your desired pin
-const PIN_STORAGE_KEY = "asubeb_auth_pin";
-const PIN_EXPIRY_KEY = "asubeb_auth_expiry";
-const PIN_VALIDITY_HOURS = 6;
 
 const getSessionYears = () => {
   const currentYear = new Date().getFullYear();
@@ -50,12 +47,12 @@ export default function EnterGradesPage() {
   const [loading, setLoading] = useState(false);
 
   // Fetch real data from API
-  const { data: dashboardData } = useAdminDashboard();
+  const { data: dashboardData } = useGlobalAdminDashboard();
 
   // Use real data from API
-  const schools = dashboardData?.schools.map(s => s.name) || [];
-  const lgas = dashboardData?.lgas.map(l => l.name) || [];
-  const classes = dashboardData?.classes.map(c => c.name) || [];
+  const schools = dashboardData?.data?.schools?.map(s => s.name) || dashboardData?.schools?.map(s => s.name) || [];
+  const lgas = dashboardData?.data?.lgas?.map(l => l.name) || dashboardData?.lgas?.map(l => l.name) || [];
+  const classes = dashboardData?.data?.classes?.map(c => c.name) || dashboardData?.classes?.map(c => c.name) || [];
 
   const handleStudentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

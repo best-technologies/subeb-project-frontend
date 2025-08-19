@@ -8,18 +8,22 @@ interface StudentsTableProps {
 
 const StudentsTable: React.FC<StudentsTableProps> = ({ topStudents }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortField, setSortField] = useState<keyof TopStudent>('position');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortField] = useState<keyof TopStudent>('position');
+  const [sortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const itemsPerPage = 10;
 
+  // Debug logging
+  console.log('StudentsTable - Received students:', topStudents?.length || 0);
+  console.log('StudentsTable - First student:', topStudents?.[0]);
+
   const sortedStudents = [...topStudents].sort((a, b) => {
-    let aValue = a[sortField];
-    let bValue = b[sortField];
+    let aValue: string | number = a[sortField] || '';
+    let bValue: string | number = b[sortField] || '';
     
     if (sortField === 'totalScore') {
-      aValue = a.totalScore;
-      bValue = b.totalScore;
+      aValue = a.totalScore || 0;
+      bValue = b.totalScore || 0;
     }
     
     if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
@@ -50,11 +54,36 @@ const StudentsTable: React.FC<StudentsTableProps> = ({ topStudents }) => {
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden">
-      <div className="px-6 py-4 border-b border-white/10">
-        <h2 className="text-xl font-bold text-white">Students Performance</h2>
-        <p className="text-gray-300 text-sm">Showing {startIndex + 1}-{Math.min(endIndex, topStudents.length)} of {topStudents.length} students</p>
-      </div>
+    <div>
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="px-6 py-4 border-b border-white/10 bg-white/5">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-300">
+              Showing {startIndex + 1}-{Math.min(endIndex, topStudents.length)} of {topStudents.length} students
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage <= 1}
+                className="px-3 py-1 bg-white/10 border border-white/20 rounded text-white hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-300">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage >= totalPages}
+                className="px-3 py-1 bg-white/10 border border-white/20 rounded text-white hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="overflow-x-auto">
         <table className="w-full">
@@ -95,7 +124,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({ topStudents }) => {
                 <tr className="hover:bg-white/5 transition-colors duration-200">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {student.position}
+                      {student.position || '-'}
                     </span>
                   </td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
@@ -120,11 +149,11 @@ const StudentsTable: React.FC<StudentsTableProps> = ({ topStudents }) => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">
-                    {student.totalScore}
+                    {student.totalScore || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`font-bold ${getScoreColor(Math.round(student.totalScore / 7))}`}>
-                      {Math.round(student.totalScore / 7)}%
+                    <span className={`font-bold ${getScoreColor(Math.round((student.totalScore || 0) / 7))}`}>
+                      {student.totalScore ? Math.round(student.totalScore / 7) + '%' : '-'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -141,9 +170,10 @@ const StudentsTable: React.FC<StudentsTableProps> = ({ topStudents }) => {
                     <td colSpan={9} className="px-6 py-4 bg-white/5">
                       <div className="text-center">
                         <p className="text-sm text-gray-400 mb-2">Student Details</p>
-                        <p className="text-white">Total Score: {student.totalScore}</p>
-                        <p className="text-white">Average Score: {Math.round(student.totalScore / 7)}%</p>
-                        <p className="text-white">Position: {student.position}</p>
+                        <p className="text-white">School Code: {student.schoolCode}</p>
+                        <p className="text-white">Total Score: {student.totalScore || 'Not available'}</p>
+                        <p className="text-white">Average Score: {student.totalScore ? Math.round(student.totalScore / 7) + '%' : 'Not available'}</p>
+                        <p className="text-white">Position: {student.position || 'Not ranked'}</p>
                       </div>
                     </td>
                   </tr>
@@ -154,30 +184,6 @@ const StudentsTable: React.FC<StudentsTableProps> = ({ topStudents }) => {
         </table>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-white/10 flex items-center justify-between">
-          <div className="text-sm text-gray-300">
-            Page {currentPage} of {totalPages}
-          </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 text-sm bg-white/10 border border-white/20 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition-colors duration-200"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm bg-white/10 border border-white/20 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition-colors duration-200"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

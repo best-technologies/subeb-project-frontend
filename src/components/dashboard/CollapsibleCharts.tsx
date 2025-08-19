@@ -9,39 +9,31 @@ interface CollapsibleChartsProps {
 
 const CollapsibleCharts: React.FC<CollapsibleChartsProps> = ({ dashboardData }) => {
   // State for selected chart (none by default)
-  const [selectedChart, setSelectedChart] = useState<string | null>(null);
+  const [selectedChart] = useState<string | null>(null);
 
   // Use real API data for charts
-  const topStudents = dashboardData?.topStudents || [];
+  const topStudents = dashboardData?.performance?.topStudents || dashboardData?.data?.students || dashboardData?.topStudents || [];
   
   // Calculate subject averages from real data (simplified since we don't have individual subject scores)
-  const subjectAverages = dashboardData?.subjects?.map(subject => ({
+  const subjectAverages = (dashboardData?.data?.subjects || dashboardData?.subjects || []).map(subject => ({
     subject: subject.name.toLowerCase().replace(/\s+/g, ''),
-    average: Math.round((dashboardData.totalStudents > 0 ? 75 : 0)), // Default average
+    average: Math.round((dashboardData?.summary?.totalStudents && dashboardData.summary.totalStudents > 0 ? 75 : 0)), // Default average
     name: formatEducationalText(subject.name)
-  })) || [];
+  }));
 
   // Calculate class performance from real data
-  const classAverages = dashboardData?.classes?.map(classItem => ({
+  const classAverages = (dashboardData?.data?.classes || dashboardData?.classes || []).map(classItem => ({
     class: classItem.name,
     average: Math.round((classItem.currentEnrollment > 0 ? 75 : 0)) // Default average
-  })).sort((a, b) => b.average - a.average) || [];
+  })).sort((a, b) => b.average - a.average);
 
   // Calculate gender performance from real data
-  const maleAverage = dashboardData?.totalMale && dashboardData.totalStudents 
-    ? Math.round((dashboardData.totalMale / dashboardData.totalStudents) * 100)
+  const maleAverage = dashboardData?.summary?.totalMale && dashboardData.summary?.totalStudents 
+    ? Math.round((dashboardData.summary.totalMale / dashboardData.summary.totalStudents) * 100)
     : 0;
-  const femaleAverage = dashboardData?.totalFemale && dashboardData.totalStudents
-    ? Math.round((dashboardData.totalFemale / dashboardData.totalStudents) * 100)
+  const femaleAverage = dashboardData?.summary?.totalFemale && dashboardData.summary?.totalStudents
+    ? Math.round((dashboardData.summary.totalFemale / dashboardData.summary.totalStudents) * 100)
     : 0;
-
-  // Tab definitions (hidden)
-  const chartTabs = [
-    { key: 'subject', label: 'Subject Performance', icon: '📚' },
-    { key: 'class', label: 'Class Performance', icon: '🏫' },
-    { key: 'gender', label: 'Gender Performance', icon: '👥' },
-    { key: 'distribution', label: 'Score Distribution', icon: '📊' },
-  ];
 
   return (
     <div className="mb-8">
@@ -125,7 +117,7 @@ const CollapsibleCharts: React.FC<CollapsibleChartsProps> = ({ dashboardData }) 
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-300">
-                  {dashboardData?.totalMale || 0} Male • {dashboardData?.totalFemale || 0} Female
+                  {dashboardData?.summary?.totalMale || 0} Male • {dashboardData?.summary?.totalFemale || 0} Female
                 </p>
               </div>
             </div>
@@ -134,14 +126,14 @@ const CollapsibleCharts: React.FC<CollapsibleChartsProps> = ({ dashboardData }) 
         {selectedChart === 'distribution' && (
           <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6">
             <h3 className="text-lg font-bold text-white mb-4">Score Distribution</h3>
-            <div className="space-y-4">
-              {[
-                { range: '90-100', color: 'from-green-500 to-green-600', count: topStudents.filter(s => s.totalScore >= 630).length },
-                { range: '80-89', color: 'from-blue-500 to-blue-600', count: topStudents.filter(s => s.totalScore >= 560 && s.totalScore < 630).length },
-                { range: '70-79', color: 'from-yellow-500 to-yellow-600', count: topStudents.filter(s => s.totalScore >= 490 && s.totalScore < 560).length },
-                { range: '60-69', color: 'from-orange-500 to-orange-600', count: topStudents.filter(s => s.totalScore >= 420 && s.totalScore < 490).length },
-                { range: 'Below 60', color: 'from-red-500 to-red-600', count: topStudents.filter(s => s.totalScore < 420).length }
-              ].map(({ range, color, count }) => (
+                      <div className="space-y-4">
+            {[
+              { range: '90-100', color: 'from-green-500 to-green-600', count: topStudents.filter(s => (s.totalScore || 0) >= 630).length },
+              { range: '80-89', color: 'from-blue-500 to-blue-600', count: topStudents.filter(s => (s.totalScore || 0) >= 560 && (s.totalScore || 0) < 630).length },
+              { range: '70-79', color: 'from-yellow-500 to-yellow-600', count: topStudents.filter(s => (s.totalScore || 0) >= 490 && (s.totalScore || 0) < 560).length },
+              { range: '60-69', color: 'from-orange-500 to-orange-600', count: topStudents.filter(s => (s.totalScore || 0) >= 420 && (s.totalScore || 0) < 490).length },
+              { range: 'Below 60', color: 'from-red-500 to-red-600', count: topStudents.filter(s => (s.totalScore || 0) < 420).length }
+            ].map(({ range, color, count }) => (
                 <div key={range} className="flex items-center space-x-4">
                   <div className="w-20 text-sm text-gray-300">{range}</div>
                   <div className="flex-1 bg-white/10 rounded-full h-3">

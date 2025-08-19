@@ -1,21 +1,20 @@
 'use client';
 import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
-  activeTab: string;
-  onTabChange: (tab: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, activeTab, onTabChange }) => {
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊', disabled: false },
-    { id: 'students', label: 'Students', icon: '👥', disabled: false },
-    { id: 'schools', label: 'Schools', icon: '🏫', disabled: false },
-    { id: 'reports', label: 'Reports', icon: '📈', disabled: true },
-    { id: 'analytics', label: 'Analytics', icon: '📋', disabled: true },
-    { id: 'settings', label: 'Settings', icon: '⚙️', disabled: true }
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
+  const pathname = usePathname();
+
+  const navigationItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/dashboard', disabled: false },
+    { id: 'students', label: 'Students', icon: '👥', href: '/students', disabled: false },
+    { id: 'schools', label: 'Schools', icon: '🏫', href: '/schools', disabled: false },
   ];
 
   return (
@@ -27,14 +26,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, activeTab, onTabCha
           onClick={onToggle}
         />
       )}
-
+      
       {/* Sidebar */}
       <div className={`
-        fixed top-0 left-0 h-full bg-white/10 backdrop-blur-lg border-r border-white/20 z-50
+        fixed inset-y-0 left-0 z-50 w-64 bg-black/20 backdrop-blur-xl border-r border-white/10
         transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto lg:relative
-        w-64 flex-shrink-0
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        lg:transform-none
       `}>
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -50,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, activeTab, onTabCha
                 onClick={onToggle}
                 className="lg:hidden text-white hover:text-gray-300"
               >
-                ✕
+                <span className="text-xl">✕</span>
               </button>
             </div>
           </div>
@@ -58,19 +56,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, activeTab, onTabCha
           {/* Navigation */}
           <nav className="flex-1 p-4">
             <ul className="space-y-2">
-              {menuItems.map((item) => (
+              {navigationItems.map((item) => (
                 <li key={item.id}>
-                  <button
-                    onClick={() => !item.disabled && onTabChange(item.id)}
-                    disabled={item.disabled}
+                  <Link
+                    href={item.href}
                     className={`
-                      w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors duration-200
-                      ${item.disabled 
-                        ? 'text-gray-500 cursor-not-allowed opacity-50' 
-                        : activeTab === item.id 
-                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' 
-                          : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                      flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+                      ${pathname === item.href 
+                        ? 'bg-blue-600 text-white shadow-lg' 
+                        : 'text-white/80 hover:bg-white/10 hover:text-white'
                       }
+                      ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                     `}
                   >
                     <span className="text-lg">{item.icon}</span>
@@ -80,7 +76,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, activeTab, onTabCha
                         Soon
                       </span>
                     )}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>

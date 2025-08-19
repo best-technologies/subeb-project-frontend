@@ -6,16 +6,32 @@ interface StatsCardsProps {
 }
 
 const StatsCards: React.FC<StatsCardsProps> = ({ dashboardData }) => {
-  // Use real API data
-  const totalStudents = dashboardData?.totalStudents || 0;
-  const maleStudents = dashboardData?.totalMale || 0;
-  const femaleStudents = dashboardData?.totalFemale || 0;
-  const averageScore = dashboardData?.topStudents && dashboardData.topStudents.length > 0
-    ? Math.round(dashboardData.topStudents.reduce((sum, s) => sum + s.totalScore, 0) / dashboardData.topStudents.length / 7) // Assuming 7 subjects
+  // Use real API data from the new structure
+  const summary = dashboardData?.summary;
+  const totalStudents = summary?.totalStudents || 0;
+  const maleStudents = summary?.totalMale || 0;
+  const femaleStudents = summary?.totalFemale || 0;
+  const totalLgas = summary?.totalLgas || 0;
+  const totalSchools = summary?.totalSchools || 0;
+  const studentsWithScores = (dashboardData?.performance?.topStudents || dashboardData?.data?.students || dashboardData?.topStudents || []).filter(s => s.totalScore);
+  const averageScore = studentsWithScores.length > 0
+    ? Math.round(studentsWithScores.reduce((sum, s) => sum + (s.totalScore || 0), 0) / studentsWithScores.length / 7) // Assuming 7 subjects
     : 0;
-  const topPerformers = dashboardData?.topStudents?.length || 0;
+  const topPerformers = (dashboardData?.performance?.topStudents || dashboardData?.data?.students || dashboardData?.topStudents || []).length;
 
   const stats = [
+    {
+      title: 'Total LGAs',
+      value: totalLgas,
+      icon: '🗺️',
+      color: 'from-teal-500 to-teal-600'
+    },
+    {
+      title: 'Total Schools',
+      value: totalSchools,
+      icon: '🏫',
+      color: 'from-indigo-500 to-indigo-600'
+    },
     {
       title: 'Total Students',
       value: totalStudents,
@@ -54,7 +70,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardData }) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-6 mb-8">
       {stats.map((stat, index) => (
         <div
           key={index}
