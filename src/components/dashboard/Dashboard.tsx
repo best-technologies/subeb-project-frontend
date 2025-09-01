@@ -155,26 +155,6 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardData, onSearchParamsChan
       {/* Stats Cards */}
       <StatsCards dashboardData={dashboardData} />
       
-      {/* Global Search and Filter */}
-      <GlobalSearchFilter
-        searchTerm={searchTerm}
-        onSearchChange={handleSearchChange}
-        availableSessions={availableSessions}
-        availableTerms={availableTerms}
-        selectedSession={selectedSession}
-        selectedTerm={selectedTerm}
-        onSessionChange={handleSessionChange}
-        onTermChange={handleTermChange}
-        lgaFilter={lgaFilter}
-        onLgaFilterChange={setLgaFilter}
-        schoolFilter={schoolFilter}
-        onSchoolFilterChange={setSchoolFilter}
-        availableLgas={availableLgas}
-        availableSchools={availableSchools}
-        pagination={dashboardData?.pagination}
-        showPagination={false} // We'll handle pagination in the table itself
-      />
-      
       {/* Collapsible Performance Charts */}
       <CollapsibleCharts dashboardData={dashboardData} />
       
@@ -232,7 +212,42 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardData, onSearchParamsChan
             <p className="text-gray-400">No students match the current filters</p>
           </div>
         ) : (
-          <StudentsTable topStudents={students} />
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-white/5">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Position</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Student Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">School</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total Score</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {students.map((student, index) => (
+                  <tr key={student.id} className="hover:bg-white/5 transition-colors duration-200">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {student.position || index + 1}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                      {student.studentName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {student.school || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {student.class || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">
+                      {student.totalScore || 'N/A'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

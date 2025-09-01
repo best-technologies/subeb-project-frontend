@@ -227,3 +227,40 @@ export const clearAuthToken = () => apiClient.clearAuthToken();
 
 // Export the class for testing or custom instances
 export { ApiClient }; 
+
+// Student Search and Filter API
+export const searchStudents = async (params: {
+  lgaId?: string;
+  schoolId?: string;
+  classId?: string;
+  gender?: string;
+  subject?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}) => {
+  const queryParams = new URLSearchParams();
+  
+  // Add all non-undefined parameters to query string
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      queryParams.append(key, value.toString());
+    }
+  });
+
+  const response = await fetch(`${API_BASE_URL}/admin/students/search?${queryParams.toString()}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      // Add any authentication headers if needed
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to search students: ${response.statusText}`);
+  }
+
+  return response.json();
+}; 

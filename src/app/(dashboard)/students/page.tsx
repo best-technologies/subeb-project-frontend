@@ -4,11 +4,7 @@ import { useGlobalStudentsDashboard } from '@/services';
 import StudentsTab from '@/components/students/StudentsTab';
 
 export default function StudentsPage() {
-  const { data, loading, error, filters, setFilters } = useGlobalStudentsDashboard();
-
-  const handleFilterChange = (filterType: string, value: string) => {
-    setFilters({ [filterType]: value });
-  };
+  const { data, loading, error } = useGlobalStudentsDashboard();
 
   if (loading) {
     return (
@@ -55,12 +51,8 @@ export default function StudentsPage() {
   return (
     <StudentsTab
       performanceTable={data.performanceTable}
-      lgas={data.lgas.map(lga => lga.name)}
-      schools={data.schools.map(school => school.name)}
-      classes={data.classes.map(cls => cls.name)}
+      lgas={data.lgas}
       subjects={data.subjects.map(subject => subject.name)}
-      filters={filters}
-      onFilterChange={handleFilterChange}
     />
   );
 } 
