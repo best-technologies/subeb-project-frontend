@@ -58,9 +58,6 @@ export default function DashboardLayout({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  {/* Enrol Officer button removed, now in sidebar */}
-                </div>
               </div>
 
               {/* Cache Status */}

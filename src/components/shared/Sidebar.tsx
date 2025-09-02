@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { LayoutDashboard, Users, School, UserRoundPen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -15,28 +16,28 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
     {
       id: "dashboard",
       label: "Dashboard",
-      icon: "📊",
+      icon: <LayoutDashboard size={20} />,
       href: "/dashboard",
       disabled: false,
     },
     {
       id: "students",
       label: "Students",
-      icon: "👥",
+      icon: <Users size={20} />,
       href: "/students",
       disabled: false,
     },
     {
       id: "schools",
       label: "Schools",
-      icon: "🏫",
+      icon: <School size={20} />,
       href: "/schools",
       disabled: false,
     },
     {
       id: "enrol-officer",
       label: "Enrol Officer",
-      icon: "📝",
+      icon: <UserRoundPen size={20} />,
       href: "/enrol-officer",
       disabled: false,
     },
