@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/shared/Sidebar";
-import { Button } from "@/components/ui/Button";
+// import { Button } from "@/components/ui/button";
 import { dialog } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/ui/FormError";
 import { CacheStatus } from "@/components/shared/CacheStatus";
 

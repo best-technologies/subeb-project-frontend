@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function EnrolOfficerPage() {
   type FormState = {
@@ -99,7 +99,12 @@ export default function EnrolOfficerPage() {
           inputMode="numeric"
         />
         <div className="pt-2">
-          <Button type="submit" variant="default" size="md" className="w-full">
+          <Button
+            type="submit"
+            variant="default"
+            size="default"
+            className="w-full"
+          >
             Submit
           </Button>
         </div>

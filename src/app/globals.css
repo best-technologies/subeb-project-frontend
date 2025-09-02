@@ -2,17 +2,20 @@
 
 @theme {
   /* Brand Colors */
-  --brand-primary: #91252a;
-  --brand-primary-contrast: #fff;
-  --brand-primary-2: #4e0000;
-  --brand-primary-2-contrast: #fff;
-  --brand-secondary: #f5b349;
-  --brand-secondary-contrast: #171717;
-  --brand-accent: #c4ac7a;
-  --brand-accent-contrast: #171717;
-  --brand-accent-background: #f0f0f0;
-  --brand-accent-background-contrast: #171717;
-  --brand-accent-text: #6d6d6d;
+  --color-brand-primary: #91252a;
+  --color-brand-primary-contrast: #fff;
+  --color-brand-primary-2: #4e0000;
+  --color-brand-primary-2-contrast: #fff;
+  --color-brand-secondary: #f5b349;
+  --color-brand-secondary-contrast: #171717;
+  --color-brand-accent: #c4ac7a;
+  --color-brand-accent-contrast: #171717;
+  --color-brand-accent-background: #f0f0f0;
+  --color-brand-accent-background-contrast: #171717;
+  /* Text Colors */
+  --color-brand-heading: #111827;
+  --color-brand-light-accent-1: #64748b;
+  --color-brand-accent-text: #6d6d6d;
   /* General background/text */
   --color-background: #ffffff;
   --color-foreground: #171717;
@@ -28,37 +31,37 @@ body {
 
 /* Brand color utility classes */
 .bg-brand-primary {
-  background-color: var(--brand-primary) !important;
+  background-color: var(--color-brand-primary) !important;
 }
 .text-brand-primary-contrast {
-  color: var(--brand-primary-contrast) !important;
+  color: var(--color-brand-primary-contrast) !important;
 }
 .bg-brand-primary-2 {
-  background-color: var(--brand-primary-2) !important;
+  background-color: var(--color-brand-primary-2) !important;
 }
 .text-brand-primary-2-contrast {
-  color: var(--brand-primary-2-contrast) !important;
+  color: var(--color-brand-primary-2-contrast) !important;
 }
 .bg-brand-secondary {
-  background-color: var(--brand-secondary) !important;
+  background-color: var(--color-brand-secondary) !important;
 }
 .text-brand-secondary-contrast {
-  color: var(--brand-secondary-contrast) !important;
+  color: var(--color-brand-secondary-contrast) !important;
 }
 .bg-brand-accent {
-  background-color: var(--brand-accent) !important;
+  background-color: var(--color-brand-accent) !important;
 }
 .text-brand-accent-contrast {
-  color: var(--brand-accent-contrast) !important;
+  color: var(--color-brand-accent-contrast) !important;
 }
 .bg-brand-accent-background {
-  background-color: var(--brand-accent-background) !important;
+  background-color: var(--color-brand-accent-background) !important;
 }
 .text-brand-accent-background-contrast {
-  color: var(--brand-accent-background-contrast) !important;
+  color: var(--color-brand-accent-background-contrast) !important;
 }
 .text-brand-accent-text {
-  color: var(--brand-accent-text) !important;
+  color: var(--color-brand-accent-text) !important;
 }
 .bg-background {
   background-color: var(--color-background) !important;
