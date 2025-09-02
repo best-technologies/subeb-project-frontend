@@ -3,6 +3,18 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* ShadCN/Tailwind custom tokens for UI components */
+  --primary: #2563eb; /* blue-600 */
+  --primary-foreground: #fff;
+  --destructive: #dc2626; /* red-600 */
+  --destructive-foreground: #fff;
+  --accent: #f1f5f9; /* slate-100 */
+  --accent-foreground: #171717;
+  --input: #e5e7eb; /* gray-200 */
+  --border: #e5e7eb; /* gray-200 */
+  --ring: #2563eb; /* blue-600 */
+  --muted: #f3f4f6; /* gray-100 */
+  --muted-foreground: #6b7280; /* gray-500 */
 }
 
 @theme inline {
@@ -16,6 +28,17 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --primary: #3b82f6; /* blue-500 */
+    --primary-foreground: #fff;
+    --destructive: #ef4444; /* red-500 */
+    --destructive-foreground: #fff;
+    --accent: #1e293b; /* slate-800 */
+    --accent-foreground: #ededed;
+    --input: #1e293b; /* slate-800 */
+    --border: #334155; /* slate-700 */
+    --ring: #3b82f6; /* blue-500 */
+    --muted: #1e293b; /* slate-800 */
+    --muted-foreground: #94a3b8; /* slate-400 */
   }
 }
 
@@ -23,4 +46,44 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Tailwind CSS custom color utilities for ShadCN tokens */
+.bg-primary {
+  background-color: var(--primary) !important;
+}
+.text-primary-foreground {
+  color: var(--primary-foreground) !important;
+}
+.bg-destructive {
+  background-color: var(--destructive) !important;
+}
+.text-destructive-foreground {
+  color: var(--destructive-foreground) !important;
+}
+.bg-accent {
+  background-color: var(--accent) !important;
+}
+.text-accent-foreground {
+  color: var(--accent-foreground) !important;
+}
+.border-input {
+  border-color: var(--input) !important;
+}
+.bg-background {
+  background-color: var(--background) !important;
+}
+.hover\:bg-primary\/90:hover {
+  background-color: var(--primary); /* fallback for 90% opacity */
+  opacity: 0.9;
+}
+.hover\:bg-accent:hover {
+  background-color: var(--accent) !important;
+}
+.hover\:text-accent-foreground:hover {
+  color: var(--accent-foreground) !important;
+}
+.hover\:bg-destructive\/90:hover {
+  background-color: var(--destructive) !important;
+  opacity: 0.9;
 }

@@ -1,7 +1,8 @@
-'use client';
-import React, { useState } from 'react';
-import Sidebar from '@/components/shared/Sidebar';
-import { CacheStatus } from '@/components/shared/CacheStatus';
+"use client";
+import React, { useState } from "react";
+import Sidebar from "@/components/shared/Sidebar";
+import { Button } from "@/components/ui/Button";
+import { CacheStatus } from "@/components/shared/CacheStatus";
 
 export default function DashboardLayout({
   children,
@@ -14,20 +15,20 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Fixed Sidebar */}
       <div className="hidden lg:block lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64">
-        <Sidebar 
-          isOpen={true} 
+        <Sidebar
+          isOpen={true}
           onToggle={() => {}} // No toggle needed for desktop
         />
       </div>
-      
+
       {/* Mobile Sidebar */}
       <div className="lg:hidden">
-        <Sidebar 
-          isOpen={sidebarOpen} 
+        <Sidebar
+          isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
       </div>
-      
+
       {/* Main Content */}
       <div className="lg:ml-64 flex flex-col min-h-screen">
         {/* Fixed Header */}
@@ -47,11 +48,19 @@ export default function DashboardLayout({
                   </div>
                   <div>
                     <h1 className="text-white text-xl font-bold">ASUBEB</h1>
-                    <p className="text-gray-300 text-sm">School Management System</p>
+                    <p className="text-gray-300 text-sm">
+                      School Management System
+                    </p>
+                  </div>
+                  <div>
+                    {/* Reusable Button component with variant, size, and icon support */}
+                    <Button variant="default" size="lg">
+                      Enroll Officer
+                    </Button>
                   </div>
                 </div>
               </div>
-              
+
               {/* Cache Status */}
               <div className="hidden md:block">
                 <CacheStatus />
@@ -75,10 +84,12 @@ export default function DashboardLayout({
                 </div>
                 <div>
                   <h3 className="text-white font-semibold">ASUBEB</h3>
-                  <p className="text-gray-400 text-sm">School Management System</p>
+                  <p className="text-gray-400 text-sm">
+                    School Management System
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm">
                 <div className="text-gray-400">
                   © 2024 ASUBEB. All rights reserved.
@@ -95,4 +106,4 @@ export default function DashboardLayout({
       </div>
     </div>
   );
-} 
+}
