@@ -1,7 +1,11 @@
 "use client";
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import Sidebar from "@/components/shared/Sidebar";
 import { Button } from "@/components/ui/Button";
+import { dialog } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/Input";
+import { FormError } from "@/components/ui/FormError";
 import { CacheStatus } from "@/components/shared/CacheStatus";
 
 export default function DashboardLayout({
@@ -10,6 +14,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -35,14 +40,14 @@ export default function DashboardLayout({
         <header className="bg-black/20 backdrop-blur-lg border-b border-white/10 flex-shrink-0">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden text-white hover:text-gray-300 p-2"
-                >
-                  ☰
-                </button>
+              <div className="flex items-center justify-between w-full">
                 <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="lg:hidden text-white hover:text-gray-300 p-2"
+                  >
+                    ☰
+                  </button>
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold text-lg">A</span>
                   </div>
@@ -52,16 +57,14 @@ export default function DashboardLayout({
                       School Management System
                     </p>
                   </div>
-                  <div>
-                    {/* Reusable Button component with variant, size, and icon support */}
-                    <Button variant="default" size="lg">
-                      Enroll Officer
-                    </Button>
-                  </div>
+                </div>
+                <div className="flex items-center">
+                  {/* Enrol Officer button removed, now in sidebar */}
                 </div>
               </div>
 
               {/* Cache Status */}
+              {/* Enrol Officer dialog removed */}
               <div className="hidden md:block">
                 <CacheStatus />
               </div>

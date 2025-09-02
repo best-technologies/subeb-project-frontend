@@ -1,7 +1,7 @@
-'use client';
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+"use client";
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,28 +12,55 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const pathname = usePathname();
 
   const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/dashboard', disabled: false },
-    { id: 'students', label: 'Students', icon: '👥', href: '/students', disabled: false },
-    { id: 'schools', label: 'Schools', icon: '🏫', href: '/schools', disabled: false },
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: "📊",
+      href: "/dashboard",
+      disabled: false,
+    },
+    {
+      id: "students",
+      label: "Students",
+      icon: "👥",
+      href: "/students",
+      disabled: false,
+    },
+    {
+      id: "schools",
+      label: "Schools",
+      icon: "🏫",
+      href: "/schools",
+      disabled: false,
+    },
+    {
+      id: "enrol-officer",
+      label: "Enrol Officer",
+      icon: "📝",
+      href: "/enrol-officer",
+      disabled: false,
+    },
   ];
 
   return (
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={onToggle}
         />
       )}
-      
+
       {/* Sidebar */}
-      <div className={`
+      <div
+        className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-black/20 backdrop-blur-xl border-r border-white/10
         transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         lg:transform-none
-      `}>
+      `}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-white/10">
@@ -62,11 +89,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                     href={item.href}
                     className={`
                       flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-                      ${pathname === item.href 
-                        ? 'bg-blue-600 text-white shadow-lg' 
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                      ${
+                        pathname === item.href
+                          ? "bg-blue-600 text-white shadow-lg"
+                          : "text-white/80 hover:bg-white/10 hover:text-white"
                       }
-                      ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                      ${
+                        item.disabled
+                          ? "opacity-50 cursor-not-allowed"
+                          : "cursor-pointer"
+                      }
                     `}
                   >
                     <span className="text-lg">{item.icon}</span>
@@ -95,4 +127,4 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

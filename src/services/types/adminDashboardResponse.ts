@@ -58,7 +58,7 @@ export interface Class {
   grade: string;
   section: string;
   capacity: number;
-  currentEnrollment: number;
+  currentEnrolment: number;
   school: {
     name: string;
   };
@@ -68,7 +68,7 @@ export interface GenderCount {
   _count: {
     gender: number;
   };
-  gender: 'MALE' | 'FEMALE';
+  gender: "MALE" | "FEMALE";
 }
 
 export interface Subject {
@@ -85,7 +85,7 @@ export interface TopStudent {
   school: string;
   schoolCode: string;
   class: string;
-  gender: 'MALE' | 'FEMALE';
+  gender: "MALE" | "FEMALE";
   // Optional fields for backward compatibility
   position?: number;
   totalScore?: number;
@@ -146,4 +146,4 @@ export interface ApiErrorResponse {
   message: string;
   statusCode: number;
   error?: string;
-} 
+}

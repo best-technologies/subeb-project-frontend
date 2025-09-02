@@ -49,4 +49,4 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 // Usage Example:
-// <Button variant="default" size="lg" icon={<IconComponent />}>Enroll Officer</Button>
+// <Button variant="default" size="lg" icon={<IconComponent />}>Enrol Officer</Button>

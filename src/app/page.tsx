@@ -37,7 +37,7 @@ export default function Home() {
         </div>
         {/* <div>
           <button className="w-full py-3 rounded-lg font-semibold text-white transition-colors text-lg bg-blue-600 hover:bg-blue-700">
-            Enroll Officer
+            Enrol Officer
           </button>
         </div> */}
 
