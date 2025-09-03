@@ -1,31 +1,26 @@
-'use client';
-import React from 'react';
-import { useGlobalAdminDashboard } from '@/services';
-import Dashboard from '@/components/dashboard/Dashboard';
+"use client";
+import React from "react";
+import { useGlobalAdminDashboard } from "@/services";
+import Dashboard from "@/components/dashboard/Dashboard";
 
 const DashboardPage: React.FC = () => {
-  const { data: dashboardData, loading, error, refetch, updateSearchParams, isCached } = useGlobalAdminDashboard();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading dashboard data...</p>
-          {isCached && (
-            <p className="text-gray-400 text-sm mt-2">Using cached data...</p>
-          )}
-        </div>
-      </div>
-    );
-  }
+  const {
+    data: dashboardData,
+    loading,
+    error,
+    refetch,
+    updateSearchParams,
+    isCached,
+  } = useGlobalAdminDashboard();
 
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
-          <h2 className="text-white text-xl font-bold mb-2">Error Loading Dashboard</h2>
+          <h2 className="text-white text-xl font-bold mb-2">
+            Error Loading Dashboard
+          </h2>
           <p className="text-gray-300 mb-4">{error}</p>
           <div className="flex gap-2 justify-center">
             <button
@@ -58,12 +53,13 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       )}
-      <Dashboard 
-        dashboardData={dashboardData} 
+      <Dashboard
+        dashboardData={dashboardData}
+        loading={loading}
         onSearchParamsChange={updateSearchParams}
       />
     </div>
   );
 };
 
-export default DashboardPage; 
+export default DashboardPage;

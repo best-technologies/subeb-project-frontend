@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import StatsCards from "./StatsCards";
+import StatsCardsSkeleton from "./StatsCardsSkeleton";
+import StudentsTableSkeleton from "@/components/students/StudentsTableSkeleton";
 import CollapsibleCharts from "./CollapsibleCharts";
 import StudentsTable from "@/components/students/StudentsTable";
 import { GlobalSearchFilter } from "@/components/shared/GlobalSearchFilter";
@@ -9,6 +11,7 @@ import { AdminDashboardData } from "@/services/types/adminDashboardResponse";
 
 interface DashboardProps {
   dashboardData: AdminDashboardData | null;
+  loading?: boolean;
   onSearchParamsChange?: (params: {
     session?: string;
     term?: string;
@@ -29,6 +32,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({
   dashboardData,
+  loading = false,
   onSearchParamsChange,
 }) => {
   // ...existing code...
@@ -179,118 +183,128 @@ const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Stats Cards */}
-      <StatsCards dashboardData={dashboardData} />
+      {loading ? (
+        <StatsCardsSkeleton />
+      ) : (
+        <StatsCards dashboardData={dashboardData} />
+      )}
 
       {/* Collapsible Performance Charts */}
       <CollapsibleCharts dashboardData={dashboardData} />
 
       {/* Students Table */}
-      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-white">Top 10 Students</h2>
-              <p className="text-gray-300 text-sm">
-                Showing {students.length} students
-                {searchTerm && ` matching "${searchTerm}"`}
-                {lgaFilter && ` • LGA: ${lgaFilter}`}
-                {schoolFilter && ` • School: ${schoolFilter}`}
+      {loading ? (
+        <StudentsTableSkeleton />
+      ) : (
+        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  Top 10 Students
+                </h2>
+                <p className="text-gray-300 text-sm">
+                  Showing {students.length} students
+                  {searchTerm && ` matching "${searchTerm}"`}
+                  {lgaFilter && ` • LGA: ${lgaFilter}`}
+                  {schoolFilter && ` • School: ${schoolFilter}`}
+                </p>
+              </div>
+
+              {/* Pagination Controls */}
+              {students.length > 10 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    disabled={true} // TODO: Implement pagination state
+                  >
+                    Previous
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    <span className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium">
+                      1
+                    </span>
+                    <span className="text-gray-300 text-sm">of</span>
+                    <span className="text-gray-300 text-sm font-medium">
+                      {Math.ceil(students.length / 10)}
+                    </span>
+                  </div>
+
+                  <button
+                    className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    disabled={students.length <= 10} // TODO: Implement pagination state
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {students.length === 0 ? (
+            <div className="px-6 py-8 text-center">
+              <p className="text-gray-400">No student data available</p>
+            </div>
+          ) : students.length === 0 ? (
+            <div className="px-6 py-8 text-center">
+              <p className="text-gray-400">
+                No students match the current filters
               </p>
             </div>
-
-            {/* Pagination Controls */}
-            {students.length > 10 && (
-              <div className="flex items-center gap-2">
-                <button
-                  className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                  disabled={true} // TODO: Implement pagination state
-                >
-                  Previous
-                </button>
-
-                <div className="flex items-center gap-1">
-                  <span className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium">
-                    1
-                  </span>
-                  <span className="text-gray-300 text-sm">of</span>
-                  <span className="text-gray-300 text-sm font-medium">
-                    {Math.ceil(students.length / 10)}
-                  </span>
-                </div>
-
-                <button
-                  className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                  disabled={students.length <= 10} // TODO: Implement pagination state
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {students.length === 0 ? (
-          <div className="px-6 py-8 text-center">
-            <p className="text-gray-400">No student data available</p>
-          </div>
-        ) : students.length === 0 ? (
-          <div className="px-6 py-8 text-center">
-            <p className="text-gray-400">
-              No students match the current filters
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-white/5">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Position
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Student Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    School
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Class
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Total Score
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10">
-                {students.map((student, index) => (
-                  <tr
-                    key={student.id}
-                    className="hover:bg-white/5 transition-colors duration-200"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {student.position || index + 1}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                      {student.studentName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {student.school || "N/A"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {student.class || "N/A"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">
-                      {student.totalScore || "N/A"}
-                    </td>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/5">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Position
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Student Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      School
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Class
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Total Score
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {students.map((student, index) => (
+                    <tr
+                      key={student.id}
+                      className="hover:bg-white/5 transition-colors duration-200"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {student.position || index + 1}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                        {student.studentName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {student.school || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {student.class || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">
+                        {student.totalScore || "N/A"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
