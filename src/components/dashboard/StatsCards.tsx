@@ -1,5 +1,14 @@
-import React from 'react';
-import { AdminDashboardData } from '@/services/types/adminDashboardResponse';
+import React from "react";
+import {
+  Map,
+  School,
+  Users,
+  Mars,
+  Venus,
+  ChartColumn,
+  Trophy,
+} from "lucide-react";
+import { AdminDashboardData } from "@/services/types/adminDashboardResponse";
 
 interface StatsCardsProps {
   dashboardData: AdminDashboardData | null;
@@ -13,64 +22,79 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardData }) => {
   const femaleStudents = summary?.totalFemale || 0;
   const totalLgas = summary?.totalLgas || 0;
   const totalSchools = summary?.totalSchools || 0;
-  const studentsWithScores = (dashboardData?.performance?.topStudents || dashboardData?.data?.students || dashboardData?.topStudents || []).filter(s => s.totalScore);
-  const averageScore = studentsWithScores.length > 0
-    ? Math.round(studentsWithScores.reduce((sum, s) => sum + (s.totalScore || 0), 0) / studentsWithScores.length / 7) // Assuming 7 subjects
-    : 0;
-  const topPerformers = (dashboardData?.performance?.topStudents || dashboardData?.data?.students || dashboardData?.topStudents || []).length;
+  const studentsWithScores = (
+    dashboardData?.performance?.topStudents ||
+    dashboardData?.data?.students ||
+    dashboardData?.topStudents ||
+    []
+  ).filter((s) => s.totalScore);
+  const averageScore =
+    studentsWithScores.length > 0
+      ? Math.round(
+          studentsWithScores.reduce((sum, s) => sum + (s.totalScore || 0), 0) /
+            studentsWithScores.length /
+            7
+        ) // Assuming 7 subjects
+      : 0;
+  const topPerformers = (
+    dashboardData?.performance?.topStudents ||
+    dashboardData?.data?.students ||
+    dashboardData?.topStudents ||
+    []
+  ).length;
 
   const stats = [
     {
-      title: 'Total LGAs',
+      title: "Total LGAs",
       value: totalLgas,
-      icon: '🗺️',
-      color: 'from-teal-500 to-teal-600'
+      icon: <Map className="w-7 h-7" />,
+      color: "from-teal-500 to-teal-600",
     },
     {
-      title: 'Total Schools',
+      title: "Total Schools",
       value: totalSchools,
-      icon: '🏫',
-      color: 'from-indigo-500 to-indigo-600'
+      icon: <School className="w-7 h-7" />,
+      color: "from-indigo-500 to-indigo-600",
     },
     {
-      title: 'Total Students',
+      title: "Total Students",
       value: totalStudents,
-      change: '+12%',
-      changeType: 'positive',
-      icon: '👥',
-      color: 'from-blue-500 to-blue-600'
+      change: "+12%",
+      changeType: "positive",
+      icon: <Users className="w-7 h-7" />,
+      color: "from-blue-500 to-blue-600",
     },
     {
-      title: 'Male Students',
+      title: "Male Students",
       value: maleStudents,
       percentage: Math.round((maleStudents / totalStudents) * 100) || 0,
-      icon: '👨',
-      color: 'from-green-500 to-green-600'
+      icon: <Mars className="w-7 h-7" />,
+      color: "from-green-500 to-green-600",
     },
     {
-      title: 'Female Students',
+      title: "Female Students",
       value: femaleStudents,
       percentage: Math.round((femaleStudents / totalStudents) * 100) || 0,
-      icon: '👩',
-      color: 'from-pink-500 to-pink-600'
+      icon: <Venus className="w-7 h-7" />,
+      color: "from-pink-500 to-pink-600",
     },
     {
-      title: 'Average Score',
+      title: "Average Score",
       value: averageScore,
-      unit: '%',
-      icon: '📊',
-      color: 'from-purple-500 to-purple-600'
+      unit: "%",
+      icon: <ChartColumn className="w-7 h-7" />,
+      color: "from-purple-500 to-purple-600",
     },
     {
-      title: 'Top 10 Students',
+      title: "Top 10 Students",
       value: topPerformers,
-      icon: '🏆',
-      color: 'from-yellow-500 to-yellow-600'
-    }
+      icon: <Trophy className="w-7 h-7" />,
+      color: "from-yellow-500 to-yellow-600",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-6 mb-8">
       {stats.map((stat, index) => (
         <div
           key={index}
@@ -85,16 +109,26 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardData }) => {
                   {stat.unit && <span className="text-lg">{stat.unit}</span>}
                 </p>
                 {stat.percentage && (
-                  <span className="text-sm text-gray-400">({stat.percentage}%)</span>
+                  <span className="text-sm text-gray-400">
+                    ({stat.percentage}%)
+                  </span>
                 )}
               </div>
               {stat.change && (
-                <p className={`text-sm ${stat.changeType === 'positive' ? 'text-green-400' : 'text-red-400'}`}>
+                <p
+                  className={`text-sm ${
+                    stat.changeType === "positive"
+                      ? "text-green-400"
+                      : "text-red-400"
+                  }`}
+                >
                   {stat.change}
                 </p>
               )}
             </div>
-            <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300`}>
+            <div
+              className={`w-12 h-12 bg-gradient-to-r ${stat.color} text-white rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300`}
+            >
               {stat.icon}
             </div>
           </div>
@@ -104,4 +138,4 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardData }) => {
   );
 };
 
-export default StatsCards; 
+export default StatsCards;
