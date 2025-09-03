@@ -71,7 +71,7 @@ export default function DashboardLayout({
           <div className="px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="flex items-center space-x-4 mb-4 md:mb-0">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">A</span>
                 </div>
                 <div>
