@@ -150,31 +150,31 @@ const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="space-y-8">
       {/* Current Session and Term Header */}
-      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-3 text-center">
+      <div className="bg-white border border-gray-200 rounded-lg p-3 text-center shadow-sm">
         <div className="flex items-center justify-center gap-6">
           <div className="text-center">
-            <h3 className="text-xs font-medium text-gray-300 mb-0.5">
+            <h3 className="text-xs font-medium text-gray-600 mb-0.5">
               Session
             </h3>
-            <p className="text-lg font-bold text-white">
+            <p className="text-lg font-bold text-gray-800">
               {dashboardData?.currentSession?.name || "Not Set"}
             </p>
             {dashboardData?.currentSession?.isCurrent && (
-              <span className="inline-block mt-0.5 px-1.5 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">
+              <span className="inline-block mt-0.5 px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
                 Active
               </span>
             )}
           </div>
 
-          <div className="w-px h-8 bg-white/20"></div>
+          <div className="w-px h-8 bg-gray-300"></div>
 
           <div className="text-center">
-            <h3 className="text-xs font-medium text-gray-300 mb-0.5">Term</h3>
-            <p className="text-lg font-bold text-white">
+            <h3 className="text-xs font-medium text-gray-600 mb-0.5">Term</h3>
+            <p className="text-lg font-bold text-gray-800">
               {dashboardData?.currentTerm?.name?.replace("_", " ") || "Not Set"}
             </p>
             {dashboardData?.currentTerm?.isCurrent && (
-              <span className="inline-block mt-0.5 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full">
+              <span className="inline-block mt-0.5 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
                 Active
               </span>
             )}
@@ -196,14 +196,14 @@ const Dashboard: React.FC<DashboardProps> = ({
       {loading || !dashboardData ? (
         <StudentsTableSkeleton />
       ) : (
-        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/10">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-bold text-gray-800">
                   Top 10 Students
                 </h2>
-                <p className="text-gray-300 text-sm">
+                <p className="text-gray-600 text-sm">
                   Showing {students.length} students
                   {searchTerm && ` matching "${searchTerm}"`}
                   {lgaFilter && ` • LGA: ${lgaFilter}`}
@@ -215,24 +215,24 @@ const Dashboard: React.FC<DashboardProps> = ({
               {students.length > 10 && (
                 <div className="flex items-center gap-2">
                   <button
-                    className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    className="px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                     disabled={true} // TODO: Implement pagination state
                   >
                     Previous
                   </button>
 
                   <div className="flex items-center gap-1">
-                    <span className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium">
+                    <span className="px-3 py-1.5 bg-brand-primary text-brand-primary-contrast rounded-lg text-sm font-medium">
                       1
                     </span>
-                    <span className="text-gray-300 text-sm">of</span>
-                    <span className="text-gray-300 text-sm font-medium">
+                    <span className="text-gray-600 text-sm">of</span>
+                    <span className="text-gray-600 text-sm font-medium">
                       {Math.ceil(students.length / 10)}
                     </span>
                   </div>
 
                   <button
-                    className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    className="px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                     disabled={students.length <= 10} // TODO: Implement pagination state
                   >
                     Next
@@ -244,57 +244,57 @@ const Dashboard: React.FC<DashboardProps> = ({
 
           {students.length === 0 ? (
             <div className="px-6 py-8 text-center">
-              <p className="text-gray-400">No student data available</p>
+              <p className="text-gray-500">No student data available</p>
             </div>
           ) : students.length === 0 ? (
             <div className="px-6 py-8 text-center">
-              <p className="text-gray-400">
+              <p className="text-gray-500">
                 No students match the current filters
               </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-white/5">
+                <thead className="bg-brand-primary-2">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
                       Position
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
                       Student Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
                       School
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
                       Class
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
                       Total Score
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10">
+                <tbody className="divide-y divide-gray-200">
                   {students.map((student, index) => (
                     <tr
                       key={student.id}
-                      className="hover:bg-white/5 transition-colors duration-200"
+                      className="hover:bg-gray-50 transition-colors duration-200"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-accent text-brand-accent-contrast">
                           {student.position || index + 1}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
                         {student.studentName}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {student.school || "N/A"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {student.class || "N/A"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-brand-primary">
                         {student.totalScore || "N/A"}
                       </td>
                     </tr>

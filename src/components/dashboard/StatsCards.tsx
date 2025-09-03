@@ -48,13 +48,17 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardData }) => {
       title: "Total LGAs",
       value: totalLgas,
       icon: <Map className="w-7 h-7" />,
-      color: "from-teal-500 to-teal-600",
+      bgColor: "bg-brand-primary",
+      textColor: "text-brand-primary-contrast",
+      titleColor: "text-brand-primary-contrast/80",
     },
     {
       title: "Total Schools",
       value: totalSchools,
       icon: <School className="w-7 h-7" />,
-      color: "from-indigo-500 to-indigo-600",
+      bgColor: "bg-brand-primary-2",
+      textColor: "text-brand-primary-2-contrast",
+      titleColor: "text-brand-primary-2-contrast/80",
     },
     {
       title: "Total Students",
@@ -62,34 +66,44 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardData }) => {
       change: "+12%",
       changeType: "positive",
       icon: <Users className="w-7 h-7" />,
-      color: "from-blue-500 to-blue-600",
+      bgColor: "bg-brand-secondary",
+      textColor: "text-brand-secondary-contrast",
+      titleColor: "text-brand-secondary-contrast/80",
     },
     {
       title: "Male Students",
       value: maleStudents,
       percentage: Math.round((maleStudents / totalStudents) * 100) || 0,
       icon: <Mars className="w-7 h-7" />,
-      color: "from-green-500 to-green-600",
+      bgColor: "bg-brand-accent",
+      textColor: "text-brand-accent-contrast",
+      titleColor: "text-brand-accent-contrast/80",
     },
     {
       title: "Female Students",
       value: femaleStudents,
       percentage: Math.round((femaleStudents / totalStudents) * 100) || 0,
       icon: <Venus className="w-7 h-7" />,
-      color: "from-pink-500 to-pink-600",
+      bgColor: "bg-brand-primary",
+      textColor: "text-brand-primary-contrast",
+      titleColor: "text-brand-primary-contrast/80",
     },
     {
       title: "Average Score",
       value: averageScore,
       unit: "%",
       icon: <ChartColumn className="w-7 h-7" />,
-      color: "from-purple-500 to-purple-600",
+      bgColor: "bg-brand-primary-2",
+      textColor: "text-brand-primary-2-contrast",
+      titleColor: "text-brand-primary-2-contrast/80",
     },
     {
       title: "Top 10 Students",
       value: topPerformers,
       icon: <Trophy className="w-7 h-7" />,
-      color: "from-yellow-500 to-yellow-600",
+      bgColor: "bg-brand-secondary",
+      textColor: "text-brand-secondary-contrast",
+      titleColor: "text-brand-secondary-contrast/80",
     },
   ];
 
@@ -98,36 +112,30 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardData }) => {
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all duration-300 group"
+          className={`${stat.bgColor} rounded-xl p-6 hover:opacity-90 transition-all duration-300 group shadow-lg`}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-300 text-sm font-medium">{stat.title}</p>
+              <p className={`${stat.titleColor} text-sm font-medium`}>
+                {stat.title}
+              </p>
               <div className="flex items-baseline space-x-2">
-                <p className="text-2xl font-bold text-white">
+                <p className={`text-2xl font-bold ${stat.textColor}`}>
                   {stat.value}
                   {stat.unit && <span className="text-lg">{stat.unit}</span>}
                 </p>
                 {stat.percentage && (
-                  <span className="text-sm text-gray-400">
+                  <span className={`text-sm ${stat.titleColor}`}>
                     ({stat.percentage}%)
                   </span>
                 )}
               </div>
               {stat.change && (
-                <p
-                  className={`text-sm ${
-                    stat.changeType === "positive"
-                      ? "text-green-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  {stat.change}
-                </p>
+                <p className={`text-sm ${stat.titleColor}`}>{stat.change}</p>
               )}
             </div>
             <div
-              className={`w-12 h-12 bg-gradient-to-r ${stat.color} text-white rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300`}
+              className={`w-12 h-12 ${stat.textColor} rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300 bg-white/20`}
             >
               {stat.icon}
             </div>
