@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import Sidebar from "@/components/shared/Sidebar";
 // import { Button } from "@/components/ui/button";
 import { dialog } from "@/components/ui/dialog";
@@ -48,15 +49,6 @@ export default function DashboardLayout({
                   >
                     ☰
                   </button>
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">A</span>
-                  </div>
-                  <div>
-                    <h1 className="text-gray-800 text-xl font-bold">ASUBEB</h1>
-                    <p className="text-gray-600 text-sm">
-                      School Management System
-                    </p>
-                  </div>
                 </div>
               </div>
 
@@ -92,12 +84,18 @@ export default function DashboardLayout({
 
               <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm">
                 <div className="text-gray-600">
-                  © 2024 ASUBEB. All rights reserved.
+                  © {new Date().getFullYear()} ASUBEB. All rights reserved.
                 </div>
                 <div className="flex items-center space-x-4 text-gray-600">
-                  <span>Version 1.0.0</span>
-                  <span>•</span>
-                  <span>Powered by Next.js</span>
+                  <span>Powered by </span>
+                  <Link
+                    href="https://www.besttechnologiesltd.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-primary hover:text-brand-accent transition-colors duration-200"
+                  >
+                    Best Technologies Ltd.
+                  </Link>
                 </div>
               </div>
             </div>

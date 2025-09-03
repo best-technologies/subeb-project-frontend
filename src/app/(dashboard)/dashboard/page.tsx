@@ -45,14 +45,6 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div>
-      {isCached && (
-        <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-          <div className="flex items-center gap-2 text-green-400 text-sm">
-            <span>✓</span>
-            <span>Using cached data (10 min cache)</span>
-          </div>
-        </div>
-      )}
       <Dashboard
         dashboardData={dashboardData}
         loading={loading}
