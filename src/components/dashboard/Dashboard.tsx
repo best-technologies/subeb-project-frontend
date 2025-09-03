@@ -183,7 +183,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Stats Cards */}
-      {loading ? (
+      {loading || !dashboardData ? (
         <StatsCardsSkeleton />
       ) : (
         <StatsCards dashboardData={dashboardData} />
@@ -193,7 +193,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       <CollapsibleCharts dashboardData={dashboardData} />
 
       {/* Students Table */}
-      {loading ? (
+      {loading || !dashboardData ? (
         <StudentsTableSkeleton />
       ) : (
         <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden">
