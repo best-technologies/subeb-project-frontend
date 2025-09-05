@@ -6,9 +6,9 @@ export const useGlobalStudentsDashboard = (
   initialFilters: StudentsFilters = {}
 ) => {
   const {
-    state: { studentsDashboard },
-    fetchStudentsDashboard,
-    isStudentsDashboardCached,
+    state: { adminDashboard },
+    fetchAdminDashboard,
+    isAdminDashboardCached,
     getStudentsDataFromAdmin,
     hasAdminDataForStudents,
   } = useData();
@@ -18,18 +18,14 @@ export const useGlobalStudentsDashboard = (
     ...initialFilters,
   });
 
-  // Get data from admin dashboard if available, otherwise use students dashboard
+  // Get data from admin dashboard if available
   const data = useMemo(() => {
     if (hasAdminDataForStudents()) {
       console.log("📦 Using admin dashboard data for students page");
       return getStudentsDataFromAdmin();
     }
-    return studentsDashboard.data;
-  }, [
-    hasAdminDataForStudents,
-    getStudentsDataFromAdmin,
-    studentsDashboard.data,
-  ]);
+    return null; // No fallback data available
+  }, [hasAdminDataForStudents, getStudentsDataFromAdmin]);
 
   // Determine loading state
   const loading = useMemo(() => {
@@ -37,8 +33,8 @@ export const useGlobalStudentsDashboard = (
     if (hasAdminDataForStudents()) {
       return false;
     }
-    return studentsDashboard.loading;
-  }, [hasAdminDataForStudents, studentsDashboard.loading]);
+    return adminDashboard.loading;
+  }, [hasAdminDataForStudents, adminDashboard.loading]);
 
   // Determine error state
   const error = useMemo(() => {
@@ -46,28 +42,23 @@ export const useGlobalStudentsDashboard = (
     if (hasAdminDataForStudents()) {
       return null;
     }
-    return studentsDashboard.error;
-  }, [hasAdminDataForStudents, studentsDashboard.error]);
+    return adminDashboard.error;
+  }, [hasAdminDataForStudents, adminDashboard.error]);
 
   useEffect(() => {
-    // Only fetch if we don't have admin data and students data is not cached
-    if (!hasAdminDataForStudents() && !isStudentsDashboardCached()) {
-      console.log("🚀 Fetching students dashboard data");
-      fetchStudentsDashboard(filters);
+    // Only fetch if we don't have admin data and admin data is not cached
+    if (!hasAdminDataForStudents() && !isAdminDashboardCached()) {
+      console.log("🚀 Fetching admin dashboard data for students");
+      fetchAdminDashboard();
     }
-  }, [
-    hasAdminDataForStudents,
-    isStudentsDashboardCached,
-    fetchStudentsDashboard,
-    filters,
-  ]);
+  }, [hasAdminDataForStudents, isAdminDashboardCached, fetchAdminDashboard]);
 
   const updateFilters = (newFilters: StudentsFilters) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
   const refetch = () => {
-    fetchStudentsDashboard(filters, true); // Force refresh
+    fetchAdminDashboard({}, true); // Force refresh
   };
 
   return {
@@ -77,7 +68,7 @@ export const useGlobalStudentsDashboard = (
     filters,
     setFilters: updateFilters,
     refetch,
-    isCached: hasAdminDataForStudents() || isStudentsDashboardCached(),
+    isCached: hasAdminDataForStudents() || isAdminDashboardCached(),
     isUsingAdminData: hasAdminDataForStudents(),
   };
 };
