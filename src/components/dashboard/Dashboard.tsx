@@ -149,39 +149,6 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="space-y-8">
-      {/* Current Session and Term Header */}
-      <div className="bg-white border border-gray-200 rounded-lg p-3 text-center shadow-sm">
-        <div className="flex items-center justify-center gap-6">
-          <div className="text-center">
-            <h3 className="text-xs font-medium text-gray-600 mb-0.5">
-              Session
-            </h3>
-            <p className="text-lg font-bold text-gray-800">
-              {dashboardData?.currentSession?.name || "Not Set"}
-            </p>
-            {dashboardData?.currentSession?.isCurrent && (
-              <span className="inline-block mt-0.5 px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                Active
-              </span>
-            )}
-          </div>
-
-          <div className="w-px h-8 bg-gray-300"></div>
-
-          <div className="text-center">
-            <h3 className="text-xs font-medium text-gray-600 mb-0.5">Term</h3>
-            <p className="text-lg font-bold text-gray-800">
-              {dashboardData?.currentTerm?.name?.replace("_", " ") || "Not Set"}
-            </p>
-            {dashboardData?.currentTerm?.isCurrent && (
-              <span className="inline-block mt-0.5 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
-                Active
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Stats Cards */}
       {loading || !dashboardData ? (
         <StatsCardsSkeleton />

@@ -6,6 +6,7 @@ import {
   School,
   UserRoundPen,
   User,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,9 +14,10 @@ import { usePathname } from "next/navigation";
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+  onRefresh?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onRefresh }) => {
   const pathname = usePathname();
 
   const navigationItems = [
@@ -72,31 +74,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
           {/* Header */}
           <div className="p-6 border-b border-white/10">
             <div className="flex items-center justify-between">
-              <div className="flex flex-col items-center">
-                <div className="w-full flex justify-start gap-2">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2 mb-2">
                   <div className="w-8 h-8 bg-brand-secondary rounded-lg flex items-center justify-center">
                     <span className="text-brand-secondary-contrast font-bold text-sm">
                       A
                     </span>
                   </div>
-                  <div>
-                    <span className="text-brand-primary-contrast font-bold text-lg block">
-                      ASUBEB
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <span className="text-brand-primary-contrast/70 text-sm">
-                    School Management System
+                  <span className="text-brand-primary-contrast font-bold text-lg">
+                    ASUBEB
                   </span>
                 </div>
+                <span className="text-brand-primary-contrast/70 text-sm">
+                  School Management System
+                </span>
               </div>
-              <button
-                onClick={onToggle}
-                className="lg:hidden text-brand-primary hover:text-brand-secondary"
-              >
-                <span className="text-xl">✕</span>
-              </button>
+
+              <div className="flex items-center gap-2">
+                {/* Refresh Icon */}
+                {onRefresh && (
+                  <button
+                    onClick={onRefresh}
+                    className="p-2 text-brand-primary-contrast/80 hover:text-brand-primary-contrast hover:bg-white/10 rounded-lg transition-all duration-200 group"
+                    title="Refresh all data"
+                  >
+                    <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+                  </button>
+                )}
+
+                {/* Mobile close button */}
+                <button
+                  onClick={onToggle}
+                  className="lg:hidden text-brand-primary-contrast hover:text-brand-secondary p-2"
+                >
+                  <span className="text-xl">✕</span>
+                </button>
+              </div>
             </div>
           </div>
 
