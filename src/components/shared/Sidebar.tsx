@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -75,41 +76,43 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onRefresh }) => {
           <div className="p-6 border-b border-white/10">
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-brand-secondary rounded-lg flex items-center justify-center">
-                    <span className="text-brand-secondary-contrast font-bold text-sm">
-                      A
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-brand-secondary rounded-lg flex items-center justify-center">
+                      <span className="text-brand-secondary-contrast font-bold text-sm">
+                        A
+                      </span>
+                    </div>
+                    <span className="text-brand-primary-contrast font-bold text-lg">
+                      ASUBEB
                     </span>
                   </div>
-                  <span className="text-brand-primary-contrast font-bold text-lg">
-                    ASUBEB
-                  </span>
+
+                  {/* Refresh Icon positioned next to logo */}
+                  {onRefresh && (
+                    <Button
+                      onClick={onRefresh}
+                      variant="ghost"
+                      size="icon"
+                      className="p-2 text-brand-primary-contrast/80 hover:text-brand-primary-contrast hover:bg-white/10 rounded-lg transition-all duration-200 group h-8 w-8"
+                      title="Refresh all data"
+                    >
+                      <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+                    </Button>
+                  )}
                 </div>
                 <span className="text-brand-primary-contrast/70 text-sm">
                   School Management System
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                {/* Refresh Icon */}
-                {onRefresh && (
-                  <button
-                    onClick={onRefresh}
-                    className="p-2 text-brand-primary-contrast/80 hover:text-brand-primary-contrast hover:bg-white/10 rounded-lg transition-all duration-200 group"
-                    title="Refresh all data"
-                  >
-                    <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
-                  </button>
-                )}
-
-                {/* Mobile close button */}
-                <button
-                  onClick={onToggle}
-                  className="lg:hidden text-brand-primary-contrast hover:text-brand-secondary p-2"
-                >
-                  <span className="text-xl">✕</span>
-                </button>
-              </div>
+              {/* Mobile close button */}
+              <button
+                onClick={onToggle}
+                className="lg:hidden text-brand-primary-contrast hover:text-brand-secondary p-2"
+              >
+                <span className="text-xl">✕</span>
+              </button>
             </div>
           </div>
 
