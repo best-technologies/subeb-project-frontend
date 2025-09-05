@@ -54,7 +54,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardData }) => {
             Term
           </p>
           <p className="text-brand-accent-contrast font-bold">
-            {dashboardData?.currentTerm?.name?.replace("_", " ") || "Not Set"}
+            {dashboardData?.currentTerm?.name?.split("_")[0] || "Not Set"}
           </p>
           {dashboardData?.currentTerm?.isCurrent ? (
             <span className="inline-block mt-1 px-3 py-1 bg-green-500 text-white text-xs rounded-full font-medium">
