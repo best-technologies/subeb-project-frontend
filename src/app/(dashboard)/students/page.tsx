@@ -1,7 +1,7 @@
-'use client';
-import React from 'react';
-import { useGlobalStudentsDashboard } from '@/services';
-import StudentsTab from '@/components/students/StudentsTab';
+"use client";
+import React from "react";
+import { useGlobalStudentsDashboard } from "@/services";
+import StudentsTab from "@/components/students/StudentsTab";
 
 export default function StudentsPage() {
   const { data, loading, error } = useGlobalStudentsDashboard();
@@ -11,8 +11,12 @@ export default function StudentsPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-white mb-2">Loading Students Data</h2>
-          <p className="text-gray-400">Please wait while we fetch the latest information...</p>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Loading Students Data
+          </h2>
+          <p className="text-gray-400">
+            Please wait while we fetch the latest information...
+          </p>
         </div>
       </div>
     );
@@ -23,7 +27,9 @@ export default function StudentsPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto">
           <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-white mb-4">Error Loading Data</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Error Loading Data
+          </h2>
           <p className="text-gray-400 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
@@ -41,8 +47,12 @@ export default function StudentsPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">📊</div>
-          <h2 className="text-2xl font-bold text-white mb-4">No Data Available</h2>
-          <p className="text-gray-400">No students data found. Please check your connection and try again.</p>
+          <h2 className="text-2xl font-bold text-white mb-4">
+            No Data Available
+          </h2>
+          <p className="text-gray-400">
+            No students data found. Please check your connection and try again.
+          </p>
         </div>
       </div>
     );
@@ -52,7 +62,7 @@ export default function StudentsPage() {
     <StudentsTab
       performanceTable={data.performanceTable}
       lgas={data.lgas}
-      subjects={data.subjects.map(subject => subject.name)}
+      subjects={data.subjects.map((subject) => subject.name)}
     />
   );
-} 
+}

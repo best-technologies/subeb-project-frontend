@@ -5,6 +5,7 @@ import React, {
   useReducer,
   ReactNode,
   useCallback,
+  useMemo,
 } from "react";
 import { AdminDashboardData } from "@/services/types/adminDashboardResponse";
 import {
@@ -159,6 +160,8 @@ interface DataContextType {
   clearCache: () => void;
   isAdminDashboardCached: () => boolean;
   isStudentsDashboardCached: () => boolean;
+  getStudentsDataFromAdmin: () => StudentsDashboardData | null;
+  hasAdminDataForStudents: () => boolean;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -175,18 +178,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       state.adminDashboard.data !== null &&
       isCacheValid(state.adminDashboard.timestamp)
     );
-  }, [state.adminDashboard.data, state.adminDashboard.timestamp, isCacheValid]);
+  }, [state.adminDashboard.data, state.adminDashboard.timestamp]);
 
   const isStudentsDashboardCached = useCallback(() => {
     return (
       state.studentsDashboard.data !== null &&
       isCacheValid(state.studentsDashboard.timestamp)
     );
-  }, [
-    state.studentsDashboard.data,
-    state.studentsDashboard.timestamp,
-    isCacheValid,
-  ]);
+  }, [state.studentsDashboard.data, state.studentsDashboard.timestamp]);
 
   const fetchAdminDashboard = useCallback(
     async (
@@ -262,7 +261,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "SET_ADMIN_DASHBOARD_ERROR", payload: errorMessage });
       }
     },
-    [isAdminDashboardCached, state.adminDashboard.loading]
+    [
+      isAdminDashboardCached,
+      state.adminDashboard.loading,
+      state.adminDashboard.error,
+      state.adminDashboard.timestamp,
+    ]
   );
 
   const fetchStudentsDashboard = useCallback(
@@ -274,6 +278,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       // Don't fetch if already loading
       if (state.studentsDashboard.loading) {
+        return;
+      }
+
+      // Don't retry if we have a recent error (prevent infinite loops)
+      const hasRecentError =
+        state.studentsDashboard.error &&
+        Date.now() - state.studentsDashboard.timestamp < 30000; // 30 seconds
+      if (hasRecentError && !forceRefresh) {
+        console.log(
+          "⚠️ Skipping students request due to recent error:",
+          state.studentsDashboard.error
+        );
         return;
       }
 
@@ -301,12 +317,72 @@ export function DataProvider({ children }: { children: ReactNode }) {
         });
       }
     },
-    [isStudentsDashboardCached, state.studentsDashboard.loading]
+    [
+      isStudentsDashboardCached,
+      state.studentsDashboard.loading,
+      state.studentsDashboard.error,
+      state.studentsDashboard.timestamp,
+    ]
   );
 
   const clearCache = useCallback(() => {
     dispatch({ type: "CLEAR_CACHE" });
   }, []);
+
+  // Function to check if admin data can be used for students page
+  const hasAdminDataForStudents = useCallback(() => {
+    return (
+      state.adminDashboard.data !== null &&
+      state.adminDashboard.data.performance?.topStudents &&
+      state.adminDashboard.data.data?.lgas &&
+      isCacheValid(state.adminDashboard.timestamp)
+    );
+  }, [state.adminDashboard.data, state.adminDashboard.timestamp]);
+
+  // Function to transform admin dashboard data into students dashboard format
+  const getStudentsDataFromAdmin =
+    useCallback((): StudentsDashboardData | null => {
+      if (!hasAdminDataForStudents() || !state.adminDashboard.data) {
+        return null;
+      }
+
+      const adminData = state.adminDashboard.data;
+
+      // Transform TopStudent[] to PerformanceStudent[]
+      const performanceTable = (adminData.performance?.topStudents || []).map(
+        (student, index) => ({
+          position: student.position || index + 1,
+          studentName: student.studentName,
+          examNo: student.examNumber || "",
+          school: student.school,
+          class: student.class,
+          total: student.totalScore || 0,
+          average: student.totalScore ? Math.round(student.totalScore / 7) : 0, // Assuming 7 subjects
+          percentage: student.totalScore
+            ? Math.round((student.totalScore / 700) * 100)
+            : 0, // Assuming 700 max score
+          gender: student.gender,
+        })
+      );
+
+      // Transform admin data to students format
+      const studentsData: StudentsDashboardData = {
+        session: adminData.currentSession?.name || "",
+        term: adminData.currentTerm?.name || "",
+        performanceTable,
+        lgas: adminData.data?.lgas || [],
+        schools: adminData.data?.schools || [],
+        classes: adminData.data?.classes || [],
+        subjects: adminData.data?.subjects || [],
+        genders:
+          adminData.statistics?.genderDistribution?.map((g) => ({
+            _count: { gender: g._count.gender },
+            gender: g.gender as "MALE" | "FEMALE",
+          })) || [],
+      };
+
+      return studentsData;
+    }, [hasAdminDataForStudents, state.adminDashboard.data]);
 
   const value: DataContextType = {
     state,
@@ -315,6 +391,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     clearCache,
     isAdminDashboardCached,
     isStudentsDashboardCached,
+    getStudentsDataFromAdmin,
+    hasAdminDataForStudents,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
