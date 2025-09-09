@@ -10,7 +10,10 @@ import {
   Search,
   Trophy,
   TrendingUp,
+  X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 
 interface SchoolStats {
   name: string;
@@ -492,15 +495,16 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
+                    <Button
+                      variant="link"
                       onClick={() => {
                         setSelectedSchool(school);
                         setShowDetails(true);
                       }}
-                      className="text-brand-primary hover:text-brand-primary-2 transition-colors duration-200 font-medium hover:underline"
+                      className="text-brand-primary hover:text-brand-primary-2 p-0 h-auto font-medium"
                     >
-                      View Details →
-                    </button>
+                      View Details
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -510,10 +514,10 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
       </div>
 
       {/* School Details Modal */}
-      {showDetails && selectedSchool && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-brand-accent-background backdrop-blur-xl rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto border border-brand-accent/20 shadow-2xl">
-            <div className="sticky top-0 bg-brand-primary-2 backdrop-blur-xl p-6 border-b border-brand-primary-2/20 rounded-t-2xl">
+      {selectedSchool && (
+        <Dialog open={showDetails} onOpenChange={setShowDetails}>
+          <div className="bg-brand-accent-background">
+            <div className="sticky top-0 bg-brand-primary-2 p-6 border-b border-brand-primary-2/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-brand-secondary/20 rounded-full flex items-center justify-center">
@@ -528,12 +532,14 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
                     </p>
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setShowDetails(false)}
-                  className="text-brand-primary-2-contrast/70 hover:text-brand-primary-2-contrast p-2 hover:bg-brand-primary-2-contrast/10 rounded-lg transition-all duration-200"
+                  className="text-brand-primary-2-contrast/70 hover:text-brand-primary-2-contrast hover:bg-brand-primary-2-contrast/10"
                 >
-                  <span className="text-xl">✕</span>
-                </button>
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
             </div>
 
@@ -587,13 +593,13 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
 
               {/* School Info and Performance */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-brand-accent-background border border-brand-accent/20 rounded-xl p-6">
+                <div className="bg-white border border-brand-accent/20 rounded-xl p-6">
                   <h4 className="text-lg font-semibold text-brand-heading mb-4 flex items-center">
                     <School className="w-5 h-5 mr-2 text-brand-primary" />
                     School Information
                   </h4>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <div className="flex justify-between items-center py-2 border-b border-brand-accent/10">
                       <span className="text-brand-light-accent-1">
                         School Name
                       </span>
@@ -601,7 +607,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
                         {formatEducationalText(selectedSchool.name)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <div className="flex justify-between items-center py-2 border-b border-brand-accent/10">
                       <span className="text-brand-light-accent-1">LGA</span>
                       <span className="text-brand-heading font-medium">
                         {selectedSchool.lga}
@@ -618,32 +624,38 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
                   </div>
                 </div>
 
-                <div className="bg-black/20 rounded-xl p-6 border border-white/10">
-                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <span className="mr-2">📊</span>
+                <div className="bg-white border border-brand-accent/20 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-brand-heading mb-4 flex items-center">
+                    <ChartColumn className="w-5 h-5 mr-2 text-brand-primary" />
                     Performance Summary
                   </h4>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
-                      <span className="text-gray-400">Average Score</span>
+                    <div className="flex justify-between items-center py-2 border-b border-brand-accent/10">
+                      <span className="text-brand-light-accent-1">
+                        Average Score
+                      </span>
                       <span
-                        className={`text-white font-medium ${getScoreColor(
+                        className={`text-brand-heading font-medium ${getScoreColor(
                           selectedSchool.averageScore
                         )}`}
                       >
                         {selectedSchool.averageScore}%
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
-                      <span className="text-gray-400">Top Performer</span>
-                      <span className="text-white font-medium">
+                    <div className="flex justify-between items-center py-2 border-b border-brand-accent/10">
+                      <span className="text-brand-light-accent-1">
+                        Top Performer
+                      </span>
+                      <span className="text-brand-heading font-medium">
                         {selectedSchool.topPerformer}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-2">
-                      <span className="text-gray-400">Top Score</span>
+                      <span className="text-brand-light-accent-1">
+                        Top Score
+                      </span>
                       <span
-                        className={`text-white font-medium ${getScoreColor(
+                        className={`text-brand-heading font-medium ${getScoreColor(
                           selectedSchool.topScore
                         )}`}
                       >
@@ -655,9 +667,9 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
               </div>
 
               {/* Class Distribution */}
-              <div className="bg-black/20 rounded-xl p-6 border border-white/10">
-                <h4 className="text-lg font-semibold text-white mb-6 flex items-center">
-                  <span className="mr-2">📚</span>
+              <div className="bg-white border border-brand-accent/20 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-brand-heading mb-6 flex items-center">
+                  <School className="w-5 h-5 mr-2 text-brand-primary" />
                   Class Distribution
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -665,12 +677,12 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
                     ([className, count]) => (
                       <div
                         key={className}
-                        className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-lg p-4 border border-blue-500/20 hover:scale-105 transition-all duration-200"
+                        className="bg-brand-secondary/10 rounded-lg p-4 border border-brand-secondary/20 hover:scale-105 transition-all duration-200"
                       >
-                        <div className="text-sm text-gray-300 mb-2">
+                        <div className="text-sm text-brand-light-accent-1 mb-2">
                           {className}
                         </div>
-                        <div className="text-2xl font-bold text-blue-400">
+                        <div className="text-2xl font-bold text-brand-secondary">
                           {count}
                         </div>
                       </div>
@@ -680,35 +692,35 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
               </div>
 
               {/* Gender Distribution */}
-              <div className="bg-black/20 rounded-xl p-6 border border-white/10">
-                <h4 className="text-lg font-semibold text-white mb-6 flex items-center">
-                  <span className="mr-2">👥</span>
+              <div className="bg-white border border-brand-accent/20 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-brand-heading mb-6 flex items-center">
+                  <Users className="w-5 h-5 mr-2 text-brand-primary" />
                   Gender Distribution
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-lg p-6 border border-blue-500/20">
+                  <div className="bg-brand-primary-2 rounded-lg p-6 border border-brand-primary-2/20">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                        <span className="text-lg">👨</span>
+                      <div className="w-10 h-10 bg-brand-secondary/20 rounded-lg flex items-center justify-center">
+                        <Users className="w-5 h-5 text-brand-secondary" />
                       </div>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-brand-primary-2-contrast/70">
                         Male Students
                       </span>
                     </div>
-                    <div className="text-3xl font-bold text-blue-400">
+                    <div className="text-3xl font-bold text-brand-secondary">
                       {selectedSchool.genderDistribution.male}
                     </div>
                   </div>
-                  <div className="bg-gradient-to-br from-pink-500/10 to-pink-600/10 rounded-lg p-6 border border-pink-500/20">
+                  <div className="bg-brand-accent rounded-lg p-6 border border-brand-accent/20">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center">
-                        <span className="text-lg">👩</span>
+                      <div className="w-10 h-10 bg-brand-accent-contrast/20 rounded-lg flex items-center justify-center">
+                        <Users className="w-5 h-5 text-brand-accent-contrast" />
                       </div>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-brand-accent-contrast/70">
                         Female Students
                       </span>
                     </div>
-                    <div className="text-3xl font-bold text-pink-400">
+                    <div className="text-3xl font-bold text-brand-accent-contrast">
                       {selectedSchool.genderDistribution.female}
                     </div>
                   </div>
@@ -716,9 +728,9 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
               </div>
 
               {/* Subject Averages */}
-              <div className="bg-black/20 rounded-xl p-6 border border-white/10">
-                <h4 className="text-lg font-semibold text-white mb-6 flex items-center">
-                  <span className="mr-2">📊</span>
+              <div className="bg-white border border-brand-accent/20 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-brand-heading mb-6 flex items-center">
+                  <ChartColumn className="w-5 h-5 mr-2 text-brand-primary" />
                   Subject Averages
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -730,7 +742,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
                           average
                         )}`}
                       >
-                        <div className="text-sm text-gray-300 mb-2 capitalize">
+                        <div className="text-sm text-brand-light-accent-1 mb-2 capitalize">
                           {subject.replace(/([A-Z])/g, " $1").trim()}
                         </div>
                         <div
@@ -747,7 +759,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
               </div>
             </div>
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );
