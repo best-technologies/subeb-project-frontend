@@ -6,7 +6,7 @@ interface DialogProps {
   children: React.ReactNode;
 }
 
-export function dialog({ open, onOpenChange, children }: DialogProps) {
+export function Dialog({ open, onOpenChange, children }: DialogProps) {
   React.useEffect(() => {
     if (!open) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -25,16 +25,17 @@ export function dialog({ open, onOpenChange, children }: DialogProps) {
         aria-label="Close dialog"
       />
       <div
-        className="relative z-10 w-full max-w-md mx-4 bg-background text-foreground rounded-xl shadow-xl p-6 flex flex-col items-center"
+        className="relative z-10 w-full max-w-5xl mx-4 bg-background text-foreground rounded-xl shadow-xl overflow-hidden"
         style={{
           maxHeight: "calc(100dvh - 2rem)",
-          overflowY: "auto",
           marginTop: "1rem",
           marginBottom: "1rem",
           paddingBottom: "env(safe-area-inset-bottom, 1rem)",
         }}
       >
-        {children}
+        <div style={{ maxHeight: "inherit", overflowY: "auto" }}>
+          {children}
+        </div>
       </div>
     </div>
   );

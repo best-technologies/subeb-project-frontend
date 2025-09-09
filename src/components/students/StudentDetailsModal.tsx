@@ -1,7 +1,19 @@
-'use client';
-import React from 'react';
-import { PerformanceStudent } from '@/services/types/studentsDashboardResponse';
-import { formatEducationalText } from '@/utils/formatters';
+"use client";
+import React from "react";
+import {
+  X,
+  Venus,
+  Mars,
+  Trophy,
+  ChartColumn,
+  ChartNoAxesCombined,
+  User,
+  School,
+} from "lucide-react";
+import { Dialog } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
+import { formatEducationalText } from "@/utils/formatters";
 
 interface StudentDetailsModalProps {
   student: PerformanceStudent | null;
@@ -16,124 +28,174 @@ const StudentDetailsModal: React.FC<StudentDetailsModalProps> = ({
   isOpen,
   onClose,
   getScoreColor,
-  getPositionBadge
+  getPositionBadge,
 }) => {
-  if (!isOpen || !student) return null;
+  if (!student) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-800/95 backdrop-blur-xl rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
-        <div className="sticky top-0 bg-slate-800/95 backdrop-blur-xl p-6 border-b border-white/10 rounded-t-2xl">
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
+      <div className="bg-brand-accent-background rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto border border-brand-accent/20 shadow-2xl">
+        <div className="sticky top-0 bg-brand-primary p-6 border-b border-brand-primary/20 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${
-                student.gender === 'MALE' ? 'bg-blue-500/20 text-blue-300' : 'bg-pink-500/20 text-pink-300'
-              }`}>
-                {student.gender === 'MALE' ? '👨' : '👩'}
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  student.gender === "MALE"
+                    ? "bg-brand-accent text-brand-accent-contrast"
+                    : "bg-brand-secondary text-brand-secondary-contrast"
+                }`}
+              >
+                {student.gender === "MALE" ? (
+                  <Mars className="w-6 h-6" />
+                ) : (
+                  <Venus className="w-6 h-6" />
+                )}
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-white">{formatEducationalText(student.studentName)}</h3>
-                <p className="text-gray-400">{student.examNo}</p>
+                <h3 className="text-2xl font-bold text-brand-primary-contrast">
+                  {formatEducationalText(student.studentName)}
+                </h3>
+                <p className="text-brand-primary-contrast/70">
+                  {student.examNo}
+                </p>
               </div>
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
-              className="text-gray-400 hover:text-white p-2 hover:bg-white/10 rounded-lg transition-all duration-200"
+              className="text-brand-primary-contrast/70 hover:text-brand-primary-contrast hover:bg-brand-primary-contrast/10"
             >
-              <span className="text-xl">✕</span>
-            </button>
+              <X className="h-5 w-5" />
+            </Button>
           </div>
         </div>
-        
+
         <div className="p-8 space-y-8">
           {/* Performance Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-xl p-6 border border-blue-500/20">
+            <div className="bg-brand-primary-2 rounded-xl p-6 border border-brand-primary-2/20 shadow-lg">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                  <span className="text-xl">📊</span>
+                <div className="w-10 h-10 bg-brand-primary-2-contrast/20 rounded-lg flex items-center justify-center">
+                  <ChartColumn className="w-5 h-5 text-brand-primary-2-contrast" />
                 </div>
-                <span className={`text-xs px-2 py-1 rounded-full ${getPositionBadge(student.position)}`}>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${getPositionBadge(
+                    student.position
+                  )}`}
+                >
                   Position {student.position}
                 </span>
               </div>
-              <div className={`text-3xl font-bold ${getScoreColor(student.total)}`}>
+              <div
+                className={`text-3xl font-bold text-brand-primary-2-contrast`}
+              >
                 {student.total}
               </div>
-              <div className="text-sm text-gray-400">Total Score</div>
-            </div>
-            
-            <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-xl p-6 border border-green-500/20">
-              <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-xl">📈</span>
+              <div className="text-sm text-brand-primary-2-contrast/70">
+                Total Score
               </div>
-              <div className={`text-3xl font-bold ${getScoreColor(student.average)}`}>
+            </div>
+
+            <div className="bg-brand-accent rounded-xl p-6 border border-brand-accent/20 shadow-lg">
+              <div className="w-10 h-10 bg-brand-accent-contrast/20 rounded-lg flex items-center justify-center mb-4">
+                <ChartNoAxesCombined className="w-5 h-5 text-brand-accent-contrast" />
+              </div>
+              <div className={`text-3xl font-bold text-brand-accent-contrast`}>
                 {student.average}%
               </div>
-              <div className="text-sm text-gray-400">Average Score</div>
-            </div>
-            
-            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-xl p-6 border border-purple-500/20">
-              <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-xl">🏆</span>
+              <div className="text-sm text-brand-accent-contrast/70">
+                Average Score
               </div>
-              <div className="text-3xl font-bold text-purple-400">
+            </div>
+
+            <div className="bg-brand-secondary rounded-xl p-6 border border-brand-secondary/20 shadow-lg">
+              <div className="w-10 h-10 bg-brand-secondary-contrast/20 rounded-lg flex items-center justify-center mb-4">
+                <Trophy className="w-5 h-5 text-brand-secondary-contrast" />
+              </div>
+              <div className="text-3xl font-bold text-brand-secondary-contrast">
                 {student.position}
               </div>
-              <div className="text-sm text-gray-400">Class Position</div>
+              <div className="text-sm text-brand-secondary-contrast/70">
+                Class Position
+              </div>
             </div>
           </div>
 
           {/* Basic Info and School Info */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-black/20 rounded-xl p-6 border border-white/10">
-              <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                <span className="mr-2">👤</span>
+            <div className="bg-brand-primary rounded-xl p-6 border border-brand-primary/20 shadow-lg">
+              <h4 className="text-lg font-semibold text-brand-primary-contrast mb-4 flex items-center">
+                <User className="w-5 h-5 mr-2" />
                 Basic Information
               </h4>
               <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-gray-400">Student Name</span>
-                  <span className="text-white font-medium">{formatEducationalText(student.studentName)}</span>
+                <div className="flex justify-between items-center py-2 border-b border-brand-primary-contrast/10">
+                  <span className="text-brand-primary-contrast/70">
+                    Student Name
+                  </span>
+                  <span className="text-brand-primary-contrast font-medium">
+                    {formatEducationalText(student.studentName)}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-gray-400">Exam Number</span>
-                  <span className="text-white font-mono">{student.examNo}</span>
+                <div className="flex justify-between items-center py-2 border-b border-brand-primary-contrast/10">
+                  <span className="text-brand-primary-contrast/70">
+                    Exam Number
+                  </span>
+                  <span className="text-brand-primary-contrast font-mono">
+                    {student.examNo}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-gray-400">Gender</span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    student.gender === 'MALE' ? 'bg-blue-500/20 text-blue-300' : 'bg-pink-500/20 text-pink-300'
-                  }`}>
-                    {student.gender === 'MALE' ? 'Male' : 'Female'}
+                <div className="flex justify-between items-center py-2 border-b border-brand-primary-contrast/10">
+                  <span className="text-brand-primary-contrast/70">Gender</span>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium ${
+                      student.gender === "MALE"
+                        ? "bg-brand-accent text-brand-accent-contrast"
+                        : "bg-brand-secondary text-brand-secondary-contrast"
+                    }`}
+                  >
+                    {student.gender === "MALE" ? "Male" : "Female"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-400">Class</span>
-                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  <span className="text-brand-primary-contrast/70">Class</span>
+                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-brand-accent text-brand-accent-contrast border border-brand-accent/30">
                     {formatEducationalText(student.class)}
                   </span>
                 </div>
               </div>
             </div>
-            
-            <div className="bg-black/20 rounded-xl p-6 border border-white/10">
-              <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                <span className="mr-2">🏫</span>
+
+            <div className="bg-brand-primary rounded-xl p-6 border border-brand-primary/20 shadow-lg">
+              <h4 className="text-lg font-semibold text-brand-primary-contrast mb-4 flex items-center">
+                <School className="w-5 h-5 mr-2" />
                 School Information
               </h4>
               <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-gray-400">School Name</span>
-                  <span className="text-white font-medium text-right">{formatEducationalText(student.school)}</span>
+                <div className="flex justify-between items-center py-2 border-b border-brand-primary-contrast/10">
+                  <span className="text-brand-primary-contrast/70">
+                    School Name
+                  </span>
+                  <span className="text-brand-primary-contrast font-medium text-right">
+                    {formatEducationalText(student.school)}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-white/5">
-                  <span className="text-gray-400">Class</span>
-                  <span className="text-white font-medium">{formatEducationalText(student.class)}</span>
+                <div className="flex justify-between items-center py-2 border-b border-brand-primary-contrast/10">
+                  <span className="text-brand-primary-contrast/70">Class</span>
+                  <span className="text-brand-primary-contrast font-medium">
+                    {formatEducationalText(student.class)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-400">Position in Class</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getPositionBadge(student.position)}`}>
+                  <span className="text-brand-primary-contrast/70">
+                    Position in Class
+                  </span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${getPositionBadge(
+                      student.position
+                    )}`}
+                  >
                     {student.position}
                   </span>
                 </div>
@@ -142,25 +204,33 @@ const StudentDetailsModal: React.FC<StudentDetailsModalProps> = ({
           </div>
 
           {/* Performance Summary */}
-          <div className="bg-black/20 rounded-xl p-6 border border-white/10">
-            <h4 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <span className="mr-2">📊</span>
+          <div className="bg-brand-primary rounded-xl p-6 border border-brand-primary/20 shadow-lg">
+            <h4 className="text-lg font-semibold text-brand-primary-contrast mb-6 flex items-center">
+              <ChartColumn className="w-5 h-5 mr-2" />
               Performance Summary
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-lg p-4 border border-blue-500/20">
-                <div className="text-sm text-gray-400 mb-2">Total Score</div>
-                <div className="text-2xl font-bold text-blue-400">{student.total}</div>
+              <div className="bg-brand-accent rounded-lg p-4 border border-brand-accent/20">
+                <div className="text-sm text-brand-accent-contrast/70 mb-2">
+                  Total Score
+                </div>
+                <div className="text-2xl font-bold text-brand-accent-contrast">
+                  {student.total}
+                </div>
               </div>
-              <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-lg p-4 border border-green-500/20">
-                <div className="text-sm text-gray-400 mb-2">Average Score</div>
-                <div className="text-2xl font-bold text-green-400">{student.average}%</div>
+              <div className="bg-brand-secondary rounded-lg p-4 border border-brand-secondary/20">
+                <div className="text-sm text-brand-secondary-contrast/70 mb-2">
+                  Average Score
+                </div>
+                <div className="text-2xl font-bold text-brand-secondary-contrast">
+                  {student.average}%
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Dialog>
   );
 };
 

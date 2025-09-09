@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { Mars, Venus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { formatEducationalText } from "@/utils/formatters";
 
@@ -91,12 +92,14 @@ const StudentRow: React.FC<StudentRowProps> = ({
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-        <button
+        <Button
+          variant="link"
+          size="sm"
           onClick={() => onViewDetails(student)}
-          className="text-brand-primary-2 hover:text-brand-primary transition-colors duration-200 font-medium hover:cursor-pointer hover:underline"
+          className="h-auto p-0 text-brand-primary hover:text-brand-primary-2"
         >
           View Details
-        </button>
+        </Button>
       </td>
     </tr>
   );
