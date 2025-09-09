@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { Mars, Venus } from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { formatEducationalText } from "@/utils/formatters";
 
@@ -30,17 +31,15 @@ const StudentRow: React.FC<StudentRowProps> = ({
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center space-x-3">
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-              student.gender === "MALE"
-                ? "bg-brand-primary/20 text-brand-primary"
-                : "bg-brand-secondary/20 text-brand-secondary"
-            }`}
-          >
-            {student.gender === "MALE" ? "👨" : "👩"}
+          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-brand-accent text-brand-accent-contrast">
+            {student.gender === "MALE" ? (
+              <Mars className="w-5 h-5" />
+            ) : (
+              <Venus className="w-5 h-5" />
+            )}
           </div>
           <div>
-            <div className="text-sm font-semibold text-brand-accent-text group-hover:text-brand-primary transition-colors duration-200">
+            <div className="text-sm font-semibold text-brand-primary-2 group-hover:text-brand-primary transition-colors duration-200">
               {formatEducationalText(student.studentName)}
             </div>
             <div className="text-sm text-brand-light-accent-1">
@@ -56,7 +55,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div>
-          <div className="text-sm font-medium text-brand-accent-text">
+          <div className="text-sm font-medium text-brand-primary-2">
             {formatEducationalText(student.school)}
           </div>
           <div className="text-sm text-brand-light-accent-1">
@@ -94,9 +93,9 @@ const StudentRow: React.FC<StudentRowProps> = ({
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <button
           onClick={() => onViewDetails(student)}
-          className="text-brand-primary hover:text-brand-primary-2 transition-colors duration-200 font-medium hover:underline"
+          className="text-brand-primary-2 hover:text-brand-primary transition-colors duration-200 font-medium hover:cursor-pointer hover:underline"
         >
-          View Details →
+          View Details
         </button>
       </td>
     </tr>
