@@ -224,19 +224,19 @@ const Dashboard: React.FC<DashboardProps> = ({
               <table className="w-full">
                 <thead className="bg-brand-primary-2">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider">
                       Position
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider">
                       Student Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider">
                       School
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider">
                       Class
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-primary-2-contrast uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider">
                       Total Score
                     </th>
                   </tr>
@@ -248,7 +248,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       className="hover:bg-gray-50 transition-colors duration-200"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-accent text-brand-accent-contrast">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-accent text-brand-accent-contrast">
                           {student.position || index + 1}
                         </span>
                       </td>
