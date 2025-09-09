@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { useData } from "@/context/DataContext";
 import StudentsTab from "@/components/students/StudentsTab";
+import StudentsPageSkeleton from "@/components/students/StudentsPageSkeleton";
 
 export default function StudentsPage() {
   const {
@@ -43,20 +44,9 @@ export default function StudentsPage() {
     }
   }, [isAdminDashboardCached, fetchAdminDashboard]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-brand-accent-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-primary mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-brand-heading mb-2">
-            Loading Students Data
-          </h2>
-          <p className="text-brand-light-accent-1">
-            Please wait while we fetch the latest information...
-          </p>
-        </div>
-      </div>
-    );
+  // Show skeleton while loading or when no data is available yet
+  if (loading || (!studentsData && !error)) {
+    return <StudentsPageSkeleton />;
   }
 
   if (error) {
@@ -79,20 +69,9 @@ export default function StudentsPage() {
     );
   }
 
+  // Guard clause - ensure studentsData exists before rendering
   if (!studentsData) {
-    return (
-      <div className="min-h-screen bg-brand-accent-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">📊</div>
-          <h2 className="text-2xl font-bold text-brand-heading mb-4">
-            No Data Available
-          </h2>
-          <p className="text-brand-light-accent-1">
-            No students data found. Please check your connection and try again.
-          </p>
-        </div>
-      </div>
-    );
+    return <StudentsPageSkeleton />;
   }
 
   return (
