@@ -1,7 +1,9 @@
 "use client";
 import React, { useEffect } from "react";
 import SchoolsTab from "@/components/schools/SchoolsTab";
+import SchoolsPageSkeleton from "@/components/schools/SchoolsPageSkeleton";
 import { useData } from "@/context/DataContext";
+import { AlertTriangle } from "lucide-react";
 
 const SchoolsPage: React.FC = () => {
   const {
@@ -18,34 +20,27 @@ const SchoolsPage: React.FC = () => {
     }
   }, [isAdminDashboardCached, fetchAdminDashboard]);
 
-  if (adminDashboard.loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Loading Schools Data
-          </h2>
-          <p className="text-gray-400">
-            Please wait while we fetch the latest information...
-          </p>
-        </div>
-      </div>
-    );
+  // Show skeleton while loading or when no data is available yet
+  if (adminDashboard.loading || !adminDashboard.data) {
+    return <SchoolsPageSkeleton />;
   }
 
   if (adminDashboard.error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-accent-background flex items-center justify-center">
         <div className="text-center max-w-md mx-auto">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="w-16 h-16 mx-auto mb-4 text-red-500">
+            <AlertTriangle className="w-full h-full" />
+          </div>
+          <h2 className="text-2xl font-bold text-brand-heading mb-4">
             Error Loading Data
           </h2>
-          <p className="text-gray-400 mb-6">{adminDashboard.error}</p>
+          <p className="text-brand-light-accent-1 mb-6">
+            {adminDashboard.error}
+          </p>
           <button
             onClick={() => fetchAdminDashboard({}, true)}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            className="px-6 py-3 bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
           >
             Try Again
           </button>
@@ -54,20 +49,9 @@ const SchoolsPage: React.FC = () => {
     );
   }
 
+  // Guard clause - ensure adminDashboard.data exists before rendering
   if (!adminDashboard.data) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🏫</div>
-          <h2 className="text-2xl font-bold text-white mb-4">
-            No Data Available
-          </h2>
-          <p className="text-gray-400">
-            No schools data found. Please check your connection and try again.
-          </p>
-        </div>
-      </div>
-    );
+    return <SchoolsPageSkeleton />;
   }
 
   return <SchoolsTab dashboardData={adminDashboard.data} />;
