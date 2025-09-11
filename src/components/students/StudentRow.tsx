@@ -4,6 +4,7 @@ import { Mars, Venus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { formatEducationalText } from "@/utils/formatters";
+import { StudentNameText, SchoolNameText } from "@/utils/truncateText";
 
 interface StudentRowProps {
   student: PerformanceStudent;
@@ -41,7 +42,10 @@ const StudentRow: React.FC<StudentRowProps> = ({
           </div>
           <div>
             <div className="text-sm font-semibold text-brand-primary-2 group-hover:text-brand-primary transition-colors duration-200">
-              {formatEducationalText(student.studentName)}
+              <StudentNameText
+                text={formatEducationalText(student.studentName)}
+                className="font-semibold"
+              />
             </div>
             <div className="text-sm text-brand-light-accent-1">
               {student.gender === "MALE" ? "Male" : "Female"}
@@ -57,7 +61,10 @@ const StudentRow: React.FC<StudentRowProps> = ({
       <td className="px-6 py-4 whitespace-nowrap">
         <div>
           <div className="text-sm font-medium text-brand-primary-2">
-            {formatEducationalText(student.school)}
+            <SchoolNameText
+              text={formatEducationalText(student.school)}
+              className="font-medium"
+            />
           </div>
           <div className="text-sm text-brand-light-accent-1">
             {formatEducationalText(student.class)}
