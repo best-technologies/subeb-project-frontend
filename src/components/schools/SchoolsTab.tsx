@@ -176,7 +176,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
           {topSchools.map((school, index) => (
             <div
               key={school.name}
-              className="bg-brand-accent-background border border-brand-accent/20 rounded-xl p-6 hover:border-brand-accent/40 transition-all duration-300 shadow-lg"
+              className="bg-white border border-brand-accent/20 rounded-xl p-6 hover:border-brand-accent/40 transition-all duration-300 shadow-lg"
             >
               <div className="flex items-center justify-between mb-4">
                 <div
@@ -438,7 +438,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-gray-200 bg-white">
               {filteredAndSortedSchools.map((school) => (
                 <tr
                   key={school.name}
