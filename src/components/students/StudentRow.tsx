@@ -26,12 +26,12 @@ const StudentRow: React.FC<StudentRowProps> = ({
       key={`${student.examNo}-${student.position}`}
       className="hover:bg-brand-accent/5 transition-all duration-200 group"
     >
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-4 whitespace-nowrap">
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-accent text-brand-accent-contrast">
           {student.position}
         </span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-4 whitespace-nowrap">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full flex items-center justify-center bg-brand-accent text-brand-accent-contrast">
             {student.gender === "MALE" ? (
@@ -53,12 +53,12 @@ const StudentRow: React.FC<StudentRowProps> = ({
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-4 whitespace-nowrap">
         <div className="text-sm font-mono text-brand-accent-text bg-brand-accent/10 px-2 py-1 rounded">
           {student.examNo}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-4 whitespace-nowrap">
         <div>
           <div className="text-sm font-medium text-brand-primary-2">
             <SchoolNameText
@@ -71,12 +71,12 @@ const StudentRow: React.FC<StudentRowProps> = ({
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-4 whitespace-nowrap">
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-brand-accent/20 text-brand-accent-contrast border border-brand-accent/30">
           {formatEducationalText(student.class)}
         </span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-4 whitespace-nowrap">
         <div
           className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold ${getScoreBgColor(
             student.total
@@ -87,7 +87,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
           </span>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-4 whitespace-nowrap">
         <div
           className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold ${getScoreBgColor(
             student.average
@@ -98,7 +98,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
           </span>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+      <td className="px-3 py-4 whitespace-nowrap text-sm font-medium">
         <Button
           variant="link"
           size="sm"

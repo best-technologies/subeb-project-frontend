@@ -31,7 +31,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
           <thead className="bg-brand-primary-2">
             <tr>
               <th
-                className="px-6 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
                 onClick={() => onSort("position")}
               >
                 <div className="flex items-center gap-2">
@@ -44,7 +44,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                 </div>
               </th>
               <th
-                className="px-6 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
                 onClick={() => onSort("studentName")}
               >
                 <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                 </div>
               </th>
               <th
-                className="px-6 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
                 onClick={() => onSort("examNo")}
               >
                 <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                 </div>
               </th>
               <th
-                className="px-6 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
                 onClick={() => onSort("school")}
               >
                 <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                 </div>
               </th>
               <th
-                className="px-6 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
                 onClick={() => onSort("class")}
               >
                 <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                 </div>
               </th>
               <th
-                className="px-6 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
                 onClick={() => onSort("total")}
               >
                 <div className="flex items-center gap-2">
@@ -109,7 +109,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                 </div>
               </th>
               <th
-                className="px-6 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
                 onClick={() => onSort("average")}
               >
                 <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                   )}
                 </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider">
+              <th className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -140,7 +140,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="px-6 py-8 text-center">
+                <td colSpan={8} className="px-3 py-8 text-center">
                   <div className="text-brand-light-accent-1">
                     <div className="text-4xl mb-4">📊</div>
                     <p className="text-lg font-medium text-brand-accent-text">
