@@ -1,15 +1,6 @@
 "use client";
 import React from "react";
-import {
-  X,
-  Venus,
-  Mars,
-  Trophy,
-  ChartColumn,
-  ChartNoAxesCombined,
-  User,
-  School,
-} from "lucide-react";
+import { X, Venus, Mars, ChartColumn, User, School } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
@@ -60,68 +51,47 @@ const StudentDetailsModal: React.FC<StudentDetailsModalProps> = ({
                 </p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="text-brand-primary-contrast/70 hover:text-brand-primary-contrast hover:bg-brand-primary-contrast/10"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center space-x-6">
+              {/* Performance Metrics */}
+              <div className="flex items-center space-x-4">
+                <div className="text-center">
+                  <div className="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                    {student.total}
+                  </div>
+                  <div className="text-xs text-brand-primary-contrast/70 mt-1">
+                    Total Score
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                    {student.average}%
+                  </div>
+                  <div className="text-xs text-brand-primary-contrast/70 mt-1">
+                    Avg. Score
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                    {student.position}
+                  </div>
+                  <div className="text-xs text-brand-primary-contrast/70 mt-1">
+                    Position
+                  </div>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="text-brand-primary-contrast/70 hover:text-brand-primary-contrast hover:bg-brand-primary-contrast/10"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
 
         <div className="p-8 space-y-8">
-          {/* Performance Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-brand-primary-2 rounded-xl p-6 border border-brand-primary-2/20 shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 bg-brand-primary-2-contrast/20 rounded-lg flex items-center justify-center">
-                  <ChartColumn className="w-5 h-5 text-brand-primary-2-contrast" />
-                </div>
-                <span
-                  className={`text-xs px-2 py-1 rounded-full ${getPositionBadge(
-                    student.position
-                  )}`}
-                >
-                  Position {student.position}
-                </span>
-              </div>
-              <div
-                className={`text-3xl font-bold text-brand-primary-2-contrast`}
-              >
-                {student.total}
-              </div>
-              <div className="text-sm text-brand-primary-2-contrast/70">
-                Total Score
-              </div>
-            </div>
-
-            <div className="bg-brand-accent rounded-xl p-6 border border-brand-accent/20 shadow-lg">
-              <div className="w-10 h-10 bg-brand-accent-contrast/20 rounded-lg flex items-center justify-center mb-4">
-                <ChartNoAxesCombined className="w-5 h-5 text-brand-accent-contrast" />
-              </div>
-              <div className={`text-3xl font-bold text-brand-accent-contrast`}>
-                {student.average}%
-              </div>
-              <div className="text-sm text-brand-accent-contrast/70">
-                Average Score
-              </div>
-            </div>
-
-            <div className="bg-brand-secondary rounded-xl p-6 border border-brand-secondary/20 shadow-lg">
-              <div className="w-10 h-10 bg-brand-secondary-contrast/20 rounded-lg flex items-center justify-center mb-4">
-                <Trophy className="w-5 h-5 text-brand-secondary-contrast" />
-              </div>
-              <div className="text-3xl font-bold text-brand-secondary-contrast">
-                {student.position}
-              </div>
-              <div className="text-sm text-brand-secondary-contrast/70">
-                Class Position
-              </div>
-            </div>
-          </div>
-
           {/* Basic Info and School Info */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-brand-primary rounded-xl p-6 border border-brand-primary/20 shadow-lg">
