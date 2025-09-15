@@ -101,6 +101,28 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const loading = hasActiveFilters ? searchLoading : false;
   const error = hasActiveFilters ? searchError : null;
 
+  // Calculate the actual search results count for the modal
+  const searchResultsCount = useMemo(() => {
+    if (hasActiveFilters) {
+      // If using search API, return the total count from API
+      return searchTotal;
+    } else {
+      // If using local search, return filtered results count
+      if (!searchTerm.trim()) return total;
+
+      const filtered = performanceTable.filter((student) => {
+        const search = searchTerm.trim().toLowerCase();
+        return (
+          student.studentName.trim().toLowerCase().includes(search) ||
+          student.examNo.trim().toLowerCase().includes(search) ||
+          student.school.trim().toLowerCase().includes(search) ||
+          student.class.trim().toLowerCase().includes(search)
+        );
+      });
+      return filtered.length;
+    }
+  }, [hasActiveFilters, searchTotal, searchTerm, performanceTable, total]);
+
   // Client-side filtering for initial data
   const filteredAndSortedStudents = useMemo(() => {
     if (hasActiveFilters) return students; // Use search results
@@ -367,7 +389,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         onClose={handleCloseSearchModal}
         searchTerm={hasActiveFilters ? searchParams.search || "" : searchTerm}
         onSearchChange={handleSearch}
-        resultsCount={students.length}
+        resultsCount={searchResultsCount}
         loading={loading}
         onSearchAll={handleSearchAll}
       />

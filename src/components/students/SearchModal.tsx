@@ -104,11 +104,22 @@ const SearchModal: React.FC<SearchModalProps> = ({
           {/* Results Count */}
           {localSearchTerm && (
             <div className="mb-4 text-sm text-brand-accent-text">
-              {loading
-                ? "Searching..."
-                : `${resultsCount} result${
-                    resultsCount !== 1 ? "s" : ""
-                  } found`}
+              {loading ? (
+                "Searching..."
+              ) : resultsCount > 0 ? (
+                <div>
+                  <div className="font-medium">
+                    {resultsCount} result{resultsCount !== 1 ? "s" : ""} found
+                  </div>
+                  <div className="text-xs text-brand-light-accent-1 mt-1">
+                    Click 'OK' to view them in the table below
+                  </div>
+                </div>
+              ) : (
+                <div className="text-brand-accent-text">
+                  No results found for "{localSearchTerm}"
+                </div>
+              )}
             </div>
           )}
 
@@ -116,10 +127,12 @@ const SearchModal: React.FC<SearchModalProps> = ({
           {localSearchTerm && !loading && resultsCount === 0 && (
             <div className="mb-4 p-3 bg-brand-accent/10 rounded-lg">
               <p className="text-sm text-brand-accent-text mb-2">
-                No students found in current results.
+                No students found matching "{localSearchTerm}" in current
+                results.
               </p>
               <p className="text-xs text-brand-light-accent-1">
-                Try searching the entire database for more results.
+                Try searching the entire database for more results, or modify
+                your search terms.
               </p>
             </div>
           )}
