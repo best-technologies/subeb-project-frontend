@@ -1,7 +1,6 @@
 import React from "react";
 import StudentsHeaderSkeleton from "./StudentsHeaderSkeleton";
 import StudentsFiltersSkeleton from "./StudentsFiltersSkeleton";
-import StudentsSearchSkeleton from "./StudentsSearchSkeleton";
 import StudentsTableSkeleton from "./StudentsTableSkeleton";
 
 const StudentsPageSkeleton: React.FC = () => {
@@ -16,10 +15,7 @@ const StudentsPageSkeleton: React.FC = () => {
       </div>
 
       {/* Search and Table Section */}
-      <div className="mt-6 space-y-6">
-        {/* Search and Pagination Controls */}
-        <StudentsSearchSkeleton />
-
+      <div className="mt-6">
         {/* Main Table */}
         <StudentsTableSkeleton />
       </div>

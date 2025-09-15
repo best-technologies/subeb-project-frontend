@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { Squirrel } from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import StudentRow from "./StudentRow";
 
@@ -142,7 +143,9 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
               <tr>
                 <td colSpan={8} className="px-3 py-8 text-center">
                   <div className="text-brand-light-accent-1">
-                    <div className="text-4xl mb-4">📊</div>
+                    <div className="flex justify-center mb-4">
+                      <Squirrel className="w-16 h-16 text-brand-primary-2" />
+                    </div>
                     <p className="text-lg font-medium text-brand-accent-text">
                       No students found
                     </p>
