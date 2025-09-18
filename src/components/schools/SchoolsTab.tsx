@@ -155,15 +155,11 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
               </div>
             </div>
             <div className="text-center">
-              <div
-                className={`text-2xl font-bold ${getScoreColor(
-                  overallAverage
-                )}`}
-              >
-                {overallAverage}%
+              <div className="text-2xl font-bold text-brand-primary-2-contrast">
+                {totalStudents}
               </div>
               <div className="text-sm text-brand-primary-2-contrast/70">
-                Overall Average
+                Total Students
               </div>
             </div>
           </div>
@@ -303,61 +299,6 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
             >
               Clear Filters
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-brand-primary-2 rounded-xl p-6 border border-brand-primary-2/20 shadow-lg">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-brand-secondary/20 rounded-xl flex items-center justify-center">
-              <School className="w-6 h-6 text-brand-secondary" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-brand-primary-2-contrast/70">
-                Total Schools
-              </p>
-              <p className="text-3xl font-bold text-brand-secondary">
-                {schoolStats.length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-brand-accent rounded-xl p-6 border border-brand-accent/20 shadow-lg">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-brand-accent-contrast/20 rounded-xl flex items-center justify-center">
-              <Users className="w-6 h-6 text-brand-accent-contrast" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-brand-accent-contrast/70">
-                Total Students
-              </p>
-              <p className="text-3xl font-bold text-brand-accent-contrast">
-                {totalStudents}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-brand-secondary rounded-xl p-6 border border-brand-secondary/20 shadow-lg">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-brand-secondary-contrast/20 rounded-xl flex items-center justify-center">
-              <ChartColumn className="w-6 h-6 text-brand-secondary-contrast" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-brand-secondary-contrast/70">
-                Overall Average
-              </p>
-              <p
-                className={`text-3xl font-bold ${getScoreColor(
-                  overallAverage
-                )}`}
-              >
-                {overallAverage}%
-              </p>
-            </div>
           </div>
         </div>
       </div>
