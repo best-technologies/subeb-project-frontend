@@ -13,6 +13,8 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Dialog } from "@/components/ui/dialog";
 
 interface SchoolStats {
@@ -227,16 +229,16 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
       <div className="bg-brand-secondary rounded-xl p-6 border border-brand-secondary/20 shadow-lg">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-brand-secondary-contrast mb-3">
+            <Label className="block text-sm font-medium text-brand-secondary-contrast mb-3">
               Search Schools
-            </label>
+            </Label>
             <div className="relative">
-              <input
+              <Input
                 type="text"
                 placeholder="Search by school name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-brand-secondary-contrast/10 border border-brand-secondary-contrast/20 rounded-lg pl-10 pr-4 py-3 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all duration-200"
+                className="w-full bg-brand-secondary-contrast/10 border border-brand-secondary-contrast/20 rounded-lg pl-10 pr-4 py-3 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all duration-200 h-auto mb-0"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="w-4 h-4 text-brand-secondary-contrast/60" />
@@ -245,9 +247,9 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-brand-secondary-contrast mb-3">
+            <Label className="block text-sm font-medium text-brand-secondary-contrast mb-3">
               Filter by LGA
-            </label>
+            </Label>
             <select
               value={selectedLGA}
               onChange={(e) => setSelectedLGA(e.target.value)}
@@ -288,7 +290,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
           </div>
 
           <div className="flex items-end">
-            <button
+            <Button
               onClick={() => {
                 setSearchTerm("");
                 setSelectedLGA("");
@@ -298,7 +300,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
               className="w-full px-6 py-3 bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
             >
               Clear Filters
-            </button>
+            </Button>
           </div>
         </div>
       </div>
