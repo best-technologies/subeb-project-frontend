@@ -15,6 +15,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Dialog } from "@/components/ui/dialog";
 
 interface SchoolStats {
@@ -35,7 +44,7 @@ interface SchoolsTabProps {
 
 const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLGA, setSelectedLGA] = useState("");
+  const [selectedLGA, setSelectedLGA] = useState("all-lgas");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [selectedSchool, setSelectedSchool] = useState<SchoolStats | null>(
@@ -76,7 +85,9 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
       const matchesSearch = schoolName.includes(search) || lga.includes(search);
       // LGA filter is case-insensitive and trimmed
       const matchesLGA =
-        !selectedLGA || lga === selectedLGA.trim().toLowerCase();
+        !selectedLGA ||
+        selectedLGA === "all-lgas" ||
+        lga === selectedLGA.trim().toLowerCase();
       return matchesSearch && matchesLGA;
     });
 
@@ -250,50 +261,62 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
             <Label className="block text-sm font-medium text-brand-secondary-contrast mb-3">
               Filter by LGA
             </Label>
-            <select
-              value={selectedLGA}
-              onChange={(e) => setSelectedLGA(e.target.value)}
-              className="w-full bg-brand-secondary-contrast/10 border border-brand-secondary-contrast/20 rounded-lg px-4 py-3 text-brand-secondary-contrast focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all duration-200"
-            >
-              <option value="">All LGAs</option>
-              {(dashboardData?.data?.lgas || dashboardData?.lgas || []).map(
-                (lga) => (
-                  <option key={lga.id} value={lga.name}>
-                    {lga.name}
-                  </option>
-                )
-              ) || (
-                <>
-                  <option value="Awka North">Awka North</option>
-                  <option value="Awka South">Awka South</option>
-                  <option value="Anambra East">Anambra East</option>
-                  <option value="Anambra West">Anambra West</option>
-                  <option value="Anaocha">Anaocha</option>
-                  <option value="Ayamelum">Ayamelum</option>
-                  <option value="Dunukofia">Dunukofia</option>
-                  <option value="Ekwusigo">Ekwusigo</option>
-                  <option value="Idemili North">Idemili North</option>
-                  <option value="Idemili South">Idemili South</option>
-                  <option value="Ihiala">Ihiala</option>
-                  <option value="Njikoka">Njikoka</option>
-                  <option value="Nnewi North">Nnewi North</option>
-                  <option value="Nnewi South">Nnewi South</option>
-                  <option value="Ogbaru">Ogbaru</option>
-                  <option value="Onitsha North">Onitsha North</option>
-                  <option value="Onitsha South">Onitsha South</option>
-                  <option value="Orumba North">Orumba North</option>
-                  <option value="Orumba South">Orumba South</option>
-                  <option value="Oyi">Oyi</option>
-                </>
-              )}
-            </select>
+            <Select value={selectedLGA} onValueChange={setSelectedLGA}>
+              <SelectTrigger className="w-full bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast">
+                <SelectValue placeholder="All LGAs" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>LGAs</SelectLabel>
+                  <SelectItem value="all-lgas">All LGAs</SelectItem>
+                  {(dashboardData?.data?.lgas || dashboardData?.lgas || []).map(
+                    (lga) => (
+                      <SelectItem key={lga.id} value={lga.name}>
+                        {lga.name}
+                      </SelectItem>
+                    )
+                  ) || (
+                    <>
+                      <SelectItem value="Awka North">Awka North</SelectItem>
+                      <SelectItem value="Awka South">Awka South</SelectItem>
+                      <SelectItem value="Anambra East">Anambra East</SelectItem>
+                      <SelectItem value="Anambra West">Anambra West</SelectItem>
+                      <SelectItem value="Anaocha">Anaocha</SelectItem>
+                      <SelectItem value="Ayamelum">Ayamelum</SelectItem>
+                      <SelectItem value="Dunukofia">Dunukofia</SelectItem>
+                      <SelectItem value="Ekwusigo">Ekwusigo</SelectItem>
+                      <SelectItem value="Idemili North">
+                        Idemili North
+                      </SelectItem>
+                      <SelectItem value="Idemili South">
+                        Idemili South
+                      </SelectItem>
+                      <SelectItem value="Ihiala">Ihiala</SelectItem>
+                      <SelectItem value="Njikoka">Njikoka</SelectItem>
+                      <SelectItem value="Nnewi North">Nnewi North</SelectItem>
+                      <SelectItem value="Nnewi South">Nnewi South</SelectItem>
+                      <SelectItem value="Ogbaru">Ogbaru</SelectItem>
+                      <SelectItem value="Onitsha North">
+                        Onitsha North
+                      </SelectItem>
+                      <SelectItem value="Onitsha South">
+                        Onitsha South
+                      </SelectItem>
+                      <SelectItem value="Orumba North">Orumba North</SelectItem>
+                      <SelectItem value="Orumba South">Orumba South</SelectItem>
+                      <SelectItem value="Oyi">Oyi</SelectItem>
+                    </>
+                  )}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex items-end">
             <Button
               onClick={() => {
                 setSearchTerm("");
-                setSelectedLGA("");
+                setSelectedLGA("all-lgas");
                 setSortBy("name");
                 setSortOrder("asc");
               }}
