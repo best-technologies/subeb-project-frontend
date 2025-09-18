@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import { TriangleAlert } from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { StudentsFilters as StudentsFiltersType } from "@/services/types/studentsDashboardResponse";
 
@@ -9,6 +10,7 @@ import StudentsFilters from "./StudentsFilters";
 import StudentsTable from "./StudentsTable";
 import StudentDetailsModal from "./StudentDetailsModal";
 import SearchModal from "./SearchModal";
+import { Button } from "@/components/ui/button";
 
 // Import utility functions
 import {
@@ -294,13 +296,13 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   // Show loading state only for search operations
   if (loading && hasActiveFilters && students.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-white mb-2">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-primary mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold text-brand-primary mb-2">
             Loading Students Data
           </h2>
-          <p className="text-gray-400">
+          <p className="text-brand-accent-text">
             Please wait while we fetch the latest information...
           </p>
         </div>
@@ -311,19 +313,22 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   // Show error state only for search operations
   if (error && hasActiveFilters && students.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="flex justify-center mb-4">
+            <TriangleAlert className="w-16 h-16 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-brand-primary mb-4">
             Error Loading Data
           </h2>
-          <p className="text-gray-400 mb-6">{error}</p>
-          <button
+          <p className="text-brand-accent-text mb-6">{error}</p>
+          <Button
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast"
+            size="lg"
           >
             Try Again
-          </button>
+          </Button>
         </div>
       </div>
     );
