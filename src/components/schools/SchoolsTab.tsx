@@ -238,18 +238,18 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
 
       {/* Search and Filters */}
       <div className="bg-brand-secondary rounded-xl p-6 border border-brand-secondary/20 shadow-lg">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
           <div>
             <Label className="block text-sm font-medium text-brand-secondary-contrast mb-3">
               Search Schools
             </Label>
-            <div className="relative">
+            <div className="relative h-12">
               <Input
                 type="text"
                 placeholder="Search by school name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-brand-secondary-contrast/10 border border-brand-secondary-contrast/20 rounded-lg pl-10 pr-4 py-3 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all duration-200 h-auto mb-0"
+                className="!h-12 w-full bg-brand-secondary-contrast/10 border border-brand-secondary-contrast/20 rounded-lg pl-10 pr-4 py-0 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all duration-200 mb-0"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="w-4 h-4 text-brand-secondary-contrast/60" />
@@ -262,7 +262,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
               Filter by LGA
             </Label>
             <Select value={selectedLGA} onValueChange={setSelectedLGA}>
-              <SelectTrigger className="w-full bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast">
+              <SelectTrigger className="w-full bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast h-12">
                 <SelectValue placeholder="All LGAs" />
               </SelectTrigger>
               <SelectContent>
@@ -312,7 +312,10 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
             </Select>
           </div>
 
-          <div className="flex items-end">
+          <div>
+            <div className="mb-3 opacity-0">
+              <Label>Placeholder</Label>
+            </div>
             <Button
               onClick={() => {
                 setSearchTerm("");
@@ -320,7 +323,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
                 setSortBy("name");
                 setSortOrder("asc");
               }}
-              className="w-full px-6 py-3 bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+              className="w-full h-12 bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
             >
               Clear Filters
             </Button>
