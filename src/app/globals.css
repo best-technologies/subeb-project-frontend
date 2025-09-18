@@ -35,14 +35,50 @@ body {
 .bg-brand-primary {
   background-color: var(--color-brand-primary) !important;
 }
+.text-brand-primary {
+  color: var(--color-brand-primary) !important;
+}
 .text-brand-primary-contrast {
   color: var(--color-brand-primary-contrast) !important;
+}
+.bg-brand-primary-hover {
+  background-color: color-mix(
+    in srgb,
+    var(--color-brand-primary) 90%,
+    black
+  ) !important;
+}
+.hover\:bg-brand-primary-hover:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--color-brand-primary) 90%,
+    black
+  ) !important;
+}
+.text-brand-primary-hover {
+  color: color-mix(in srgb, var(--color-brand-primary) 90%, black) !important;
+}
+.hover\:text-brand-primary-hover:hover {
+  color: color-mix(in srgb, var(--color-brand-primary) 90%, black) !important;
+}
+.border-brand-primary {
+  border-color: var(--color-brand-primary) !important;
+}
+.ring-brand-primary {
+  --tw-ring-color: var(--color-brand-primary) !important;
+}
+.focus-visible\:ring-brand-primary:focus-visible {
+  --tw-ring-color: var(--color-brand-primary) !important;
 }
 .bg-brand-primary-2 {
   background-color: var(--color-brand-primary-2) !important;
 }
 .text-brand-primary-2-contrast {
   color: var(--color-brand-primary-2-contrast) !important;
+}
+/* Cursor utilities */
+.hover\:cursor-pointer:hover {
+  cursor: pointer !important;
 }
 .bg-brand-secondary {
   background-color: var(--color-brand-secondary) !important;
