@@ -9,7 +9,7 @@ export interface InputProps
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className, type, ...props }, ref) => (
-    <div className="mb-4">
+    <div className="mb-2">
       {label && (
         <label className="block mb-1 font-medium text-foreground">
           {label}
