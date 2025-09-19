@@ -42,3 +42,6 @@ next-env.d.ts
 
 # context screenshots for Co-Pilot
 /public/bin
+
+# internal documentation
+/doc
