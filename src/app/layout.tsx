@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { DataProvider } from "@/context/DataContext";
+import { QueryProvider } from "@/components/providers/query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "ASUBEB School Management System",
-  description: "Comprehensive school management system for Abia State Universal Basic Education Board",
+  description:
+    "Comprehensive school management system for Abia State Universal Basic Education Board",
 };
 
 export default function RootLayout({
@@ -28,9 +30,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <DataProvider>
-          {children}
-        </DataProvider>
+        <QueryProvider>
+          <DataProvider>{children}</DataProvider>
+        </QueryProvider>
       </body>
     </html>
   );

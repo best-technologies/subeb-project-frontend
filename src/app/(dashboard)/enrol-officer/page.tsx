@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { useEnrollOfficer } from "@/services/hooks/useEnrollOfficer";
 import {
   Form,
   FormControl,
@@ -29,6 +30,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function EnrolOfficerPage() {
+  const enrollOfficerMutation = useEnrollOfficer();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,11 +44,19 @@ export default function EnrolOfficerPage() {
   });
 
   function onSubmit(values: FormValues) {
-    // Submit logic here
-    console.log(values);
+    console.log("Form submitted with values:", values);
 
-    // Reset form after successful submission
-    form.reset();
+    // Call the API through our new hook
+    enrollOfficerMutation.mutate(values, {
+      onSuccess: (data) => {
+        console.log("Enrollment successful, resetting form");
+        form.reset();
+      },
+      onError: (error) => {
+        console.error("Enrollment failed:", error);
+        // Form stays populated on error so user can retry
+      },
+    });
   }
 
   return (
@@ -140,9 +151,11 @@ export default function EnrolOfficerPage() {
               variant="default"
               size="default"
               className="w-full"
-              disabled={form.formState.isSubmitting}
+              disabled={enrollOfficerMutation.isPending}
             >
-              {form.formState.isSubmitting ? "Submitting..." : "Submit"}
+              {enrollOfficerMutation.isPending
+                ? "Enrolling..."
+                : "Enroll Officer"}
             </Button>
           </div>
         </form>
