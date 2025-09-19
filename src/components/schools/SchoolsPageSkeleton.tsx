@@ -2,7 +2,6 @@ import React from "react";
 import SchoolsHeaderSkeleton from "./SchoolsHeaderSkeleton";
 import SchoolsTopPerformersSkeleton from "./SchoolsTopPerformersSkeleton";
 import SchoolsFiltersSkeleton from "./SchoolsFiltersSkeleton";
-import SchoolsSummaryCardsSkeleton from "./SchoolsSummaryCardsSkeleton";
 import SchoolsTableSkeleton from "./SchoolsTableSkeleton";
 
 const SchoolsPageSkeleton: React.FC = () => {
@@ -16,9 +15,6 @@ const SchoolsPageSkeleton: React.FC = () => {
 
       {/* Filters Section */}
       <SchoolsFiltersSkeleton />
-
-      {/* Summary Cards Section */}
-      <SchoolsSummaryCardsSkeleton />
 
       {/* Table Section */}
       <SchoolsTableSkeleton />
