@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Mars, Venus } from "lucide-react";
+import { Mars, Venus, Eye, UserRoundPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { formatEducationalText } from "@/utils/formatters";
@@ -12,6 +12,7 @@ interface StudentRowProps {
   getScoreBgColor: (score: number) => string;
   getPositionBadge: (position: number) => string;
   onViewDetails: (student: PerformanceStudent) => void;
+  onEditStudent: (student: PerformanceStudent) => void;
 }
 
 const StudentRow: React.FC<StudentRowProps> = ({
@@ -20,6 +21,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
   getScoreBgColor,
   getPositionBadge,
   onViewDetails,
+  onEditStudent,
 }) => {
   return (
     <tr
@@ -99,14 +101,27 @@ const StudentRow: React.FC<StudentRowProps> = ({
         </div>
       </td>
       <td className="px-3 py-4 whitespace-nowrap text-sm font-medium">
-        <Button
-          variant="link"
-          size="sm"
-          onClick={() => onViewDetails(student)}
-          className="h-auto p-0 text-brand-primary hover:text-brand-primary-2"
-        >
-          View Details
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="View student details"
+            onClick={() => onViewDetails(student)}
+            className="h-8 w-8 text-brand-primary hover:text-brand-primary-2 hover:bg-brand-primary/10"
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Edit student"
+            onClick={() => onEditStudent(student)}
+            className="h-8 w-8 text-brand-primary hover:text-brand-primary-2 hover:bg-brand-primary/10"
+          >
+            <UserRoundPen className="w-4 h-4" />
+          </Button>
+        </div>
       </td>
     </tr>
   );

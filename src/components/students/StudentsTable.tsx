@@ -13,6 +13,7 @@ interface StudentsTableProps {
   getScoreBgColor: (score: number) => string;
   getPositionBadge: (position: number) => string;
   onViewDetails: (student: PerformanceStudent) => void;
+  onEditStudent: (student: PerformanceStudent) => void;
 }
 
 const StudentsTable: React.FC<StudentsTableProps> = ({
@@ -24,6 +25,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
   getScoreBgColor,
   getPositionBadge,
   onViewDetails,
+  onEditStudent,
 }) => {
   return (
     <div className="bg-white border border-brand-accent/20 rounded-xl overflow-hidden shadow-lg">
@@ -137,6 +139,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                   getScoreBgColor={getScoreBgColor}
                   getPositionBadge={getPositionBadge}
                   onViewDetails={onViewDetails}
+                  onEditStudent={onEditStudent}
                 />
               ))
             ) : (
