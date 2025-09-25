@@ -1,8 +1,10 @@
 "use client";
 import React, { useEffect } from "react";
+import { TriangleAlert } from "lucide-react";
 import { useData } from "@/context/DataContext";
 import StudentsTab from "@/components/students/StudentsTab";
 import StudentsPageSkeleton from "@/components/students/StudentsPageSkeleton";
+import { Button } from "@/components/ui/Button";
 
 export default function StudentsPage() {
   const {
@@ -51,19 +53,22 @@ export default function StudentsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-brand-accent-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-brand-heading mb-4">
+          <div className="flex justify-center mb-4">
+            <TriangleAlert className="w-16 h-16 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-brand-primary mb-4">
             Error Loading Data
           </h2>
-          <p className="text-brand-light-accent-1 mb-6">{error}</p>
-          <button
+          <p className="text-brand-accent-text mb-6">{error}</p>
+          <Button
             onClick={() => fetchAdminDashboard({}, true)}
-            className="px-6 py-3 bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast"
+            size="lg"
           >
             Try Again
-          </button>
+          </Button>
         </div>
       </div>
     );
