@@ -83,7 +83,7 @@ class ApiClient {
       }
 
       if (error instanceof Error) {
-        throw new Error(`API request failed: ${error.message}`);
+        throw new Error(`API request failed. Error message: ${error.message}`);
       }
       throw new Error("API request failed: Unknown error");
     }

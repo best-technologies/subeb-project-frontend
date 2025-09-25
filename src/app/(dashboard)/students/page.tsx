@@ -10,7 +10,7 @@ export default function StudentsPage() {
   const {
     state: { adminDashboard },
     fetchAdminDashboard,
-    isAdminDashboardCached,
+    shouldFetchAdminDashboard,
     getStudentsDataFromAdmin,
     hasAdminDataForStudents,
   } = useData();
@@ -29,7 +29,7 @@ export default function StudentsPage() {
     loading: adminDashboard.loading,
     error: adminDashboard.error,
     timestamp: adminDashboard.timestamp,
-    isCached: isAdminDashboardCached(),
+    hasAttempted: adminDashboard.hasAttempted,
   });
 
   // Determine loading state - if no data and still loading admin
@@ -39,12 +39,12 @@ export default function StudentsPage() {
   const error = !studentsData ? adminDashboard.error : null;
 
   useEffect(() => {
-    // Fetch admin dashboard if not cached
-    if (!isAdminDashboardCached()) {
+    // Only fetch if we should (prevents infinite loops after errors)
+    if (shouldFetchAdminDashboard()) {
       console.log("🚀 Fetching admin dashboard data for students page");
       fetchAdminDashboard();
     }
-  }, [isAdminDashboardCached, fetchAdminDashboard]);
+  }, [shouldFetchAdminDashboard, fetchAdminDashboard]);
 
   // Show skeleton while loading or when no data is available yet
   if (loading || (!studentsData && !error)) {

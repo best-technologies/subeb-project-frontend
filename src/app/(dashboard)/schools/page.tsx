@@ -3,47 +3,51 @@ import React, { useEffect } from "react";
 import SchoolsTab from "@/components/schools/SchoolsTab";
 import SchoolsPageSkeleton from "@/components/schools/SchoolsPageSkeleton";
 import { useData } from "@/context/DataContext";
-import { AlertTriangle } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 const SchoolsPage: React.FC = () => {
   const {
     state: { adminDashboard },
     fetchAdminDashboard,
-    isAdminDashboardCached,
+    shouldFetchAdminDashboard,
   } = useData();
 
   useEffect(() => {
-    // Only fetch if not cached
-    if (!isAdminDashboardCached()) {
-      console.log("🚀 Fetching admin dashboard data for schools page");
+    // Only fetch if we should (prevents infinite loops after errors)
+    if (shouldFetchAdminDashboard()) {
+      console.log("Fetching admin dashboard data for schools page");
       fetchAdminDashboard();
     }
-  }, [isAdminDashboardCached, fetchAdminDashboard]);
+  }, [shouldFetchAdminDashboard, fetchAdminDashboard]);
 
-  // Show skeleton while loading or when no data is available yet
-  if (adminDashboard.loading || !adminDashboard.data) {
+  // Determine loading and error states similar to students page
+  const loading = adminDashboard.loading;
+  const error = !adminDashboard.data ? adminDashboard.error : null;
+
+  // Show skeleton while loading or when no data is available yet (but no error)
+  if (loading || (!adminDashboard.data && !error)) {
     return <SchoolsPageSkeleton />;
   }
 
-  if (adminDashboard.error) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-brand-accent-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto">
-          <div className="w-16 h-16 mx-auto mb-4 text-red-500">
-            <AlertTriangle className="w-full h-full" />
+          <div className="flex justify-center mb-4">
+            <TriangleAlert className="w-16 h-16 text-red-600" />
           </div>
-          <h2 className="text-2xl font-bold text-brand-heading mb-4">
+          <h2 className="text-2xl font-bold text-brand-primary mb-4">
             Error Loading Data
           </h2>
-          <p className="text-brand-light-accent-1 mb-6">
-            {adminDashboard.error}
-          </p>
-          <button
+          <p className="text-brand-accent-text mb-6">{error}</p>
+          <Button
             onClick={() => fetchAdminDashboard({}, true)}
-            className="px-6 py-3 bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast"
+            size="lg"
           >
             Try Again
-          </button>
+          </Button>
         </div>
       </div>
     );

@@ -18,6 +18,7 @@ interface CacheEntry<T> {
   timestamp: number;
   loading: boolean;
   error: string | null;
+  hasAttempted: boolean;
 }
 
 interface DataState {
@@ -36,6 +37,7 @@ const initialState: DataState = {
     timestamp: 0,
     loading: false,
     error: null,
+    hasAttempted: false,
   },
 };
 
@@ -58,6 +60,7 @@ function dataReducer(state: DataState, action: DataAction): DataState {
           timestamp: Date.now(),
           loading: false,
           error: null,
+          hasAttempted: true,
         },
       };
     case "SET_ADMIN_DASHBOARD_ERROR":
@@ -67,6 +70,7 @@ function dataReducer(state: DataState, action: DataAction): DataState {
           ...state.adminDashboard,
           loading: false,
           error: action.payload,
+          hasAttempted: true,
         },
       };
     case "CLEAR_CACHE":
@@ -76,6 +80,7 @@ function dataReducer(state: DataState, action: DataAction): DataState {
           timestamp: 0,
           loading: false,
           error: null,
+          hasAttempted: false,
         },
       };
     default:
@@ -106,6 +111,7 @@ interface DataContextType {
   ) => Promise<void>;
   clearCache: () => void;
   isAdminDashboardCached: () => boolean;
+  shouldFetchAdminDashboard: () => boolean;
   getStudentsDataFromAdmin: () => StudentsDashboardData | null;
   hasAdminDataForStudents: () => boolean;
 }
@@ -125,6 +131,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
       isCacheValid(state.adminDashboard.timestamp)
     );
   }, [state.adminDashboard.data, state.adminDashboard.timestamp, isCacheValid]);
+
+  const shouldFetchAdminDashboard = useCallback(() => {
+    // Don't fetch if already loading
+    if (state.adminDashboard.loading) {
+      return false;
+    }
+
+    // Don't fetch if we have cached data
+    if (isAdminDashboardCached()) {
+      return false;
+    }
+
+    // Don't fetch if we've already attempted and have an error (prevent infinite loops)
+    if (state.adminDashboard.hasAttempted && state.adminDashboard.error) {
+      return false;
+    }
+
+    // Fetch if we haven't attempted yet or if we have successful data but it's stale
+    return true;
+  }, [
+    state.adminDashboard.loading,
+    state.adminDashboard.hasAttempted,
+    state.adminDashboard.error,
+    isAdminDashboardCached,
+  ]);
 
   const fetchAdminDashboard = useCallback(
     async (
@@ -163,13 +194,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Don't retry if we have a recent error (prevent infinite loops)
-      const hasRecentError =
+      // Don't retry if we have an error and not forcing refresh (prevent infinite loops)
+      if (
+        state.adminDashboard.hasAttempted &&
         state.adminDashboard.error &&
-        Date.now() - state.adminDashboard.timestamp < 30000; // 30 seconds
-      if (hasRecentError && !forceRefresh) {
+        !forceRefresh
+      ) {
         console.log(
-          "⚠️ Skipping request due to recent error:",
+          "⚠️ Skipping request due to previous error (use forceRefresh to retry):",
           state.adminDashboard.error
         );
         return;
@@ -317,6 +349,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     fetchAdminDashboard,
     clearCache,
     isAdminDashboardCached,
+    shouldFetchAdminDashboard,
     getStudentsDataFromAdmin,
     hasAdminDataForStudents,
   };
