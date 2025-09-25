@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { User, Mail, Phone, MapPin, Calendar, Shield } from "lucide-react";
 
@@ -32,9 +33,11 @@ const ProfilePage: React.FC = () => {
           <div className="flex items-center space-x-4">
             <div className="w-20 h-20 bg-brand-secondary rounded-full flex items-center justify-center">
               {userProfile.avatar ? (
-                <img
+                <Image
                   src={userProfile.avatar}
                   alt="Profile"
+                  width={80}
+                  height={80}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (

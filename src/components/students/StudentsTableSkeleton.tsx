@@ -1,7 +1,7 @@
 import React from "react";
 
 const ROWS = 10;
-const COLS = 8; // Match actual table columns: Position, Student, Exam No, School, Class, Total, Average, Actions
+// const COLS = 8; // Match actual table columns: Position, Student, Exam No, School, Class, Total, Average, Actions
 
 const StudentsTableSkeleton: React.FC = () => {
   return (

@@ -4,8 +4,6 @@ import StatsCards from "./StatsCards";
 import StatsCardsSkeleton from "./StatsCardsSkeleton";
 import StudentsTableSkeleton from "@/components/students/StudentsTableSkeleton";
 import CollapsibleCharts from "./CollapsibleCharts";
-import StudentsTable from "@/components/students/StudentsTable";
-import { GlobalSearchFilter } from "@/components/shared/GlobalSearchFilter";
 import { useGlobalSearchFilter } from "@/services";
 import { AdminDashboardData } from "@/services/types/adminDashboardResponse";
 
@@ -37,20 +35,11 @@ const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   // ...existing code...
 
-  const [lgaFilter, setLgaFilter] = useState("");
-  const [schoolFilter, setSchoolFilter] = useState("");
+  const [lgaFilter] = useState("");
+  const [schoolFilter] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  const {
-    searchTerm,
-    selectedSession,
-    selectedTerm,
-    handleSearchChange,
-    handleSessionChange,
-    handleTermChange,
-    availableSessions,
-    availableTerms,
-  } = useGlobalSearchFilter({
+  const { searchTerm, selectedSession, selectedTerm } = useGlobalSearchFilter({
     availableSessions: dashboardData?.availableSessions || [],
     availableTerms: dashboardData?.availableTerms || [],
   });
@@ -125,9 +114,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   ]);
 
   // Get unique LGAs and schools from the dashboard data
-  const availableLgas = dashboardData?.data?.lgas?.map((lga) => lga.name) || [];
-  const availableSchools =
-    dashboardData?.data?.schools?.map((school) => school.name) || [];
+  // const availableLgas = dashboardData?.data?.lgas?.map((lga) => lga.name) || [];
+  // const availableSchools =
+  //   dashboardData?.data?.schools?.map((school) => school.name) || [];
 
   // Debug the filters
   // console.log("Available LGAs:", availableLgas);

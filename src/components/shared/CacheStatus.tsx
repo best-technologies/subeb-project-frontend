@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useData } from "@/context/DataContext";
-import { ArrowPathIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 interface CacheStatusProps {
   className?: string;

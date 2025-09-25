@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 
 const ForgotPassword = () => {
@@ -20,8 +20,8 @@ const ForgotPassword = () => {
             Forgot your password?
           </h2>
           <p className="text-brand-light-accent-1 text-sm">
-            Enter your email address and we'll send you instructions to reset
-            your password.
+            Enter your email address and we&apos;ll send you instructions to
+            reset your password.
           </p>
         </div>
 

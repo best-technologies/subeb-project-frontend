@@ -1,7 +1,7 @@
 import React from "react";
 
 const ROWS = 8;
-const COLS = 6; // School, LGA, Students, Average, Top Score, Actions
+// const COLS = 6; // School, LGA, Students, Average, Top Score, Actions
 
 const SchoolsTableSkeleton: React.FC = () => {
   return (

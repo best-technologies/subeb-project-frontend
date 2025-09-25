@@ -11,7 +11,7 @@ import StudentsTable from "./StudentsTable";
 import StudentDetailsModal from "./StudentDetailsModal";
 import EditStudentDialog from "./EditStudentDialog";
 import SearchModal from "./SearchModal";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 
 // Import utility functions
 import {
@@ -47,7 +47,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const [sortBy, setSortBy] = useState("position");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState<StudentsFiltersType>({});
+  // const [filters] = useState<StudentsFiltersType>({});
   const studentsPerPage = 10;
 
   // Use the new search hook
@@ -55,9 +55,9 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     // Data
     students: searchStudents,
     total: searchTotal,
-    currentPage: searchCurrentPage,
-    totalPages: searchTotalPages,
-    limit,
+    // currentPage: searchCurrentPage,
+    // totalPages: searchTotalPages,
+    // limit,
 
     // States
     loading: searchLoading,
@@ -77,7 +77,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     updateSearch,
     updateAnySearchParam,
     updateSorting,
-    changePage,
+    // changePage,
     clearFilters,
 
     // Check if filters are enabled
@@ -101,10 +101,10 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   // Use search results if filters are active, otherwise use initial data
   const students = hasActiveFilters ? searchStudents : performanceTable;
   const total = hasActiveFilters ? searchTotal : performanceTable.length;
-  const currentPageValue = hasActiveFilters ? searchCurrentPage : currentPage;
-  const totalPages = hasActiveFilters
-    ? searchTotalPages
-    : Math.ceil(performanceTable.length / studentsPerPage);
+  // const currentPageValue = hasActiveFilters ? searchCurrentPage : currentPage;
+  // const totalPages = hasActiveFilters
+  //   ? searchTotalPages
+  //   : Math.ceil(performanceTable.length / studentsPerPage);
   const loading = hasActiveFilters ? searchLoading : false;
   const error = hasActiveFilters ? searchError : null;
 
@@ -283,13 +283,13 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     }
   };
 
-  const handlePageChange = (page: number) => {
-    if (hasActiveFilters) {
-      changePage(page);
-    } else {
-      setCurrentPage(page);
-    }
-  };
+  // const handlePageChange = (page: number) => {
+  //   if (hasActiveFilters) {
+  //     changePage(page);
+  //   } else {
+  //     setCurrentPage(page);
+  //   }
+  // };
 
   const handleClearFilters = () => {
     if (hasActiveFilters) {
@@ -299,7 +299,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
       setSortBy("position");
       setSortOrder("asc");
       setCurrentPage(1);
-      setFilters({});
+      // setFilters({});
     }
   };
 

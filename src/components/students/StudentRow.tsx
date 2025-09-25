@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Mars, Venus, Eye, UserRoundPen } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { formatEducationalText } from "@/utils/formatters";
 import { StudentNameText, SchoolNameText } from "@/utils/truncateText";
@@ -19,7 +19,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
   student,
   getScoreColor,
   getScoreBgColor,
-  getPositionBadge,
+  // getPositionBadge,
   onViewDetails,
   onEditStudent,
 }) => {

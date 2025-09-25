@@ -6,14 +6,13 @@ import {
   School,
   Users,
   ChartColumn,
-  MapPin,
   Search,
   Trophy,
   TrendingUp,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -137,10 +136,10 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
     (sum, school) => sum + school.totalStudents,
     0
   );
-  const overallAverage = Math.round(
-    schoolStats.reduce((sum, school) => sum + school.averageScore, 0) /
-      schoolStats.length
-  );
+  // const overallAverage = Math.round(
+  //   schoolStats.reduce((sum, school) => sum + school.averageScore, 0) /
+  //     schoolStats.length
+  // );
   const topSchools = schoolStats
     .sort((a, b) => b.averageScore - a.averageScore)
     .slice(0, 3);

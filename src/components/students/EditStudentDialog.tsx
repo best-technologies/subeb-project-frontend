@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Dialog } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { X } from "lucide-react";
 
@@ -135,7 +135,10 @@ const EditStudentDialog: React.FC<EditStudentDialogProps> = ({
     }
   };
 
-  const updateFormField = (field: keyof PerformanceStudent, value: any) => {
+  const updateFormField = (
+    field: keyof PerformanceStudent,
+    value: string | number
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts editing
     if (error) {
@@ -239,7 +242,9 @@ const EditStudentDialog: React.FC<EditStudentDialogProps> = ({
               </Label>
               <Input
                 id="class"
-                value={(form as any).class || ""}
+                value={
+                  (form as PerformanceStudent & { class: string }).class || ""
+                }
                 onChange={(e) => updateFormField("class", e.target.value)}
                 className="border-brand-accent/30 focus:border-brand-primary"
                 placeholder="Enter class"

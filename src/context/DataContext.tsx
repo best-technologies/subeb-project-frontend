@@ -5,7 +5,6 @@ import React, {
   useReducer,
   ReactNode,
   useCallback,
-  useMemo,
 } from "react";
 import { AdminDashboardData } from "@/services/types/adminDashboardResponse";
 import { StudentsDashboardData } from "@/services/types/studentsDashboardResponse";
@@ -125,7 +124,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       state.adminDashboard.data !== null &&
       isCacheValid(state.adminDashboard.timestamp)
     );
-  }, [state.adminDashboard.data, state.adminDashboard.timestamp]);
+  }, [state.adminDashboard.data, state.adminDashboard.timestamp, isCacheValid]);
 
   const fetchAdminDashboard = useCallback(
     async (
@@ -237,7 +236,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     // For now, let's be more lenient and just check if we have data and it's valid
     return !!(hasData && isCacheValidNow);
-  }, [state.adminDashboard.data, state.adminDashboard.timestamp]);
+  }, [state.adminDashboard.data, state.adminDashboard.timestamp, isCacheValid]);
 
   // Function to transform admin dashboard data into students dashboard format
   const getStudentsDataFromAdmin =

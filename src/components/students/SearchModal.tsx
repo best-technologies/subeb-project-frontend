@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -112,12 +112,12 @@ const SearchModal: React.FC<SearchModalProps> = ({
                     {resultsCount} result{resultsCount !== 1 ? "s" : ""} found
                   </div>
                   <div className="text-xs text-brand-light-accent-1 mt-1">
-                    Click 'OK' to view them in the table below
+                    Click &apos;OK&apos; to view them in the table below
                   </div>
                 </div>
               ) : (
                 <div className="text-brand-accent-text">
-                  No results found for "{localSearchTerm}"
+                  No results found for &quot;{localSearchTerm}&quot;
                 </div>
               )}
             </div>
@@ -127,8 +127,8 @@ const SearchModal: React.FC<SearchModalProps> = ({
           {localSearchTerm && !loading && resultsCount === 0 && (
             <div className="mb-4 p-3 bg-brand-accent/10 rounded-lg">
               <p className="text-sm text-brand-accent-text mb-2">
-                No students found matching "{localSearchTerm}" in current
-                results.
+                No students found matching &quot;{localSearchTerm}&quot; in
+                current results.
               </p>
               <p className="text-xs text-brand-light-accent-1">
                 Try searching the entire database for more results, or modify

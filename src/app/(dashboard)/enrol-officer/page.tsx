@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useEnrollOfficer } from "@/services/hooks/useEnrollOfficer";
 import {
   Form,
@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/Input";
 
 // Zod schema for form validation
 const formSchema = z.object({
@@ -48,7 +48,7 @@ export default function EnrolOfficerPage() {
 
     // Call the API through our new hook
     enrollOfficerMutation.mutate(values, {
-      onSuccess: (data) => {
+      onSuccess: () => {
         console.log("Enrollment successful, resetting form");
         form.reset();
       },

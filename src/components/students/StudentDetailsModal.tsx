@@ -2,7 +2,7 @@
 import React from "react";
 import { X, Venus, Mars, ChartColumn, User, School } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { formatEducationalText } from "@/utils/formatters";
 
@@ -18,7 +18,7 @@ const StudentDetailsModal: React.FC<StudentDetailsModalProps> = ({
   student,
   isOpen,
   onClose,
-  getScoreColor,
+  // getScoreColor,
   getPositionBadge,
 }) => {
   if (!student) return null;

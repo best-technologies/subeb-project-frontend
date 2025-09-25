@@ -11,9 +11,16 @@ export const queryClient = new QueryClient({
       gcTime: 10 * 60 * 1000, // 10 minutes (previously cacheTime)
 
       // Retry failed requests
-      retry: (failureCount, error: any) => {
+      retry: (
+        failureCount,
+        error: Error & { response?: { status: number } }
+      ) => {
         // Don't retry for 4xx errors
-        if (error?.response?.status >= 400 && error?.response?.status < 500) {
+        if (
+          error?.response?.status &&
+          error.response.status >= 400 &&
+          error.response.status < 500
+        ) {
           return false;
         }
         return failureCount < 3;
@@ -43,7 +50,7 @@ export const queryKeys = {
   // Officer management keys
   officers: {
     all: () => ["officers"] as const,
-    list: (filters?: any) =>
+    list: (filters?: Record<string, unknown>) =>
       [...queryKeys.officers.all(), "list", filters] as const,
     detail: (id: string) =>
       [...queryKeys.officers.all(), "detail", id] as const,
@@ -52,7 +59,7 @@ export const queryKeys = {
   // Student management keys
   students: {
     all: () => ["students"] as const,
-    list: (filters?: any) =>
+    list: (filters?: Record<string, unknown>) =>
       [...queryKeys.students.all(), "list", filters] as const,
     search: (query: string) =>
       [...queryKeys.students.all(), "search", query] as const,
@@ -62,7 +69,9 @@ export const queryKeys = {
 
   // Dashboard keys
   dashboard: {
-    admin: (params?: any) => ["dashboard", "admin", params] as const,
-    students: (filters?: any) => ["dashboard", "students", filters] as const,
+    admin: (params?: Record<string, unknown>) =>
+      ["dashboard", "admin", params] as const,
+    students: (filters?: Record<string, unknown>) =>
+      ["dashboard", "students", filters] as const,
   },
 } as const;

@@ -78,7 +78,7 @@ class ApiClient {
       if (error instanceof TypeError && error.message.includes("fetch")) {
         // console.log("API Client - Network error, API not available");
         throw new Error(
-          "API not available - please ensure your backend is running at http://localhost:3000"
+          `API not available - please check if your backend is accessible at ${API_BASE_URL}`
         );
       }
 

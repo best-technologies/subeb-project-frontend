@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Binoculars } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 
 interface StudentsHeaderProps {
   totalStudents: number;
@@ -13,7 +13,7 @@ interface StudentsHeaderProps {
 const StudentsHeader: React.FC<StudentsHeaderProps> = ({
   totalStudents,
   averageScore,
-  getScoreColor,
+  // getScoreColor,
   onSearchClick,
 }) => {
   return (

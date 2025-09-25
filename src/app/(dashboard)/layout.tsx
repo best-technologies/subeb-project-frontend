@@ -1,13 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Sidebar from "@/components/shared/Sidebar";
-// import { Button } from "@/components/ui/button";
-import { dialog } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { FormError } from "@/components/ui/FormError";
-import { CacheStatus } from "@/components/shared/CacheStatus";
+// import { Button } from "@/components/ui/Button";
 
 export default function DashboardLayout({
   children,
@@ -15,7 +10,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const pathname = usePathname();
 
   // Refresh function to be passed to sidebar
   const handleRefresh = () => {

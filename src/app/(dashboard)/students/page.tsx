@@ -78,7 +78,9 @@ export default function StudentsPage() {
     <StudentsTab
       performanceTable={studentsData.performanceTable}
       lgas={studentsData.lgas}
-      subjects={studentsData.subjects.map((subject: any) => subject.name)}
+      subjects={studentsData.subjects.map(
+        (subject: { name: string }) => subject.name
+      )}
     />
   );
 }
