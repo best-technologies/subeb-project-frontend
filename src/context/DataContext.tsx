@@ -184,13 +184,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       // Return cached data only if no search params and not forcing refresh
       if (!forceRefresh && !hasSearchParams && isAdminDashboardCached()) {
-        console.log("📦 Using cached data (no search params)");
+        console.log("Using cached data (no search params)");
         return;
       }
 
       // Don't fetch if already loading
       if (state.adminDashboard.loading) {
-        // console.log("⏳ Already loading, skipping request");
+        // console.log("Already loading, skipping request");
         return;
       }
 
@@ -201,25 +201,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
         !forceRefresh
       ) {
         console.log(
-          "⚠️ Skipping request due to previous error (use forceRefresh to retry):",
+          "Skipping request due to previous error (use forceRefresh to retry):",
           state.adminDashboard.error
         );
         return;
       }
 
-      // console.log("🚀 DataContext - Making API call with params:", params);
+      // console.log("DataContext - Making API call with params:", params);
       dispatch({ type: "SET_ADMIN_DASHBOARD_LOADING" });
 
       try {
         const response = await getAdminDashboard(params);
-        //  console.log('✅ DataContext - API response received:', response);
+        //  console.log('DataContext - API response received:', response);
         if (response.success) {
           dispatch({
             type: "SET_ADMIN_DASHBOARD_SUCCESS",
             payload: response.data,
           });
         } else {
-          console.error("❌ DataContext - API error:", response.message);
+          console.error("DataContext - API error:", response.message);
           dispatch({
             type: "SET_ADMIN_DASHBOARD_ERROR",
             payload: response.message,
@@ -228,7 +228,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "An unknown error occurred";
-        console.error("❌ DataContext - Fetch error:", errorMessage);
+        console.error("DataContext - Fetch error:", errorMessage);
         dispatch({ type: "SET_ADMIN_DASHBOARD_ERROR", payload: errorMessage });
       }
     },
@@ -236,7 +236,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       isAdminDashboardCached,
       state.adminDashboard.loading,
       state.adminDashboard.error,
-      state.adminDashboard.timestamp,
+      state.adminDashboard.hasAttempted,
     ]
   );
 
@@ -274,12 +274,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const getStudentsDataFromAdmin =
     useCallback((): StudentsDashboardData | null => {
       if (!state.adminDashboard.data) {
-        console.log("❌ No admin dashboard data available");
+        console.log("No admin dashboard data available");
         return null;
       }
 
       const adminData = state.adminDashboard.data;
-      console.log("🔄 Transforming admin data for students:", {
+      console.log("Transforming admin data for students:", {
         keys: Object.keys(adminData),
         performance: adminData.performance,
         data: adminData.data,
@@ -334,7 +334,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           [],
       };
 
-      console.log("✅ Transformed students data:", {
+      console.log("Transformed students data:", {
         performanceTableLength: studentsData.performanceTable.length,
         lgasLength: studentsData.lgas.length,
         schoolsLength: studentsData.schools.length,
