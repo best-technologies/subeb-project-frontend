@@ -6,6 +6,7 @@ import {
   StudentsDashboardResponse,
   StudentsFilters,
 } from "./types/studentsDashboardResponse";
+import { CurrentSessionResponse } from "./api/session";
 
 // API Configuration
 const API_BASE_URL =
@@ -243,6 +244,26 @@ class ApiClient {
     // TODO: Implement when authentication is added
     // localStorage.removeItem('authToken');
   }
+
+  // Current Session API Method
+  async getCurrentSession(): Promise<CurrentSessionResponse> {
+    try {
+      // Add cache-busting headers to prevent 304 responses
+      const response = await this.get<CurrentSessionResponse>(
+        "/academic/sessions/current",
+        undefined,
+        {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        }
+      );
+      return response;
+    } catch (error) {
+      console.error("❌ API Client - Error in getCurrentSession:", error);
+      throw error;
+    }
+  }
 }
 
 // Create and export a singleton instance
@@ -257,6 +278,7 @@ export const getAdminDashboard = (
 ) => apiClient.getAdminDashboard(params);
 export const getStudentsDashboard = (filters?: StudentsFilters) =>
   apiClient.getStudentsDashboard(filters);
+export const getCurrentSession = () => apiClient.getCurrentSession();
 export const setAuthToken = (token: string) => apiClient.setAuthToken(token);
 export const clearAuthToken = () => apiClient.clearAuthToken();
 
