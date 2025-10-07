@@ -1,24 +1,24 @@
-'use client';
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [pin, setPin] = useState('');
+  const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     // Simulate API call
     setTimeout(() => {
-      if (pin === '6234') {
-        router.push('/dashboard');
+      if (pin === "6234") {
+        router.push("/dashboard");
       } else {
-        setError('Invalid PIN. Please try again.');
+        setError("Invalid PIN. Please try again.");
       }
       setLoading(false);
     }, 1000);
@@ -35,11 +35,19 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-white mb-2">ASUBEB</h1>
           <p className="text-gray-300">School Management System</p>
         </div>
+        {/* <div>
+          <button className="w-full py-3 rounded-lg font-semibold text-white transition-colors text-lg bg-blue-600 hover:bg-blue-700">
+            Enrol Officer
+          </button>
+        </div> */}
 
         {/* PIN Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="pin" className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="pin"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Enter Access PIN
             </label>
             <input
@@ -57,9 +65,13 @@ export default function Home() {
           <button
             type="submit"
             disabled={loading || !pin}
-            className={`w-full py-3 rounded-lg font-semibold text-white transition-colors text-lg ${loading || !pin ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+            className={`w-full py-3 rounded-lg font-semibold text-white transition-colors text-lg ${
+              loading || !pin
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            {loading ? 'Verifying...' : 'Access Dashboard'}
+            {loading ? "Verifying..." : "Access Dashboard"}
           </button>
         </form>
 

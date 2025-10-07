@@ -1,17 +1,22 @@
 // Export API functions
-export { getAdminDashboard, getStudentsDashboard } from './api';
+export {
+  getAdminDashboard,
+  getStudentsDashboard,
+  getCurrentSession,
+} from "./api";
 
 // Export hooks
-export { useAdminDashboard } from './hooks/useAdminDashboard';
-export { useStudentsDashboard } from './hooks/useStudentsDashboard';
-export { useGlobalAdminDashboard } from './hooks/useGlobalAdminDashboard';
-export { useGlobalStudentsDashboard } from './hooks/useGlobalStudentsDashboard';
-export { useGlobalSearchFilter } from './hooks/useGlobalSearchFilter';
+export { useAdminDashboard } from "./hooks/useAdminDashboard";
+export { useStudentsDashboard } from "./hooks/useStudentsDashboard";
+export { useGlobalAdminDashboard } from "./hooks/useGlobalAdminDashboard";
+export { useGlobalStudentsDashboard } from "./hooks/useGlobalStudentsDashboard";
+export { useGlobalSearchFilter } from "./hooks/useGlobalSearchFilter";
+export { useCurrentSession } from "./hooks/useCurrentSession";
 
 // Export types
-export type { 
-  AdminDashboardResponse, 
-  AdminDashboardData, 
+export type {
+  AdminDashboardResponse,
+  AdminDashboardData,
   TopStudent,
   School,
   Class,
@@ -21,8 +26,8 @@ export type {
   Session,
   Term,
   Pagination,
-  Summary
-} from './types/adminDashboardResponse';
+  Summary,
+} from "./types/adminDashboardResponse";
 
 export type {
   StudentsDashboardResponse,
@@ -33,5 +38,11 @@ export type {
   School as StudentsSchool,
   Class as StudentsClass,
   Subject as StudentsSubject,
-  GenderCount as StudentsGenderCount
-} from './types/studentsDashboardResponse'; 
+  GenderCount as StudentsGenderCount,
+} from "./types/studentsDashboardResponse";
+
+export type {
+  AcademicSession,
+  Term as SessionTerm,
+  CurrentSessionResponse,
+} from "./api/session";

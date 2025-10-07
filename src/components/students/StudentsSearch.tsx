@@ -1,6 +1,6 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import PaginationControls from './PaginationControls';
+"use client";
+import React, { useState, useEffect } from "react";
+import PaginationControls from "./PaginationControls";
 
 interface StudentsSearchProps {
   searchTerm: string;
@@ -17,7 +17,7 @@ const StudentsSearch: React.FC<StudentsSearchProps> = ({
   currentPage,
   totalPages,
   onPageChange,
-  loading = false
+  loading = false,
 }) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
 
@@ -38,28 +38,30 @@ const StudentsSearch: React.FC<StudentsSearchProps> = ({
   }, [searchTerm]);
 
   return (
-    <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+    <div className="bg-brand-accent-background border border-brand-accent/20 rounded-xl p-6 shadow-lg">
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-300 mb-3">Search Students</label>
+          <label className="block text-sm font-medium text-brand-accent-text mb-3">
+            Search Students
+          </label>
           <div className="relative">
             <input
               type="text"
               placeholder="Search by name, exam number, school, or class..."
               value={localSearchTerm}
               onChange={(e) => setLocalSearchTerm(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full bg-brand-accent/10 border border-brand-accent/20 rounded-lg pl-10 pr-4 py-3 text-brand-accent-text placeholder-brand-light-accent-1 focus:outline-none focus:ring-2 focus:ring-brand-accent/40 focus:border-transparent transition-all duration-200"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               {loading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-accent"></div>
               ) : (
-                <span className="text-gray-400">🔍</span>
+                <span className="text-brand-light-accent-1">🔍</span>
               )}
             </div>
           </div>
         </div>
-        
+
         {/* Pagination Controls */}
         <div className="flex items-end">
           <PaginationControls

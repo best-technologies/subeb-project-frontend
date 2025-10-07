@@ -1,17 +1,19 @@
-'use client';
-import React from 'react';
-import { PerformanceStudent } from '@/services/types/studentsDashboardResponse';
-import StudentRow from './StudentRow';
+"use client";
+import React from "react";
+import { Squirrel } from "lucide-react";
+import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
+import StudentRow from "./StudentRow";
 
 interface StudentsTableProps {
   students: PerformanceStudent[];
   sortBy: string;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: "asc" | "desc";
   onSort: (field: string) => void;
   getScoreColor: (score: number) => string;
   getScoreBgColor: (score: number) => string;
   getPositionBadge: (position: number) => string;
   onViewDetails: (student: PerformanceStudent) => void;
+  onEditStudent: (student: PerformanceStudent) => void;
 }
 
 const StudentsTable: React.FC<StudentsTableProps> = ({
@@ -22,76 +24,112 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
   getScoreColor,
   getScoreBgColor,
   getPositionBadge,
-  onViewDetails
+  onViewDetails,
+  onEditStudent,
 }) => {
   return (
-    <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden shadow-2xl">
+    <div className="bg-white border border-brand-accent/20 rounded-xl overflow-hidden shadow-lg">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gradient-to-r from-black/40 to-black/20">
+          <thead className="bg-brand-primary-2">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200" onClick={() => onSort('position')}>
+              <th
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                onClick={() => onSort("position")}
+              >
                 <div className="flex items-center gap-2">
-                  <span>🏆 Position</span>
-                  {sortBy === 'position' && (
-                    <span className="text-blue-400">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                  <span>Position</span>
+                  {sortBy === "position" && (
+                    <span className="text-brand-accent-contrast">
+                      {sortOrder === "asc" ? "↑" : "↓"}
+                    </span>
                   )}
                 </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200" onClick={() => onSort('studentName')}>
+              <th
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                onClick={() => onSort("studentName")}
+              >
                 <div className="flex items-center gap-2">
-                  <span>👤 Student</span>
-                  {sortBy === 'studentName' && (
-                    <span className="text-blue-400">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                  <span>Student</span>
+                  {sortBy === "studentName" && (
+                    <span className="text-brand-accent-contrast">
+                      {sortOrder === "asc" ? "↑" : "↓"}
+                    </span>
                   )}
                 </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200" onClick={() => onSort('examNo')}>
+              <th
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                onClick={() => onSort("examNo")}
+              >
                 <div className="flex items-center gap-2">
-                  <span>🆔 Exam No.</span>
-                  {sortBy === 'examNo' && (
-                    <span className="text-blue-400">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                  <span>Exam No.</span>
+                  {sortBy === "examNo" && (
+                    <span className="text-brand-accent-contrast">
+                      {sortOrder === "asc" ? "↑" : "↓"}
+                    </span>
                   )}
                 </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200" onClick={() => onSort('school')}>
+              <th
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                onClick={() => onSort("school")}
+              >
                 <div className="flex items-center gap-2">
-                  <span>🏫 School</span>
-                  {sortBy === 'school' && (
-                    <span className="text-blue-400">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                  <span>School</span>
+                  {sortBy === "school" && (
+                    <span className="text-brand-accent-contrast">
+                      {sortOrder === "asc" ? "↑" : "↓"}
+                    </span>
                   )}
                 </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200" onClick={() => onSort('class')}>
+              <th
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                onClick={() => onSort("class")}
+              >
                 <div className="flex items-center gap-2">
-                  <span>📚 Class</span>
-                  {sortBy === 'class' && (
-                    <span className="text-blue-400">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                  <span>Class</span>
+                  {sortBy === "class" && (
+                    <span className="text-brand-accent-contrast">
+                      {sortOrder === "asc" ? "↑" : "↓"}
+                    </span>
                   )}
                 </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200" onClick={() => onSort('total')}>
+              <th
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                onClick={() => onSort("total")}
+              >
                 <div className="flex items-center gap-2">
-                  <span>📊 Total</span>
-                  {sortBy === 'total' && (
-                    <span className="text-blue-400">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                  <span>Total</span>
+                  {sortBy === "total" && (
+                    <span className="text-brand-accent-contrast">
+                      {sortOrder === "asc" ? "↑" : "↓"}
+                    </span>
                   )}
                 </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200" onClick={() => onSort('average')}>
+              <th
+                className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider cursor-pointer hover:text-brand-accent-contrast/80 transition-colors duration-200"
+                onClick={() => onSort("average")}
+              >
                 <div className="flex items-center gap-2">
-                  <span>📈 Average</span>
-                  {sortBy === 'average' && (
-                    <span className="text-blue-400">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                  <span>Average</span>
+                  {sortBy === "average" && (
+                    <span className="text-brand-accent-contrast">
+                      {sortOrder === "asc" ? "↑" : "↓"}
+                    </span>
                   )}
                 </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+              <th className="px-3 py-4 text-left text-xs font-semibold text-brand-primary-2-contrast uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-brand-accent/10">
             {students && students.length > 0 ? (
               students.map((student) => (
                 <StudentRow
@@ -101,15 +139,22 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                   getScoreBgColor={getScoreBgColor}
                   getPositionBadge={getPositionBadge}
                   onViewDetails={onViewDetails}
+                  onEditStudent={onEditStudent}
                 />
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="px-6 py-8 text-center">
-                  <div className="text-gray-400">
-                    <div className="text-4xl mb-4">📊</div>
-                    <p className="text-lg font-medium">No students found</p>
-                    <p className="text-sm">Try adjusting your filters or search terms</p>
+                <td colSpan={8} className="px-3 py-8 text-center">
+                  <div className="text-brand-light-accent-1">
+                    <div className="flex justify-center mb-4">
+                      <Squirrel className="w-16 h-16 text-brand-primary-2" />
+                    </div>
+                    <p className="text-lg font-medium text-brand-accent-text">
+                      No students found
+                    </p>
+                    <p className="text-sm">
+                      Try adjusting your filters or search terms
+                    </p>
                   </div>
                 </td>
               </tr>
@@ -121,4 +166,4 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
   );
 };
 
-export default StudentsTable; 
+export default StudentsTable;

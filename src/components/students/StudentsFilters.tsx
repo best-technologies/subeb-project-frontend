@@ -1,7 +1,7 @@
-'use client';
-import React from 'react';
-import { StudentsFilters as StudentsFiltersType } from '@/services/types/studentsDashboardResponse';
-import { formatEducationalText } from '@/utils/formatters';
+"use client";
+import React from "react";
+import { StudentsFilters as StudentsFiltersType } from "@/services/types/studentsDashboardResponse";
+import { formatEducationalText } from "@/utils/formatters";
 
 interface StudentsFiltersProps {
   filters: StudentsFiltersType;
@@ -10,12 +10,12 @@ interface StudentsFiltersProps {
   availableClasses: Array<{ id: string; name: string }>;
   availableGenders: string[];
   subjects: string[];
-  
+
   // Progressive filter states
   isSchoolEnabled: boolean;
   isClassEnabled: boolean;
   isGenderEnabled: boolean;
-  
+
   // Actions
   onLgaChange: (lgaId: string) => void;
   onSchoolChange: (schoolId: string) => void;
@@ -40,18 +40,20 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
   onClassChange,
   onGenderChange,
   onSubjectChange,
-  onClearFilters
+  onClearFilters,
 }) => {
   return (
-    <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+    <div className="bg-brand-secondary rounded-xl p-6 shadow-lg hover:opacity-90 transition-all duration-300">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* LGA Filter - Always enabled */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">LGA</label>
+          <label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+            LGA
+          </label>
           <select
-            value={filters.lga || ''}
+            value={filters.lga || ""}
             onChange={(e) => onLgaChange(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full bg-brand-secondary-contrast/10 border border-brand-secondary-contrast/20 rounded-lg px-3 py-2 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60 focus:outline-none focus:ring-2 focus:ring-brand-secondary-contrast/40 focus:border-transparent"
           >
             <option value="">All LGAs</option>
             {lgas.map((lga) => (
@@ -64,83 +66,94 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
 
         {/* School Filter - Enabled only after LGA selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">School</label>
+          <label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+            School
+          </label>
           <select
-            value={filters.school || ''}
+            value={filters.school || ""}
             onChange={(e) => onSchoolChange(e.target.value)}
             disabled={!isSchoolEnabled}
-            className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-              isSchoolEnabled 
-                ? 'bg-white/10 border-white/20 text-white placeholder-gray-400' 
-                : 'bg-gray-800/50 border-gray-600/50 text-gray-500 cursor-not-allowed'
+            className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary-contrast/40 focus:border-transparent transition-all duration-200 ${
+              isSchoolEnabled
+                ? "bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60"
+                : "bg-brand-secondary-contrast/5 border-brand-secondary-contrast/10 text-brand-secondary-contrast/40 cursor-not-allowed"
             }`}
           >
             <option value="">
-              {isSchoolEnabled ? 'All Schools' : 'Select LGA first'}
+              {isSchoolEnabled ? "All Schools" : "Select LGA first"}
             </option>
-            {isSchoolEnabled && availableSchools.map((school) => (
-              <option key={school.id} value={school.id}>
-                {formatEducationalText(school.name)}
-              </option>
-            ))}
+            {isSchoolEnabled &&
+              availableSchools.map((school) => (
+                <option key={school.id} value={school.id}>
+                  {formatEducationalText(school.name)}
+                </option>
+              ))}
           </select>
         </div>
 
         {/* Class Filter - Enabled only after School selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Class</label>
+          <label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+            Class
+          </label>
           <select
-            value={filters.class || ''}
+            value={filters.class || ""}
             onChange={(e) => onClassChange(e.target.value)}
             disabled={!isClassEnabled}
-            className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-              isClassEnabled 
-                ? 'bg-white/10 border-white/20 text-white placeholder-gray-400' 
-                : 'bg-gray-800/50 border-gray-600/50 text-gray-500 cursor-not-allowed'
+            className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary-contrast/40 focus:border-transparent transition-all duration-200 ${
+              isClassEnabled
+                ? "bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60"
+                : "bg-brand-secondary-contrast/5 border-brand-secondary-contrast/10 text-brand-secondary-contrast/40 cursor-not-allowed"
             }`}
           >
             <option value="">
-              {isClassEnabled ? 'All Classes' : 'Select School first'}
+              {isClassEnabled ? "All Classes" : "Select School first"}
             </option>
-            {isClassEnabled && availableClasses.map((classItem) => (
-              <option key={classItem.id} value={classItem.id}>
-                {formatEducationalText(classItem.name)}
-              </option>
-            ))}
+            {isClassEnabled &&
+              availableClasses.map((classItem) => (
+                <option key={classItem.id} value={classItem.id}>
+                  {formatEducationalText(classItem.name)}
+                </option>
+              ))}
           </select>
         </div>
 
         {/* Gender Filter - Enabled only after Class selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
+          <label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+            Gender
+          </label>
           <select
-            value={filters.gender || ''}
+            value={filters.gender || ""}
             onChange={(e) => onGenderChange(e.target.value)}
             disabled={!isGenderEnabled}
-            className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-              isGenderEnabled 
-                ? 'bg-white/10 border-white/20 text-white placeholder-gray-400' 
-                : 'bg-gray-800/50 border-gray-600/50 text-gray-500 cursor-not-allowed'
+            className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-secondary-contrast/40 focus:border-transparent transition-all duration-200 ${
+              isGenderEnabled
+                ? "bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60"
+                : "bg-brand-secondary-contrast/5 border-brand-secondary-contrast/10 text-brand-secondary-contrast/40 cursor-not-allowed"
             }`}
           >
             <option value="">
-              {isGenderEnabled ? 'All Genders' : 'Select Class first'}
+              {isGenderEnabled ? "All Genders" : "Select Class first"}
             </option>
-            {isGenderEnabled && availableGenders.map((gender) => (
-              <option key={gender} value={gender}>
-                {gender === 'MALE' ? 'Male' : 'Female'}
-              </option>
-            ))}
+            {isGenderEnabled &&
+              availableGenders.map((gender) => (
+                <option key={gender} value={gender}>
+                  {gender === "MALE" ? "Male" : "Female"}
+                </option>
+              ))}
           </select>
         </div>
 
         {/* Subject Filter - Always enabled */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+          <label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+            Subject
+          </label>
           <select
-            value={filters.subject || ''}
+            value={filters.subject || ""}
             onChange={(e) => onSubjectChange(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full bg-brand-secondary-contrast/10 border border-brand-secondary-contrast/20 rounded-lg px-3 py-2 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60 focus:outline-none focus:ring-2 focus:ring-brand-secondary-contrast/40 focus:border-transparent"
           >
             <option value="">All Subjects</option>
             {subjects.map((subject) => (
@@ -155,7 +168,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
         <div className="flex items-end">
           <button
             onClick={onClearFilters}
-            className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            className="w-full px-4 py-2 bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
           >
             Clear Filters
           </button>

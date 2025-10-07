@@ -1,46 +1,47 @@
-'use client';
-import React from 'react';
-import { useGlobalAdminDashboard } from '@/services';
-import Dashboard from '@/components/dashboard/Dashboard';
+"use client";
+import React from "react";
+import { TriangleAlert } from "lucide-react";
+import { useGlobalAdminDashboard } from "@/services";
+import Dashboard from "@/components/dashboard/Dashboard";
+import { Button } from "@/components/ui/Button";
 
 const DashboardPage: React.FC = () => {
-  const { data: dashboardData, loading, error, refetch, updateSearchParams, isCached } = useGlobalAdminDashboard();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading dashboard data...</p>
-          {isCached && (
-            <p className="text-gray-400 text-sm mt-2">Using cached data...</p>
-          )}
-        </div>
-      </div>
-    );
-  }
+  const {
+    data: dashboardData,
+    loading,
+    error,
+    refetch,
+    updateSearchParams,
+    isCached,
+  } = useGlobalAdminDashboard();
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center max-w-md mx-auto p-6">
-          <div className="text-red-400 text-6xl mb-4">⚠️</div>
-          <h2 className="text-white text-xl font-bold mb-2">Error Loading Dashboard</h2>
-          <p className="text-gray-300 mb-4">{error}</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto">
+          <div className="flex justify-center mb-4">
+            <TriangleAlert className="w-16 h-16 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-brand-primary mb-4">
+            Error Loading Dashboard
+          </h2>
+          <p className="text-brand-accent-text mb-6">{error}</p>
           <div className="flex gap-2 justify-center">
-            <button
+            <Button
               onClick={() => refetch()}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+              className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast"
+              size="lg"
             >
               Try Again
-            </button>
+            </Button>
             {isCached && (
-              <button
+              <Button
                 onClick={() => refetch()}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors"
+                className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast"
+                size="lg"
               >
                 Force Refresh
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -50,20 +51,13 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div>
-      {isCached && (
-        <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-          <div className="flex items-center gap-2 text-green-400 text-sm">
-            <span>✓</span>
-            <span>Using cached data (10 min cache)</span>
-          </div>
-        </div>
-      )}
-      <Dashboard 
-        dashboardData={dashboardData} 
+      <Dashboard
+        dashboardData={dashboardData}
+        loading={loading}
         onSearchParamsChange={updateSearchParams}
       />
     </div>
   );
 };
 
-export default DashboardPage; 
+export default DashboardPage;
