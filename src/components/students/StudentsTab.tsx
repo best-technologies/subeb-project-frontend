@@ -10,7 +10,6 @@ import StudentsFilters from "./StudentsFilters";
 import StudentsTable from "./StudentsTable";
 import StudentDetailsModal from "./StudentDetailsModal";
 import EditStudentDialog from "./EditStudentDialog";
-import SearchModal from "./SearchModal";
 import { Button } from "@/components/ui/Button";
 
 // Import utility functions
@@ -27,13 +26,11 @@ interface StudentsTabProps {
   // Initial data from dashboard
   performanceTable: PerformanceStudent[];
   lgas: Array<{ id: string; name: string }>;
-  subjects: string[];
 }
 
 const StudentsTab: React.FC<StudentsTabProps> = ({
   performanceTable,
   lgas,
-  subjects,
 }) => {
   const [selectedStudent, setSelectedStudent] =
     useState<PerformanceStudent | null>(null);
@@ -42,7 +39,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const [studentToEdit, setStudentToEdit] = useState<PerformanceStudent | null>(
     null
   );
-  const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("position");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -55,9 +51,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     // Data
     students: searchStudents,
     total: searchTotal,
-    // currentPage: searchCurrentPage,
-    // totalPages: searchTotalPages,
-    // limit,
 
     // States
     loading: searchLoading,
@@ -67,23 +60,18 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     // Available filters (progressive)
     availableSchools,
     availableClasses,
-    availableGenders,
 
     // Actions
     selectLGA,
     selectSchool,
     selectClass,
-    selectGender,
     updateSearch,
-    updateAnySearchParam,
     updateSorting,
-    // changePage,
     clearFilters,
 
     // Check if filters are enabled
     isSchoolEnabled,
     isClassEnabled,
-    isGenderEnabled,
   } = useStudentSearch();
 
   // Determine if we should use search results or initial data
@@ -92,8 +80,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
       searchParams.lgaId ||
       searchParams.schoolId ||
       searchParams.classId ||
-      searchParams.gender ||
-      searchParams.subject ||
       searchParams.search
     );
   }, [searchParams]);
@@ -107,28 +93,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   //   : Math.ceil(performanceTable.length / studentsPerPage);
   const loading = hasActiveFilters ? searchLoading : false;
   const error = hasActiveFilters ? searchError : null;
-
-  // Calculate the actual search results count for the modal
-  const searchResultsCount = useMemo(() => {
-    if (hasActiveFilters) {
-      // If using search API, return the total count from API
-      return searchTotal;
-    } else {
-      // If using local search, return filtered results count
-      if (!searchTerm.trim()) return total;
-
-      const filtered = performanceTable.filter((student) => {
-        const search = searchTerm.trim().toLowerCase();
-        return (
-          student.studentName.trim().toLowerCase().includes(search) ||
-          student.examNo.trim().toLowerCase().includes(search) ||
-          student.school.trim().toLowerCase().includes(search) ||
-          student.class.trim().toLowerCase().includes(search)
-        );
-      });
-      return filtered.length;
-    }
-  }, [hasActiveFilters, searchTotal, searchTerm, performanceTable, total]);
 
   // Client-side filtering for initial data
   const filteredAndSortedStudents = useMemo(() => {
@@ -242,20 +206,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     console.log("Student updated:", updatedStudent);
   };
 
-  const handleSearchClick = () => {
-    setShowSearchModal(true);
-  };
-
-  const handleCloseSearchModal = () => {
-    setShowSearchModal(false);
-  };
-
-  const handleSearchAll = () => {
-    // Logic to search all records (expand beyond current 10)
-    // This can be implemented later when working on search logic
-    console.log("Search all records functionality to be implemented");
-  };
-
   const handleSort = (field: string) => {
     if (hasActiveFilters) {
       const currentSortOrder = searchParams.sortOrder || "asc";
@@ -283,14 +233,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     }
   };
 
-  // const handlePageChange = (page: number) => {
-  //   if (hasActiveFilters) {
-  //     changePage(page);
-  //   } else {
-  //     setCurrentPage(page);
-  //   }
-  // };
-
   const handleClearFilters = () => {
     if (hasActiveFilters) {
       clearFilters();
@@ -299,17 +241,30 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
       setSortBy("position");
       setSortOrder("asc");
       setCurrentPage(1);
-      // setFilters({});
     }
+  };
+
+  // Wrapper functions to handle special "all-*" values
+  const handleLgaChange = (value: string) => {
+    const lgaId = value === "all-lgas" ? "" : value;
+    selectLGA(lgaId);
+  };
+
+  const handleSchoolChange = (value: string) => {
+    const schoolId = value === "all-schools" ? "" : value;
+    selectSchool(schoolId);
+  };
+
+  const handleClassChange = (value: string) => {
+    const classId = value === "all-classes" ? "" : value;
+    selectClass(classId);
   };
 
   // Convert searchParams to filters format for the components
   const filtersForComponent: StudentsFiltersType = {
-    lga: searchParams.lgaId,
-    school: searchParams.schoolId,
-    class: searchParams.classId,
-    gender: searchParams.gender,
-    subject: searchParams.subject,
+    lga: searchParams.lgaId || "all-lgas",
+    school: searchParams.schoolId || "all-schools",
+    class: searchParams.classId || "all-classes",
   };
 
   const averageScore = Math.round(
@@ -367,7 +322,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         totalStudents={total}
         averageScore={averageScore}
         getScoreColor={getScoreColor}
-        onSearchClick={handleSearchClick}
       />
 
       {/* Filters Component */}
@@ -376,18 +330,13 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         lgas={lgas}
         availableSchools={availableSchools}
         availableClasses={availableClasses}
-        availableGenders={availableGenders}
-        subjects={subjects}
+        searchTerm={hasActiveFilters ? searchParams.search || "" : searchTerm}
+        onSearchChange={handleSearch}
         isSchoolEnabled={isSchoolEnabled}
         isClassEnabled={isClassEnabled}
-        isGenderEnabled={isGenderEnabled}
-        onLgaChange={selectLGA}
-        onSchoolChange={selectSchool}
-        onClassChange={selectClass}
-        onGenderChange={selectGender}
-        onSubjectChange={(subject) =>
-          updateAnySearchParam({ subject: subject || undefined })
-        }
+        onLgaChange={handleLgaChange}
+        onSchoolChange={handleSchoolChange}
+        onClassChange={handleClassChange}
         onClearFilters={handleClearFilters}
       />
 
@@ -413,17 +362,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         onClose={handleCloseModal}
         getScoreColor={getScoreColor}
         getPositionBadge={getPositionBadge}
-      />
-
-      {/* Search Modal */}
-      <SearchModal
-        isOpen={showSearchModal}
-        onClose={handleCloseSearchModal}
-        searchTerm={hasActiveFilters ? searchParams.search || "" : searchTerm}
-        onSearchChange={handleSearch}
-        resultsCount={searchResultsCount}
-        loading={loading}
-        onSearchAll={handleSearchAll}
       />
 
       {/* Edit Student Dialog */}

@@ -1,6 +1,15 @@
 "use client";
 import React from "react";
-import { X, Venus, Mars, ChartColumn, User, School } from "lucide-react";
+import {
+  X,
+  Venus,
+  Mars,
+  ChartColumn,
+  User,
+  School,
+  Download,
+  Share2,
+} from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
@@ -23,12 +32,23 @@ const StudentDetailsModal: React.FC<StudentDetailsModalProps> = ({
 }) => {
   if (!student) return null;
 
+  const handleDownload = () => {
+    // TODO: Implement download functionality
+    console.log("Download student details for:", student.studentName);
+  };
+
+  const handleShare = () => {
+    // TODO: Implement share functionality
+    console.log("Share student details for:", student.studentName);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <div className="bg-brand-accent-background rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto border border-brand-accent/20 shadow-2xl">
         <div className="sticky top-0 bg-brand-primary p-6 border-b border-brand-primary/20 rounded-t-2xl">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            {/* Left Section - Student Info */}
+            <div className="flex items-center space-x-4 flex-1">
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center ${
                   student.gender === "MALE"
@@ -51,7 +71,31 @@ const StudentDetailsModal: React.FC<StudentDetailsModalProps> = ({
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-6">
+
+            {/* Center Section - Download and Share Buttons */}
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDownload}
+                className="text-brand-primary-contrast/70 hover:text-brand-primary-contrast hover:bg-brand-primary-contrast/10"
+                title="Download student details"
+              >
+                <Download className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleShare}
+                className="text-brand-primary-contrast/70 hover:text-brand-primary-contrast hover:bg-brand-primary-contrast/10"
+                title="Share student details"
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Right Section - Performance Metrics and Close Button */}
+            <div className="flex items-center space-x-6 flex-1 justify-end">
               {/* Performance Metrics */}
               <div className="flex items-center space-x-4">
                 <div className="text-center">
@@ -84,6 +128,7 @@ const StudentDetailsModal: React.FC<StudentDetailsModalProps> = ({
                 size="icon"
                 onClick={onClose}
                 className="text-brand-primary-contrast/70 hover:text-brand-primary-contrast hover:bg-brand-primary-contrast/10"
+                title="Close modal"
               >
                 <X className="h-5 w-5" />
               </Button>

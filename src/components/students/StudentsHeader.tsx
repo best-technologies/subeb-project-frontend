@@ -1,20 +1,16 @@
 "use client";
 import React from "react";
-import { Binoculars } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 
 interface StudentsHeaderProps {
   totalStudents: number;
   averageScore: number;
   getScoreColor: (score: number) => string;
-  onSearchClick: () => void;
 }
 
 const StudentsHeader: React.FC<StudentsHeaderProps> = ({
   totalStudents,
   averageScore,
   // getScoreColor,
-  onSearchClick,
 }) => {
   return (
     <div className="bg-brand-primary-2 rounded-xl p-8 shadow-lg hover:opacity-90 transition-all duration-300">
@@ -44,17 +40,6 @@ const StudentsHeader: React.FC<StudentsHeaderProps> = ({
               Average Score
             </div>
           </div>
-
-          {/* Search Icon Button */}
-          <Button
-            onClick={onSearchClick}
-            variant="ghost"
-            size="icon"
-            className="ml-4 bg-brand-primary-2-contrast/10 hover:bg-brand-primary-2-contrast/20 text-brand-primary-2-contrast group"
-            title="Search Students"
-          >
-            <Binoculars className="h-5 w-5 group-hover:text-brand-primary-2" />
-          </Button>
         </div>
       </div>
     </div>

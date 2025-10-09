@@ -19,7 +19,7 @@ export default function StudentsPage() {
   const studentsData = getStudentsDataFromAdmin();
 
   // Add debugging
-  console.log("🔍 Students Page Debug:", {
+  console.log("Students Page Debug:", {
     hasAdminDataForStudents: hasAdminDataForStudents(),
     studentsData,
     adminDashboard: adminDashboard.data,
@@ -41,7 +41,7 @@ export default function StudentsPage() {
   useEffect(() => {
     // Only fetch if we should (prevents infinite loops after errors)
     if (shouldFetchAdminDashboard()) {
-      console.log("🚀 Fetching admin dashboard data for students page");
+      console.log("Fetching admin dashboard data for students page");
       fetchAdminDashboard();
     }
   }, [shouldFetchAdminDashboard, fetchAdminDashboard]);
@@ -83,9 +83,6 @@ export default function StudentsPage() {
     <StudentsTab
       performanceTable={studentsData.performanceTable}
       lgas={studentsData.lgas}
-      subjects={studentsData.subjects.map(
-        (subject: { name: string }) => subject.name
-      )}
     />
   );
 }
