@@ -65,7 +65,7 @@ export default function DashboardLayout({
                 <div>
                   <h3 className="text-gray-800 font-semibold">ASUBEB</h3>
                   <p className="text-gray-600 text-sm">
-                    School Management System
+                    Student Management System
                   </p>
                 </div>
               </div>

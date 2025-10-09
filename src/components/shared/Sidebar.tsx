@@ -102,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onRefresh }) => {
                   )}
                 </div>
                 <span className="text-brand-primary-contrast/70 text-sm">
-                  School Management System
+                  Student Management System
                 </span>
               </div>
 
