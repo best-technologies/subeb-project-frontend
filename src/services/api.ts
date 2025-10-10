@@ -297,7 +297,7 @@ export const searchStudents = async (params: {
   page?: number;
   limit?: number;
 }) => {
-  console.log("searchStudents called with params:", params);
+  // console.log("searchStudents called with params:", params);
 
   const queryParams = new URLSearchParams();
 
@@ -310,7 +310,7 @@ export const searchStudents = async (params: {
 
   // Use the correct endpoint with API version - same as ApiClient
   const url = `${API_BASE_URL}/api/${API_VERSION}/admin/students/dashboard?${queryParams.toString()}`;
-  console.log("Making request to:", url);
+  // console.log("Making request to:", url);
 
   const response = await fetch(url, {
     method: "GET",
