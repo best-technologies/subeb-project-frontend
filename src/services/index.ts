@@ -4,6 +4,7 @@ export {
   getStudentsDashboard,
   getCurrentSession,
   getStudentDetails,
+  downloadStudentResultPDF,
 } from "./api";
 
 // Export hooks

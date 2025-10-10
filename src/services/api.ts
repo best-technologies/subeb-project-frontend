@@ -278,6 +278,34 @@ class ApiClient {
       throw error;
     }
   }
+
+  // Student PDF Result Download API Method
+  async downloadStudentResultPDF(studentId: string): Promise<Blob> {
+    try {
+      const url = `${this.baseURL}/admin/students/${studentId}/result.pdf`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          ...this.defaultHeaders,
+          Accept: "application/pdf",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      return blob;
+    } catch (error) {
+      console.error(
+        "❌ API Client - Error in downloadStudentResultPDF:",
+        error
+      );
+      throw error;
+    }
+  }
 }
 
 // Create and export a singleton instance
@@ -295,6 +323,8 @@ export const getStudentsDashboard = (filters?: StudentsFilters) =>
 export const getCurrentSession = () => apiClient.getCurrentSession();
 export const getStudentDetails = (studentId: string) =>
   apiClient.getStudentDetails(studentId);
+export const downloadStudentResultPDF = (studentId: string) =>
+  apiClient.downloadStudentResultPDF(studentId);
 export const setAuthToken = (token: string) => apiClient.setAuthToken(token);
 export const clearAuthToken = () => apiClient.clearAuthToken();
 

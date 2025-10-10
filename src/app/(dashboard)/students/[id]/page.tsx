@@ -19,8 +19,10 @@ import {
   StudentDetailsData,
   SubjectBreakdown,
   getStudentDetails,
+  downloadStudentResultPDF,
 } from "@/services";
 import { formatEducationalText } from "@/utils/formatters";
+import { downloadBlob, sanitizeFilename } from "@/utils/downloadUtils";
 import {
   getScoreColor,
   getScoreBgColor,
@@ -42,6 +44,7 @@ export default function StudentDetailsPage() {
     useState<StudentDetailsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(true);
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
 
   useEffect(() => {
     // Get students data from admin dashboard for basic info
@@ -84,9 +87,30 @@ export default function StudentDetailsPage() {
     router.push("/students");
   };
 
-  const handleDownload = () => {
-    // TODO: Implement download functionality
-    console.log("Download student details for:", student?.studentName);
+  const handleDownload = async () => {
+    if (downloadingPDF) return; // Prevent multiple downloads
+
+    try {
+      setDownloadingPDF(true);
+      console.log("📥 Starting PDF download for student:", getStudentName());
+
+      const blob = await downloadStudentResultPDF(studentId);
+
+      // Generate a clean filename
+      const studentName = getStudentName();
+      const filename = sanitizeFilename(`${studentName}_Result.pdf`);
+
+      // Download the PDF
+      downloadBlob(blob, filename);
+
+      console.log("✅ PDF download completed successfully");
+    } catch (error) {
+      console.error("❌ Error downloading PDF:", error);
+      // You could show a toast notification or error message here
+      alert("Failed to download PDF. Please try again.");
+    } finally {
+      setDownloadingPDF(false);
+    }
   };
 
   const handleShare = () => {
@@ -320,10 +344,19 @@ export default function StudentDetailsPage() {
                   variant="ghost"
                   size="icon"
                   onClick={handleDownload}
-                  className="text-brand-primary-contrast/70 hover:text-brand-primary-contrast hover:bg-brand-primary-contrast/10"
-                  title="Download student details"
+                  disabled={downloadingPDF}
+                  className="text-brand-primary-contrast/70 hover:text-brand-primary-contrast hover:bg-brand-primary-contrast/10 disabled:opacity-50"
+                  title={
+                    downloadingPDF
+                      ? "Downloading..."
+                      : "Download student result PDF"
+                  }
                 >
-                  <Download className="h-5 w-5" />
+                  {downloadingPDF ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-primary-contrast border-t-transparent" />
+                  ) : (
+                    <Download className="h-5 w-5" />
+                  )}
                 </Button>
                 <Button
                   variant="ghost"
