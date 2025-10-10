@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { TriangleAlert } from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { StudentsFilters as StudentsFiltersType } from "@/services/types/studentsDashboardResponse";
@@ -11,6 +11,7 @@ import StudentsTable from "./StudentsTable";
 import StudentDetailsModal from "./StudentDetailsModal";
 import EditStudentDialog from "./EditStudentDialog";
 import { Button } from "@/components/ui/Button";
+import { LoadingModal } from "@/components/ui/LoadingModal";
 
 // Import utility functions
 import {
@@ -42,7 +43,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("position");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [currentPage, setCurrentPage] = useState(1);
   // const [filters] = useState<StudentsFiltersType>({});
   const studentsPerPage = 10;
 
@@ -51,30 +51,42 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     // Data
     students: searchStudents,
     total: searchTotal,
+    currentPage,
+    // totalPages, // Unused variable
 
     // States
     loading: searchLoading,
     error: searchError,
     searchParams,
 
+    // Loading states for specific operations
+    loadingStates,
+    selectedLgaName,
+    selectedSchoolName,
+
     // Available filters (progressive)
     availableSchools,
     availableClasses,
+    // schoolStats, // Unused variable
 
     // Actions
     selectLGA,
     selectSchool,
     selectClass,
     updateSearch,
-    updateSorting,
+    // changePage, // Unused variable
     clearFilters,
+    initializeStudents,
 
     // Check if filters are enabled
     isSchoolEnabled,
     isClassEnabled,
   } = useStudentSearch();
 
-  // Determine if we should use search results or initial data
+  // Initialize with original data on mount
+  useEffect(() => {
+    initializeStudents(performanceTable);
+  }, [performanceTable, initializeStudents]); // Determine if we should use search results or initial data
   const hasActiveFilters = useMemo(() => {
     return (
       searchParams.lgaId ||
@@ -84,15 +96,11 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     );
   }, [searchParams]);
 
-  // Use search results if filters are active, otherwise use initial data
-  const students = hasActiveFilters ? searchStudents : performanceTable;
-  const total = hasActiveFilters ? searchTotal : performanceTable.length;
-  // const currentPageValue = hasActiveFilters ? searchCurrentPage : currentPage;
-  // const totalPages = hasActiveFilters
-  //   ? searchTotalPages
-  //   : Math.ceil(performanceTable.length / studentsPerPage);
-  const loading = hasActiveFilters ? searchLoading : false;
-  const error = hasActiveFilters ? searchError : null;
+  // Use search results if class is selected, otherwise use initial data
+  const students = searchParams.classId ? searchStudents : performanceTable;
+  const total = searchParams.classId ? searchTotal : performanceTable.length;
+  const loading = searchLoading;
+  const error = searchError;
 
   // Client-side filtering for initial data
   const filteredAndSortedStudents = useMemo(() => {
@@ -207,14 +215,8 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   };
 
   const handleSort = (field: string) => {
-    if (hasActiveFilters) {
-      const currentSortOrder = searchParams.sortOrder || "asc";
-      const newSortOrder =
-        searchParams.sortBy === field && currentSortOrder === "asc"
-          ? "desc"
-          : "asc";
-      updateSorting(field, newSortOrder);
-    } else {
+    // Only do client-side sorting when no class is selected
+    if (!searchParams.classId) {
       if (sortBy === field) {
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
       } else {
@@ -222,42 +224,65 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         setSortOrder("asc");
       }
     }
+    // For server-side sorting when class is selected, this can be implemented later
   };
 
   const handleSearch = (search: string) => {
-    if (hasActiveFilters) {
+    setSearchTerm(search);
+    if (searchParams.classId) {
+      // Use server-side search when class is selected
       updateSearch(search);
-    } else {
-      setSearchTerm(search);
-      setCurrentPage(1);
     }
+    // For client-side search, the useMemo will handle the filtering
   };
 
   const handleClearFilters = () => {
-    if (hasActiveFilters) {
+    if (searchParams.classId || searchParams.lgaId || searchParams.schoolId) {
       clearFilters();
     } else {
       setSearchTerm("");
       setSortBy("position");
       setSortOrder("asc");
-      setCurrentPage(1);
     }
   };
 
   // Wrapper functions to handle special "all-*" values
-  const handleLgaChange = (value: string) => {
-    const lgaId = value === "all-lgas" ? "" : value;
-    selectLGA(lgaId);
+  const handleLgaChange = (value: string, name?: string) => {
+    if (value === "all-lgas") {
+      clearFilters();
+    } else {
+      const selectedLga = lgas.find((lga) => lga.id === value);
+      selectLGA(value, selectedLga?.name || name);
+    }
   };
 
-  const handleSchoolChange = (value: string) => {
-    const schoolId = value === "all-schools" ? "" : value;
-    selectSchool(schoolId);
+  const handleSchoolChange = (value: string, name?: string) => {
+    if (value === "all-schools") {
+      // Reset to LGA level - keep LGA selected but clear school/class
+      const currentLga = lgas.find((lga) => lga.id === searchParams.lgaId);
+      if (currentLga && searchParams.lgaId) {
+        selectLGA(searchParams.lgaId, currentLga.name);
+      }
+    } else {
+      const selectedSchool = availableSchools.find(
+        (school) => school.id === value
+      );
+      selectSchool(value, selectedSchool?.name || name);
+    }
   };
 
   const handleClassChange = (value: string) => {
-    const classId = value === "all-classes" ? "" : value;
-    selectClass(classId);
+    if (value === "all-classes") {
+      // Reset to school level - keep school selected but clear class
+      const currentSchool = availableSchools.find(
+        (school) => school.id === searchParams.schoolId
+      );
+      if (currentSchool && searchParams.schoolId) {
+        selectSchool(searchParams.schoolId, currentSchool.name);
+      }
+    } else {
+      selectClass(value);
+    }
   };
 
   // Convert searchParams to filters format for the components
@@ -330,7 +355,9 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         lgas={lgas}
         availableSchools={availableSchools}
         availableClasses={availableClasses}
-        searchTerm={hasActiveFilters ? searchParams.search || "" : searchTerm}
+        searchTerm={
+          searchParams.classId ? searchParams.search || "" : searchTerm
+        }
         onSearchChange={handleSearch}
         isSchoolEnabled={isSchoolEnabled}
         isClassEnabled={isClassEnabled}
@@ -343,10 +370,8 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
       {/* Table Component */}
       <StudentsTable
         students={paginatedStudents}
-        sortBy={hasActiveFilters ? searchParams.sortBy || "position" : sortBy}
-        sortOrder={
-          hasActiveFilters ? searchParams.sortOrder || "asc" : sortOrder
-        }
+        sortBy={sortBy}
+        sortOrder={sortOrder}
         onSort={handleSort}
         getScoreColor={getScoreColor}
         getScoreBgColor={getScoreBgColor}
@@ -370,6 +395,22 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         student={studentToEdit}
         onOpenChange={handleCloseEditDialog}
         onSave={handleSaveStudent}
+      />
+
+      {/* Loading Modal for progressive filtering */}
+      <LoadingModal
+        isOpen={
+          loadingStates.lga || loadingStates.school || loadingStates.class
+        }
+        message={
+          loadingStates.lga
+            ? `Fetching the schools under ${selectedLgaName}`
+            : loadingStates.school
+            ? `Fetching the classes under ${selectedSchoolName}`
+            : loadingStates.class
+            ? "Fetching students in the selected class"
+            : "Loading..."
+        }
       />
     </div>
   );

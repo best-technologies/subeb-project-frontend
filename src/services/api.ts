@@ -285,19 +285,20 @@ export const clearAuthToken = () => apiClient.clearAuthToken();
 // Export the class for testing or custom instances
 export { ApiClient };
 
-// Student Search and Filter API
+// Student Search and Filter API with progressive filtering
 export const searchStudents = async (params: {
+  session?: string;
+  term?: string;
   lgaId?: string;
   schoolId?: string;
   classId?: string;
   gender?: string;
-  subject?: string;
   search?: string;
   page?: number;
   limit?: number;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
 }) => {
+  console.log("searchStudents called with params:", params);
+
   const queryParams = new URLSearchParams();
 
   // Add all non-undefined parameters to query string
@@ -307,19 +308,30 @@ export const searchStudents = async (params: {
     }
   });
 
-  const response = await fetch(
-    `${API_BASE_URL}/admin/students/search?${queryParams.toString()}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        // Add any authentication headers if needed
-      },
-    }
-  );
+  // Use the correct endpoint with API version - same as ApiClient
+  const url = `${API_BASE_URL}/api/${API_VERSION}/admin/students/dashboard?${queryParams.toString()}`;
+  console.log("Making request to:", url);
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      // Add any authentication headers if needed
+    },
+  });
 
   if (!response.ok) {
-    throw new Error(`Failed to search students: ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage =
+      errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+
+    if (response.status === 400) {
+      throw new Error(`Bad request - invalid parameters: ${errorMessage}`);
+    } else if (response.status === 500) {
+      throw new Error(`Internal server error: ${errorMessage}`);
+    } else {
+      throw new Error(`Failed to fetch data: ${errorMessage}`);
+    }
   }
 
   return response.json();

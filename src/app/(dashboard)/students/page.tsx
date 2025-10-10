@@ -12,7 +12,7 @@ export default function StudentsPage() {
     fetchAdminDashboard,
     shouldFetchAdminDashboard,
     getStudentsDataFromAdmin,
-    hasAdminDataForStudents,
+    // hasAdminDataForStudents, // Unused variable
   } = useData();
 
   // Always try to get students data

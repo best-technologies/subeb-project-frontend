@@ -31,8 +31,8 @@ interface StudentsFiltersProps {
   isClassEnabled: boolean;
 
   // Actions
-  onLgaChange: (lgaId: string) => void;
-  onSchoolChange: (schoolId: string) => void;
+  onLgaChange: (lgaId: string, lgaName?: string) => void;
+  onSchoolChange: (schoolId: string, schoolName?: string) => void;
   onClassChange: (classId: string) => void;
   onClearFilters: () => void;
 }
@@ -51,6 +51,29 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
   onClassChange,
   onClearFilters,
 }) => {
+  // Handler to pass both ID and name when LGA is selected
+  const handleLgaChange = (lgaId: string) => {
+    if (lgaId === "all-lgas") {
+      onClearFilters();
+      return;
+    }
+
+    const selectedLga = lgas.find((lga) => lga.id === lgaId);
+    onLgaChange(lgaId, selectedLga?.name);
+  };
+
+  // Handler to pass both ID and name when School is selected
+  const handleSchoolChange = (schoolId: string) => {
+    if (schoolId === "all-schools") {
+      return;
+    }
+
+    const selectedSchool = availableSchools.find(
+      (school) => school.id === schoolId
+    );
+    onSchoolChange(schoolId, selectedSchool?.name);
+  };
+
   return (
     <div className="bg-brand-secondary rounded-xl p-6 shadow-lg hover:opacity-90 transition-all duration-300">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -59,7 +82,10 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
           <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
             LGA
           </Label>
-          <Select value={filters.lga || "all-lgas"} onValueChange={onLgaChange}>
+          <Select
+            value={filters.lga || "all-lgas"}
+            onValueChange={handleLgaChange}
+          >
             <SelectTrigger className="w-full bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast h-12">
               <SelectValue placeholder="All LGAs" />
             </SelectTrigger>
@@ -84,7 +110,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
           </Label>
           <Select
             value={filters.school || "all-schools"}
-            onValueChange={onSchoolChange}
+            onValueChange={handleSchoolChange}
             disabled={!isSchoolEnabled}
           >
             <SelectTrigger

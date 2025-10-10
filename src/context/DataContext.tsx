@@ -247,8 +247,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Function to check if admin data can be used for students page
   const hasAdminDataForStudents = useCallback(() => {
     const hasData = state.adminDashboard.data !== null;
-    const hasTopStudents = state.adminDashboard.data?.performance?.topStudents;
-    const hasLgas = state.adminDashboard.data?.data?.lgas;
+    // const hasTopStudents = state.adminDashboard.data?.performance?.topStudents; // Unused variable
+    // const hasLgas = state.adminDashboard.data?.data?.lgas; // Unused variable
     const isCacheValidNow = state.adminDashboard.data
       ? isCacheValid(state.adminDashboard.timestamp)
       : false;
