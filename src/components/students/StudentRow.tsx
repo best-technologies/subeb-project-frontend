@@ -25,7 +25,8 @@ const StudentRow: React.FC<StudentRowProps> = ({
   const router = useRouter();
 
   const handleViewDetails = () => {
-    router.push(`/students/${student.examNo}`);
+    // Use the student UUID (id) for API calls, not examNo
+    router.push(`/students/${student.id}`);
   };
   return (
     <tr

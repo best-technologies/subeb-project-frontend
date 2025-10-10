@@ -297,6 +297,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
 
       const performanceTable = (topStudents || []).map((student, index) => ({
+        id: student.id, // Include the UUID for API calls
         position: student.position || index + 1,
         studentName: student.studentName,
         examNo: student.examNumber || "",
