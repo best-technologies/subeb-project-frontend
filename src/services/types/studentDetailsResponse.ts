@@ -1,5 +1,22 @@
 // Types for Student Details API Response
 
+export interface Teacher {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+}
+
+export interface Parent {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  relationship: string;
+}
+
 export interface StudentDetailsStudent {
   id: string;
   studentId: string;
@@ -45,9 +62,9 @@ export interface StudentDetailsStudent {
     capacity: number;
     currentEnrollment: number;
     academicYear: string;
-    teacher: any | null;
+    teacher: Teacher | null;
   };
-  parent: any | null;
+  parent: Parent | null;
 }
 
 export interface Assessment {
@@ -70,7 +87,7 @@ export interface Assessment {
     code: string;
     level: string;
   };
-  teacher: any | null;
+  teacher: Teacher | null;
 }
 
 export interface SubjectBreakdown {

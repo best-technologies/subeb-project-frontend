@@ -20,14 +20,11 @@ import {
   SubjectBreakdown,
   getStudentDetails,
   downloadStudentResultPDF,
+  StudentDetailsStudent,
 } from "@/services";
 import { formatEducationalText } from "@/utils/formatters";
 import { downloadBlob, sanitizeFilename } from "@/utils/downloadUtils";
-import {
-  getScoreColor,
-  getScoreBgColor,
-  getPositionBadge,
-} from "@/components/students/utils/studentUtils";
+import { getPositionBadge } from "@/components/students/utils/studentUtils";
 
 export default function StudentDetailsPage() {
   const params = useParams();
@@ -180,7 +177,7 @@ export default function StudentDetailsPage() {
             Student Not Found
           </h2>
           <p className="text-brand-accent-text mb-6">
-            The student with ID "{studentId}" could not be found.
+            The student with ID &quot;{studentId}&quot; could not be found.
           </p>
           <Button
             onClick={handleBackToStudents}
@@ -200,8 +197,9 @@ export default function StudentDetailsPage() {
   // Helper to get student name
   const getStudentName = () => {
     if (studentDetails?.student) {
-      return `${(displayStudent as any).firstName || ""} ${
-        (displayStudent as any).lastName || ""
+      const detailsStudent = displayStudent as StudentDetailsStudent;
+      return `${detailsStudent.firstName || ""} ${
+        detailsStudent.lastName || ""
       }`.trim();
     }
     return (student as PerformanceStudent)?.studentName || "";
@@ -210,7 +208,8 @@ export default function StudentDetailsPage() {
   // Helper to get student ID
   const getStudentId = () => {
     if (studentDetails?.student) {
-      return (displayStudent as any).studentId;
+      const detailsStudent = displayStudent as StudentDetailsStudent;
+      return detailsStudent.studentId;
     }
     return (student as PerformanceStudent)?.examNo || studentId;
   };
@@ -218,7 +217,8 @@ export default function StudentDetailsPage() {
   // Helper to get class name
   const getClassName = () => {
     if (studentDetails?.student) {
-      const classData = (displayStudent as any).class;
+      const detailsStudent = displayStudent as StudentDetailsStudent;
+      const classData = detailsStudent.class;
       return typeof classData === "object"
         ? classData?.name || ""
         : classData || "";
@@ -229,7 +229,8 @@ export default function StudentDetailsPage() {
   // Helper to get school name
   const getSchoolName = () => {
     if (studentDetails?.student) {
-      const schoolData = (displayStudent as any).school;
+      const detailsStudent = displayStudent as StudentDetailsStudent;
+      const schoolData = detailsStudent.school;
       return typeof schoolData === "object"
         ? schoolData?.name || ""
         : schoolData || "";
@@ -240,7 +241,8 @@ export default function StudentDetailsPage() {
   // Helper to get section
   const getSection = () => {
     if (studentDetails?.student) {
-      const classData = (displayStudent as any).class;
+      const detailsStudent = displayStudent as StudentDetailsStudent;
+      const classData = detailsStudent.class;
       return typeof classData === "object"
         ? classData?.section || "N/A"
         : "N/A";
@@ -292,7 +294,12 @@ export default function StudentDetailsPage() {
                     : `Exam No: ${getStudentId()}`}
                 </p>
                 <p className="text-brand-primary-contrast/60">
-                  {(displayStudent as any)?.gender === "MALE"
+                  {studentDetails?.student
+                    ? (displayStudent as StudentDetailsStudent)?.gender ===
+                      "MALE"
+                      ? "Male"
+                      : "Female"
+                    : (student as PerformanceStudent)?.gender === "MALE"
                     ? "Male"
                     : "Female"}{" "}
                   • {formatEducationalText(getClassName())}
