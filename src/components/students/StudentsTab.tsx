@@ -8,7 +8,6 @@ import { StudentsFilters as StudentsFiltersType } from "@/services/types/student
 import StudentsHeader from "./StudentsHeader";
 import StudentsFilters from "./StudentsFilters";
 import StudentsTable from "./StudentsTable";
-import StudentDetailsModal from "./StudentDetailsModal";
 import EditStudentDialog from "./EditStudentDialog";
 import { Button } from "@/components/ui/Button";
 import { LoadingModal } from "@/components/ui/LoadingModal";
@@ -33,9 +32,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   performanceTable,
   lgas,
 }) => {
-  const [selectedStudent, setSelectedStudent] =
-    useState<PerformanceStudent | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState<PerformanceStudent | null>(
     null
@@ -183,19 +179,9 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     return filteredAndSortedStudents.slice(startIndex, endIndex);
   }, [filteredAndSortedStudents, currentPage, hasActiveFilters, students]);
 
-  const handleViewDetails = (student: PerformanceStudent) => {
-    setSelectedStudent(student);
-    setShowDetails(true);
-  };
-
   const handleEditStudent = (student: PerformanceStudent) => {
     setStudentToEdit(student);
     setShowEditDialog(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowDetails(false);
-    setSelectedStudent(null);
   };
 
   const handleCloseEditDialog = () => {
@@ -376,17 +362,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         getScoreColor={getScoreColor}
         getScoreBgColor={getScoreBgColor}
         getPositionBadge={getPositionBadge}
-        onViewDetails={handleViewDetails}
         onEditStudent={handleEditStudent}
-      />
-
-      {/* Student Details Modal */}
-      <StudentDetailsModal
-        student={selectedStudent}
-        isOpen={showDetails}
-        onClose={handleCloseModal}
-        getScoreColor={getScoreColor}
-        getPositionBadge={getPositionBadge}
       />
 
       {/* Edit Student Dialog */}

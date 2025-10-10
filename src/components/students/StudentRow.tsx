@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Mars, Venus, Eye, UserRoundPen } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
@@ -11,7 +12,6 @@ interface StudentRowProps {
   getScoreColor: (score: number) => string;
   getScoreBgColor: (score: number) => string;
   getPositionBadge: (position: number) => string;
-  onViewDetails: (student: PerformanceStudent) => void;
   onEditStudent: (student: PerformanceStudent) => void;
 }
 
@@ -20,9 +20,13 @@ const StudentRow: React.FC<StudentRowProps> = ({
   getScoreColor,
   getScoreBgColor,
   // getPositionBadge,
-  onViewDetails,
   onEditStudent,
 }) => {
+  const router = useRouter();
+
+  const handleViewDetails = () => {
+    router.push(`/students/${student.examNo}`);
+  };
   return (
     <tr
       key={`${student.examNo}-${student.position}`}
@@ -106,7 +110,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
             variant="ghost"
             size="icon"
             aria-label="View student details"
-            onClick={() => onViewDetails(student)}
+            onClick={handleViewDetails}
             className="h-8 w-8 text-brand-primary hover:text-brand-primary-2 hover:bg-brand-primary/10"
           >
             <Eye className="w-4 h-4" />
