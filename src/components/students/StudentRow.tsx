@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Mars, Venus, Eye, UserRoundPen } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
-import { formatEducationalText } from "@/utils/formatters";
+import { formatEducationalText, capitalizeInitials } from "@/utils/formatters";
 import { StudentNameText, SchoolNameText } from "@/utils/truncateText";
 
 interface StudentRowProps {
@@ -50,7 +50,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
           <div>
             <div className="text-sm font-semibold text-brand-primary-2 group-hover:text-brand-primary transition-colors duration-200">
               <StudentNameText
-                text={formatEducationalText(student.studentName)}
+                text={capitalizeInitials(student.studentName)}
                 className="font-semibold"
               />
             </div>
@@ -69,7 +69,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
         <div>
           <div className="text-sm font-medium text-brand-primary-2">
             <SchoolNameText
-              text={formatEducationalText(student.school)}
+              text={capitalizeInitials(student.school)}
               className="font-medium"
             />
           </div>
