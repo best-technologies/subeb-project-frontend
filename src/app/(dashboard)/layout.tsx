@@ -17,6 +17,11 @@ export default function DashboardLayout({
     window.location.reload();
   };
 
+  // Function to close the mobile sidebar when navigation occurs
+  const handleMobileNavigation = () => {
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-brand-accent-background">
       {/* Fixed Sidebar */}
@@ -25,6 +30,7 @@ export default function DashboardLayout({
           isOpen={true}
           onToggle={() => {}} // No toggle needed for desktop
           onRefresh={handleRefresh}
+          // No onNavigate needed for desktop since sidebar is always visible
         />
       </div>
 
@@ -34,6 +40,7 @@ export default function DashboardLayout({
           isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
           onRefresh={handleRefresh}
+          onNavigate={handleMobileNavigation}
         />
       </div>
 
