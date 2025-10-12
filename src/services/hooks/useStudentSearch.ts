@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { searchStudents } from "../api";
-import { PerformanceStudent } from "../types/studentsDashboardResponse";
+import { PerformanceStudent, School } from "../types/studentsDashboardResponse";
 
 interface SearchParams {
   session?: string;
@@ -31,8 +31,6 @@ interface SchoolStats {
 
 export const useStudentSearch = () => {
   const [searchParams, setSearchParams] = useState<SearchParams>({
-    session: "2024/2025",
-    term: "FIRST_TERM",
     page: 1,
     limit: 10,
   });
@@ -81,12 +79,10 @@ export const useStudentSearch = () => {
         setSchoolStats(null);
         setStudents(originalStudents);
         setTotalStudents(originalStudents.length);
-        setSearchParams((prev) => ({
-          session: prev.session,
-          term: prev.term,
+        setSearchParams({
           page: 1,
           limit: 10,
-        }));
+        });
         setSelectedLgaName("");
         setSelectedSchoolName("");
         return;
@@ -98,8 +94,6 @@ export const useStudentSearch = () => {
 
       try {
         const response = await searchStudents({
-          session: searchParams.session,
-          term: searchParams.term,
           lgaId,
         });
 
@@ -108,7 +102,10 @@ export const useStudentSearch = () => {
           const schools = response.data.schools || [];
           setFilterOptions((prev) => ({
             ...prev,
-            schools: schools,
+            schools: schools.map((school: School) => ({
+              id: school.id,
+              name: school.name,
+            })),
             classes: [], // Clear classes when LGA changes
           }));
 
@@ -136,7 +133,7 @@ export const useStudentSearch = () => {
         setLoadingStates((prev) => ({ ...prev, lga: false }));
       }
     },
-    [originalStudents, searchParams.session, searchParams.term]
+    [originalStudents]
   );
 
   // Select School - fetch classes
@@ -150,8 +147,6 @@ export const useStudentSearch = () => {
 
       try {
         const response = await searchStudents({
-          session: searchParams.session,
-          term: searchParams.term,
           lgaId: searchParams.lgaId,
           schoolId,
         });
@@ -199,12 +194,7 @@ export const useStudentSearch = () => {
         setLoadingStates((prev) => ({ ...prev, school: false }));
       }
     },
-    [
-      searchParams.lgaId,
-      searchParams.session,
-      searchParams.term,
-      originalStudents,
-    ]
+    [searchParams.lgaId, originalStudents]
   );
 
   // Select Class - fetch students (final step that updates table)
@@ -217,8 +207,6 @@ export const useStudentSearch = () => {
 
       try {
         const response = await searchStudents({
-          session: searchParams.session,
-          term: searchParams.term,
           lgaId: searchParams.lgaId,
           schoolId: searchParams.schoolId,
           classId,
@@ -230,10 +218,13 @@ export const useStudentSearch = () => {
 
         if (response.success && response.data) {
           // NOW update the table with filtered students
-          const studentsData = response.data.students || [];
+          const studentsData = response.data.performanceTable || [];
           setStudents(studentsData);
-          setTotalStudents(response.data.total || studentsData.length);
-          setTotalPages(response.data.totalPages || 1);
+
+          // Extract pagination info from the response
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
 
           setSearchParams((prev) => ({
             ...prev,
@@ -262,8 +253,6 @@ export const useStudentSearch = () => {
     setTotalStudents(originalStudents.length);
     setTotalPages(1);
     setSearchParams({
-      session: "2024/2025",
-      term: "FIRST_TERM",
       page: 1,
       limit: 10,
     });
@@ -287,9 +276,12 @@ export const useStudentSearch = () => {
         });
 
         if (response.success && response.data) {
-          setStudents(response.data.students || []);
-          setTotalStudents(response.data.total || 0);
-          setTotalPages(response.data.totalPages || 1);
+          const studentsData = response.data.performanceTable || [];
+          setStudents(studentsData);
+
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
         }
       } catch (err) {
         setError(
@@ -314,9 +306,12 @@ export const useStudentSearch = () => {
         });
 
         if (response.success && response.data) {
-          setStudents(response.data.students || []);
-          setTotalStudents(response.data.total || 0);
-          setTotalPages(response.data.totalPages || 1);
+          const studentsData = response.data.performanceTable || [];
+          setStudents(studentsData);
+
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load page");
