@@ -89,7 +89,7 @@ export default function StudentDetailsPage() {
 
     try {
       setDownloadingPDF(true);
-      console.log("📥 Starting PDF download for student:", getStudentName());
+      // console.log("Starting PDF download for student:", getStudentName());
 
       const blob = await downloadStudentResultPDF(studentId);
 
@@ -100,9 +100,9 @@ export default function StudentDetailsPage() {
       // Download the PDF
       downloadBlob(blob, filename);
 
-      console.log("✅ PDF download completed successfully");
+      // console.log("PDF download completed successfully");
     } catch (error) {
-      console.error("❌ Error downloading PDF:", error);
+      console.error("Error downloading PDF:", error);
       // You could show a toast notification or error message here
       alert("Failed to download PDF. Please try again.");
     } finally {

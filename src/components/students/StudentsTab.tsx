@@ -9,6 +9,7 @@ import StudentsHeader from "./StudentsHeader";
 import StudentsFilters from "./StudentsFilters";
 import StudentsTable from "./StudentsTable";
 import EditStudentDialog from "./EditStudentDialog";
+import FilterContextMessage from "./FilterContextMessage";
 import { Button } from "@/components/ui/Button";
 import { LoadingModal } from "@/components/ui/LoadingModal";
 
@@ -278,6 +279,37 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     class: searchParams.classId || "all-classes",
   };
 
+  // Get selected class name for the filter context message
+  const selectedClassName = useMemo(() => {
+    if (!searchParams.classId) return undefined;
+    const selectedClass = availableClasses.find(
+      (cls) => cls.id === searchParams.classId
+    );
+    return selectedClass?.name;
+  }, [searchParams.classId, availableClasses]);
+
+  // Determine if filter context message should be shown
+  const shouldShowFilterContext = useMemo(() => {
+    // Show when class is selected (full filter path) OR when search is used
+    const hasFullFilters =
+      searchParams.classId &&
+      selectedLgaName &&
+      selectedSchoolName &&
+      selectedClassName;
+    const hasSearchOnly = searchParams.search && searchParams.search.trim();
+    const hasClientSideSearch =
+      !searchParams.classId && searchTerm && searchTerm.trim();
+
+    return !!(hasFullFilters || hasSearchOnly || hasClientSideSearch);
+  }, [
+    searchParams.classId,
+    searchParams.search,
+    selectedLgaName,
+    selectedSchoolName,
+    selectedClassName,
+    searchTerm,
+  ]);
+
   const averageScore = Math.round(
     students.length > 0
       ? students.reduce((sum, student) => sum + student.average, 0) /
@@ -351,6 +383,15 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         onSchoolChange={handleSchoolChange}
         onClassChange={handleClassChange}
         onClearFilters={handleClearFilters}
+      />
+
+      {/* Filter Context Message */}
+      <FilterContextMessage
+        lgaName={selectedLgaName}
+        schoolName={selectedSchoolName}
+        className={selectedClassName}
+        searchTerm={searchParams.classId ? searchParams.search : searchTerm}
+        isVisible={shouldShowFilterContext}
       />
 
       {/* Table Component */}
