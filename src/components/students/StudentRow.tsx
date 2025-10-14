@@ -66,16 +66,11 @@ const StudentRow: React.FC<StudentRowProps> = ({
         </div>
       </td>
       <td className="px-3 py-4 whitespace-nowrap">
-        <div>
-          <div className="text-sm font-medium text-brand-primary-2">
-            <SchoolNameText
-              text={capitalizeInitials(student.school)}
-              className="font-medium"
-            />
-          </div>
-          <div className="text-sm text-brand-light-accent-1">
-            {formatEducationalText(student.class)}
-          </div>
+        <div className="text-sm font-medium text-brand-primary-2">
+          <SchoolNameText
+            text={capitalizeInitials(student.school)}
+            className="font-medium"
+          />
         </div>
       </td>
       <td className="px-3 py-4 whitespace-nowrap">
