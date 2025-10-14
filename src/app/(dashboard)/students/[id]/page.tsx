@@ -44,7 +44,7 @@ export default function StudentDetailsPage() {
   const [downloadingPDF, setDownloadingPDF] = useState(false);
 
   useEffect(() => {
-    // Get students data from admin dashboard for basic info
+    // Get students data from admin dashboard for basic info (fallback only)
     const studentsData = getStudentsDataFromAdmin();
 
     if (studentsData?.performanceTable) {
@@ -69,6 +69,12 @@ export default function StudentDetailsPage() {
         // Use the student UUID from the URL for the API call
         const response = await getStudentDetails(studentId);
         setStudentDetails(response.data);
+
+        // If we don't have the student in cache, we can still proceed with API data
+        if (!student && response.data?.student) {
+          // We have all the data we need from the API, no need to block
+          setLoading(false);
+        }
       } catch (error) {
         console.error("Error fetching student details:", error);
         // Handle error - maybe show a fallback or error message
@@ -78,7 +84,7 @@ export default function StudentDetailsPage() {
     };
 
     fetchStudentDetails();
-  }, [studentId]);
+  }, [studentId, student]);
 
   const handleBackToStudents = () => {
     router.push("/students");
@@ -169,7 +175,8 @@ export default function StudentDetailsPage() {
     );
   }
 
-  if (!student) {
+  // Show "Student Not Found" only if we don't have student in cache AND no student details from API
+  if (!student && !studentDetails?.student) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto">
