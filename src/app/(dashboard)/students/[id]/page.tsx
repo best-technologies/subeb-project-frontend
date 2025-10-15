@@ -11,7 +11,6 @@ import {
   TrendingUp,
   TrendingDown,
   Award,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/dialog";
@@ -744,15 +743,6 @@ export default function StudentDetailsPage() {
       {/* Success Modal for PDF Download */}
       <Dialog open={showDownloadSuccess} onOpenChange={setShowDownloadSuccess}>
         <div className="relative bg-white rounded-lg p-6 !max-w-sm !w-auto mx-auto">
-          {/* Close Button */}
-          <button
-            onClick={() => setShowDownloadSuccess(false)}
-            className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-          </button>
-
           <div className="text-center pt-2">
             {/* Success Animation */}
             <div className="flex justify-center mb-4">
@@ -765,7 +755,7 @@ export default function StudentDetailsPage() {
               Download Successful!
             </h3>
             <p className="text-brand-accent-text mb-4 text-sm">
-              PDF for{" "}
+              PDF result for{" "}
               <strong className="text-brand-primary">{getStudentName()}</strong>{" "}
               downloaded successfully.
             </p>

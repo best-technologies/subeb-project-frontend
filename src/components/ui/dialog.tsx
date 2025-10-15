@@ -1,12 +1,19 @@
 import * as React from "react";
+import { X } from "lucide-react";
 
 interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
+  showCloseButton?: boolean;
 }
 
-export function Dialog({ open, onOpenChange, children }: DialogProps) {
+export function Dialog({
+  open,
+  onOpenChange,
+  children,
+  showCloseButton = true,
+}: DialogProps) {
   React.useEffect(() => {
     if (!open) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -25,7 +32,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
         aria-label="Close dialog"
       />
       <div
-        className="relative z-10 w-full max-w-5xl mx-4 bg-background text-foreground rounded-xl shadow-xl overflow-hidden"
+        className="relative z-10 w-full max-w-lg mx-4 bg-background text-foreground rounded-xl shadow-xl overflow-hidden"
         style={{
           maxHeight: "calc(100dvh - 2rem)",
           marginTop: "1rem",
@@ -35,6 +42,15 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
       >
         <div style={{ maxHeight: "inherit", overflowY: "auto" }}>
           {children}
+          {showCloseButton && (
+            <button
+              onClick={() => onOpenChange(false)}
+              className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition-colors opacity-70 hover:opacity-100"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+            </button>
+          )}
         </div>
       </div>
     </div>
