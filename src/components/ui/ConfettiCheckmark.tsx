@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Check } from "lucide-react";
 
 interface ConfettiParticle {
@@ -48,7 +48,7 @@ export default function ConfettiCheckmark({
   const [confetti, setConfetti] = useState<ConfettiParticle[]>([]);
   const [showCheck, setShowCheck] = useState(false);
 
-  const trigger = () => {
+  const trigger = useCallback(() => {
     if (isAnimating) return;
 
     setIsAnimating(true);
@@ -78,13 +78,13 @@ export default function ConfettiCheckmark({
       setConfetti([]);
       onComplete?.();
     }, duration);
-  };
+  }, [isAnimating, particleCount, confettiColors, duration, onComplete]);
 
   useEffect(() => {
     if (autoPlay) {
       trigger();
     }
-  }, [autoPlay]);
+  }, [autoPlay, trigger]);
 
   useEffect(() => {
     if (!isAnimating || confetti.length === 0) return;
