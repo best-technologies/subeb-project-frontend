@@ -23,7 +23,7 @@ import {
   downloadStudentResultPDF,
   StudentDetailsStudent,
 } from "@/services";
-import { formatEducationalText } from "@/utils/formatters";
+import { formatEducationalText, capitalizeInitials } from "@/utils/formatters";
 import { downloadBlob, sanitizeFilename } from "@/utils/downloadUtils";
 import { getPositionBadge } from "@/components/students/utils/studentUtils";
 import ConfettiCheckmark from "@/components/ui/ConfettiCheckmark";
@@ -209,13 +209,16 @@ export default function StudentDetailsPage() {
 
   // Helper to get student name
   const getStudentName = () => {
+    let name = "";
     if (studentDetails?.student) {
       const detailsStudent = displayStudent as StudentDetailsStudent;
-      return `${detailsStudent.firstName || ""} ${
+      name = `${detailsStudent.firstName || ""} ${
         detailsStudent.lastName || ""
       }`.trim();
+    } else {
+      name = (student as PerformanceStudent)?.studentName || "";
     }
-    return (student as PerformanceStudent)?.studentName || "";
+    return capitalizeInitials(name);
   };
 
   // Helper to get student ID
