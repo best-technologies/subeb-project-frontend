@@ -1,12 +1,24 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { createSession, isSessionValid, clearSession } from "@/lib/auth";
 
 export default function Home() {
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+
+  // Check if user already has a valid session
+  useEffect(() => {
+    if (isSessionValid()) {
+      // User already authenticated, redirect to dashboard
+      router.push("/dashboard");
+    } else {
+      // Clear any expired sessions
+      clearSession();
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +28,8 @@ export default function Home() {
     // Simulate API call
     setTimeout(() => {
       if (pin === "6234") {
+        // Create session on successful PIN validation
+        createSession();
         router.push("/dashboard");
       } else {
         setError("Invalid PIN. Please try again.");
