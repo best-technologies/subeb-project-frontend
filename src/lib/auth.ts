@@ -39,7 +39,7 @@ export function getSession(): SessionData | null {
     if (!sessionStr) return null;
 
     return JSON.parse(sessionStr) as SessionData;
-  } catch (error) {
+  } catch {
     // Invalid session data, clear it
     clearSession();
     return null;
