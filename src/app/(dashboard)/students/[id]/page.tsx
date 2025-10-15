@@ -7,12 +7,14 @@ import {
   School,
   ChartColumn,
   Download,
-  Share2,
+  // Share2, // Commented out - share functionality not available yet
   TrendingUp,
   TrendingDown,
   Award,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Dialog } from "@/components/ui/dialog";
 import { useData } from "@/context/DataContext";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import {
@@ -25,6 +27,7 @@ import {
 import { formatEducationalText } from "@/utils/formatters";
 import { downloadBlob, sanitizeFilename } from "@/utils/downloadUtils";
 import { getPositionBadge } from "@/components/students/utils/studentUtils";
+import ConfettiCheckmark from "@/components/ui/ConfettiCheckmark";
 
 export default function StudentDetailsPage() {
   const params = useParams();
@@ -42,6 +45,7 @@ export default function StudentDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(true);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
+  const [showDownloadSuccess, setShowDownloadSuccess] = useState(false);
 
   useEffect(() => {
     // Get students data from admin dashboard for basic info (fallback only)
@@ -106,6 +110,9 @@ export default function StudentDetailsPage() {
       // Download the PDF
       downloadBlob(blob, filename);
 
+      // Show success modal
+      setShowDownloadSuccess(true);
+
       // console.log("PDF download completed successfully");
     } catch (error) {
       console.error("Error downloading PDF:", error);
@@ -116,10 +123,10 @@ export default function StudentDetailsPage() {
     }
   };
 
-  const handleShare = () => {
-    // TODO: Implement share functionality
-    console.log("Share student details for:", student?.studentName);
-  };
+  // const handleShare = () => {
+  //   // TODO: Implement share functionality
+  //   console.log("Share student details for:", student?.studentName);
+  // };
 
   // Helper functions for analytics
   const getSubjectGrade = (percentage: number): string => {
@@ -363,7 +370,7 @@ export default function StudentDetailsPage() {
                   title={
                     downloadingPDF
                       ? "Downloading..."
-                      : "Download student result PDF"
+                      : "Download student result in PDF"
                   }
                 >
                   {downloadingPDF ? (
@@ -372,7 +379,8 @@ export default function StudentDetailsPage() {
                     <Download className="h-5 w-5" />
                   )}
                 </Button>
-                <Button
+                {/* Share button commented out - backend API not available yet */}
+                {/* <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleShare}
@@ -380,7 +388,7 @@ export default function StudentDetailsPage() {
                   title="Share student details"
                 >
                   <Share2 className="h-5 w-5" />
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
@@ -732,6 +740,44 @@ export default function StudentDetailsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Success Modal for PDF Download */}
+      <Dialog open={showDownloadSuccess} onOpenChange={setShowDownloadSuccess}>
+        <div className="relative bg-white rounded-lg p-6 !max-w-sm !w-auto mx-auto">
+          {/* Close Button */}
+          <button
+            onClick={() => setShowDownloadSuccess(false)}
+            className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+          </button>
+
+          <div className="text-center pt-2">
+            {/* Success Animation */}
+            <div className="flex justify-center mb-4">
+              <div className="w-24 h-24">
+                <ConfettiCheckmark />
+              </div>
+            </div>
+
+            <h3 className="text-lg font-bold text-brand-primary mb-2">
+              Download Successful!
+            </h3>
+            <p className="text-brand-accent-text mb-4 text-sm">
+              PDF for{" "}
+              <strong className="text-brand-primary">{getStudentName()}</strong>{" "}
+              downloaded successfully.
+            </p>
+            <Button
+              onClick={() => setShowDownloadSuccess(false)}
+              className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast px-6 py-2 text-sm"
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }
