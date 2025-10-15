@@ -270,13 +270,13 @@ export default function StudentDetailsPage() {
     <div className="min-h-screen bg-brand-accent-background/30">
       {/* Header Section */}
       <div className="bg-brand-primary shadow-lg">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           {/* Back Button */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <Button
               onClick={handleBackToStudents}
               variant="ghost"
-              className="text-brand-primary-contrast hover:bg-brand-primary-contrast/10 flex items-center gap-2"
+              className="text-brand-primary-contrast hover:bg-brand-primary-contrast/10 flex items-center gap-2 text-sm sm:text-base"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Students
@@ -286,9 +286,9 @@ export default function StudentDetailsPage() {
           {/* Student Header Info */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             {/* Left Section - Student Info */}
-            <div className="flex items-center space-x-6">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-6">
               <div
-                className={`w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold ${
+                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold flex-shrink-0 ${
                   displayStudent?.gender === "MALE"
                     ? "bg-brand-accent text-brand-accent-contrast"
                     : "bg-brand-secondary text-brand-secondary-contrast"
@@ -300,16 +300,16 @@ export default function StudentDetailsPage() {
                   .join("")
                   .toUpperCase()}
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-brand-primary-contrast">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-brand-primary-contrast break-words">
                   {getStudentName()}
                 </h1>
-                <p className="text-brand-primary-contrast/70 text-lg">
+                <p className="text-brand-primary-contrast/70 text-sm sm:text-base lg:text-lg">
                   {studentDetails?.student
                     ? `Student ID: ${getStudentId()}`
                     : `Exam No: ${getStudentId()}`}
                 </p>
-                <p className="text-brand-primary-contrast/60">
+                <p className="text-brand-primary-contrast/60 text-xs sm:text-sm">
                   {studentDetails?.student
                     ? (displayStudent as StudentDetailsStudent)?.gender ===
                       "MALE"
@@ -324,13 +324,13 @@ export default function StudentDetailsPage() {
             </div>
 
             {/* Right Section - Performance Metrics and Actions */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-start sm:items-center lg:items-end xl:items-center gap-4">
               {/* Performance Metrics */}
               {performanceSummary && (
-                <div className="flex items-center space-x-4">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 sm:flex">
                   <div className="text-center">
-                    <div className="px-4 py-2 rounded-lg bg-brand-accent/20 border border-brand-accent/30">
-                      <div className="text-xl font-bold text-brand-primary-contrast">
+                    <div className="px-2 py-2 sm:px-4 sm:py-2 rounded-lg bg-brand-accent/20 border border-brand-accent/30">
+                      <div className="text-lg sm:text-xl font-bold text-brand-primary-contrast">
                         {performanceSummary.totalScore}
                       </div>
                       <div className="text-xs text-brand-primary-contrast/70">
@@ -339,8 +339,8 @@ export default function StudentDetailsPage() {
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className="px-4 py-2 rounded-lg bg-brand-secondary/20 border border-brand-secondary/30">
-                      <div className="text-xl font-bold text-brand-primary-contrast">
+                    <div className="px-2 py-2 sm:px-4 sm:py-2 rounded-lg bg-brand-secondary/20 border border-brand-secondary/30">
+                      <div className="text-lg sm:text-xl font-bold text-brand-primary-contrast">
                         {performanceSummary.averageScore.toFixed(1)}%
                       </div>
                       <div className="text-xs text-brand-primary-contrast/70">
@@ -349,8 +349,8 @@ export default function StudentDetailsPage() {
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className="px-4 py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/30">
-                      <div className="text-xl font-bold text-yellow-300">
+                    <div className="px-2 py-2 sm:px-4 sm:py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/30">
+                      <div className="text-lg sm:text-xl font-bold text-yellow-300">
                         {performanceSummary.grade}
                       </div>
                       <div className="text-xs text-brand-primary-contrast/70">
@@ -362,7 +362,7 @@ export default function StudentDetailsPage() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex items-center space-x-2">
+              <div className="flex justify-center sm:justify-start lg:justify-end">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -398,9 +398,9 @@ export default function StudentDetailsPage() {
       </div>
 
       {/* Content Section */}
-      <div className="max-w-6xl mx-auto px-6 py-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Compact Information Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6">
           {/* Basic Information Card - Compact */}
           <div className="bg-white rounded-lg p-4 border border-brand-accent/20 shadow-sm">
             <div className="flex items-center mb-3">
@@ -409,12 +409,12 @@ export default function StudentDetailsPage() {
                 Basic Information
               </h3>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div>
                 <span className="text-brand-accent-text/60 block">
                   Student Name
                 </span>
-                <span className="text-brand-primary font-medium">
+                <span className="text-brand-primary font-medium break-words">
                   {getStudentName()}
                 </span>
               </div>
@@ -422,7 +422,7 @@ export default function StudentDetailsPage() {
                 <span className="text-brand-accent-text/60 block">
                   {studentDetails?.student ? "Student ID" : "Exam Number"}
                 </span>
-                <span className="text-brand-primary font-mono font-medium">
+                <span className="text-brand-primary font-mono font-medium break-all">
                   {getStudentId()}
                 </span>
               </div>
@@ -440,7 +440,7 @@ export default function StudentDetailsPage() {
               </div>
               <div>
                 <span className="text-brand-accent-text/60 block">Class</span>
-                <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-brand-primary/10 text-brand-primary">
+                <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-brand-primary/10 text-brand-primary break-words">
                   {formatEducationalText(getClassName())}
                 </span>
               </div>
@@ -455,12 +455,12 @@ export default function StudentDetailsPage() {
                 School Information
               </h3>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div className="sm:col-span-2">
                 <span className="text-brand-accent-text/60 block">
                   School Name
                 </span>
-                <span className="text-brand-primary font-medium leading-tight">
+                <span className="text-brand-primary font-medium leading-tight break-words">
                   {formatEducationalText(getSchoolName())}
                 </span>
               </div>
@@ -490,9 +490,9 @@ export default function StudentDetailsPage() {
 
         {/* Enhanced Performance Summary */}
         {performanceSummary ? (
-          <div className="bg-white rounded-xl p-6 border border-brand-accent/20 shadow-lg">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-brand-primary flex items-center">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-brand-accent/20 shadow-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+              <h3 className="text-lg sm:text-xl font-semibold text-brand-primary flex items-center">
                 <ChartColumn className="w-5 h-5 mr-3" />
                 Academic Performance Report
               </h3>
@@ -503,44 +503,118 @@ export default function StudentDetailsPage() {
             </div>
 
             {/* Performance Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-brand-accent/10 to-brand-accent/5 rounded-lg p-4 border border-brand-accent/20">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+              <div className="bg-gradient-to-br from-brand-accent/10 to-brand-accent/5 rounded-lg p-3 sm:p-4 border border-brand-accent/20">
                 <div className="text-xs text-brand-accent-text/70 mb-1 font-medium">
                   Total Score
                 </div>
-                <div className="text-2xl font-bold text-brand-accent">
+                <div className="text-lg sm:text-2xl font-bold text-brand-accent">
                   {performanceSummary.totalScore}/
                   {performanceSummary.totalMaxScore}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-brand-secondary/10 to-brand-secondary/5 rounded-lg p-4 border border-brand-secondary/20">
+              <div className="bg-gradient-to-br from-brand-secondary/10 to-brand-secondary/5 rounded-lg p-3 sm:p-4 border border-brand-secondary/20">
                 <div className="text-xs text-brand-accent-text/70 mb-1 font-medium">
                   Average
                 </div>
-                <div className="text-2xl font-bold text-brand-secondary">
+                <div className="text-lg sm:text-2xl font-bold text-brand-secondary">
                   {performanceSummary.averageScore.toFixed(1)}%
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 rounded-lg p-4 border border-yellow-500/20">
+              <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 rounded-lg p-3 sm:p-4 border border-yellow-500/20">
                 <div className="text-xs text-brand-accent-text/70 mb-1 font-medium">
                   Grade
                 </div>
-                <div className="text-2xl font-bold text-yellow-600">
+                <div className="text-lg sm:text-2xl font-bold text-yellow-600">
                   {performanceSummary.grade}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-brand-primary/10 to-brand-primary/5 rounded-lg p-4 border border-brand-primary/20">
+              <div className="bg-gradient-to-br from-brand-primary/10 to-brand-primary/5 rounded-lg p-3 sm:p-4 border border-brand-primary/20">
                 <div className="text-xs text-brand-accent-text/70 mb-1 font-medium">
                   Subjects
                 </div>
-                <div className="text-2xl font-bold text-brand-primary">
+                <div className="text-lg sm:text-2xl font-bold text-brand-primary">
                   {performanceSummary.subjectBreakdown.length}
                 </div>
               </div>
             </div>
 
-            {/* Subject Performance Table */}
-            <div className="overflow-x-auto">
+            {/* Subject Performance Table - Mobile Cards & Desktop Table */}
+            <div className="block sm:hidden">
+              {/* Mobile Card Layout */}
+              <div className="space-y-3">
+                {performanceSummary.subjectBreakdown
+                  .sort((a, b) => b.percentage - a.percentage)
+                  .map((subject, index) => (
+                    <div
+                      key={subject.subject.id}
+                      className="bg-brand-accent/5 rounded-lg p-4 border border-brand-accent/10"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-medium text-brand-primary text-sm">
+                          {formatSubjectName(subject.subject.name)}
+                        </h4>
+                        <span
+                          className={`inline-flex px-2 py-1 rounded text-xs font-bold ${
+                            subject.percentage >= 80
+                              ? "bg-emerald-500 text-white"
+                              : subject.percentage >= 70
+                              ? "bg-blue-500 text-white"
+                              : subject.percentage >= 60
+                              ? "bg-yellow-500 text-white"
+                              : subject.percentage >= 50
+                              ? "bg-orange-500 text-white"
+                              : "bg-red-500 text-white"
+                          }`}
+                        >
+                          {getSubjectGrade(subject.percentage)}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-xs">
+                        <div>
+                          <span className="text-brand-accent-text/60 block">
+                            Score
+                          </span>
+                          <span className="font-semibold text-brand-accent-text">
+                            {subject.totalScore}/{subject.totalMaxScore}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-brand-accent-text/60 block">
+                            Percentage
+                          </span>
+                          <span
+                            className={`font-semibold ${
+                              subject.percentage >= 80
+                                ? "text-emerald-700"
+                                : subject.percentage >= 70
+                                ? "text-blue-700"
+                                : subject.percentage >= 60
+                                ? "text-yellow-700"
+                                : subject.percentage >= 50
+                                ? "text-orange-700"
+                                : "text-red-700"
+                            }`}
+                          >
+                            {subject.percentage.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-brand-accent-text/60 block">
+                            Rank
+                          </span>
+                          <span className="font-semibold text-brand-accent-text">
+                            #{index + 1}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Desktop Table Layout */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-brand-accent/20">
@@ -630,18 +704,18 @@ export default function StudentDetailsPage() {
                 performanceSummary.subjectBreakdown
               );
               return (
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
                     <div className="flex items-center mb-2">
                       <TrendingUp className="w-4 h-4 text-emerald-600 mr-2" />
-                      <h4 className="font-semibold text-emerald-800">
+                      <h4 className="font-semibold text-emerald-800 text-sm">
                         Top Subjects
                       </h4>
                     </div>
                     {insights.topSubjects.map((subject) => (
                       <div
                         key={subject.subject.id}
-                        className="text-sm text-emerald-700 mb-1"
+                        className="text-xs sm:text-sm text-emerald-700 mb-1 break-words"
                       >
                         • {formatSubjectName(subject.subject.name)} (
                         {subject.percentage.toFixed(1)}%)
@@ -652,14 +726,14 @@ export default function StudentDetailsPage() {
                   <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
                     <div className="flex items-center mb-2">
                       <TrendingDown className="w-4 h-4 text-orange-600 mr-2" />
-                      <h4 className="font-semibold text-orange-800">
+                      <h4 className="font-semibold text-orange-800 text-sm">
                         Needs Improvement
                       </h4>
                     </div>
                     {insights.improvementAreas.map((subject) => (
                       <div
                         key={subject.subject.id}
-                        className="text-sm text-orange-700 mb-1"
+                        className="text-xs sm:text-sm text-orange-700 mb-1 break-words"
                       >
                         • {formatSubjectName(subject.subject.name)} (
                         {subject.percentage.toFixed(1)}%)
@@ -667,14 +741,14 @@ export default function StudentDetailsPage() {
                     ))}
                   </div>
 
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 sm:col-span-2 lg:col-span-1">
                     <div className="flex items-center mb-2">
                       <Award className="w-4 h-4 text-blue-600 mr-2" />
-                      <h4 className="font-semibold text-blue-800">
+                      <h4 className="font-semibold text-blue-800 text-sm">
                         Grade Distribution
                       </h4>
                     </div>
-                    <div className="text-sm text-blue-700 space-y-1">
+                    <div className="text-xs sm:text-sm text-blue-700 space-y-1">
                       <div>• A Grades: {insights.gradeDistribution.A}</div>
                       <div>• B Grades: {insights.gradeDistribution.B}</div>
                       <div>• C Grades: {insights.gradeDistribution.C}</div>
@@ -687,39 +761,39 @@ export default function StudentDetailsPage() {
           </div>
         ) : (
           // Fallback Performance Summary if detailed data isn't available
-          <div className="bg-white rounded-xl p-6 border border-brand-accent/20 shadow-lg">
-            <h3 className="text-xl font-semibold text-brand-primary mb-6 flex items-center">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-brand-accent/20 shadow-lg">
+            <h3 className="text-lg sm:text-xl font-semibold text-brand-primary mb-6 flex items-center">
               <ChartColumn className="w-5 h-5 mr-3" />
               Performance Summary
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-brand-accent/10 to-brand-accent/5 rounded-lg p-6 border border-brand-accent/20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="bg-gradient-to-br from-brand-accent/10 to-brand-accent/5 rounded-lg p-4 sm:p-6 border border-brand-accent/20">
                 <div className="text-sm text-brand-accent-text/70 mb-2 font-medium">
                   Total Score
                 </div>
-                <div className="text-3xl font-bold text-brand-accent mb-1">
+                <div className="text-2xl sm:text-3xl font-bold text-brand-accent mb-1">
                   {student?.total || "N/A"}
                 </div>
                 <div className="text-xs text-brand-accent-text/60">
                   Out of total possible marks
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-brand-secondary/10 to-brand-secondary/5 rounded-lg p-6 border border-brand-secondary/20">
+              <div className="bg-gradient-to-br from-brand-secondary/10 to-brand-secondary/5 rounded-lg p-4 sm:p-6 border border-brand-secondary/20">
                 <div className="text-sm text-brand-accent-text/70 mb-2 font-medium">
                   Average Score
                 </div>
-                <div className="text-3xl font-bold text-brand-secondary mb-1">
+                <div className="text-2xl sm:text-3xl font-bold text-brand-secondary mb-1">
                   {student?.average || "N/A"}%
                 </div>
                 <div className="text-xs text-brand-accent-text/60">
                   Overall performance percentage
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-brand-primary/10 to-brand-primary/5 rounded-lg p-6 border border-brand-primary/20">
+              <div className="bg-gradient-to-br from-brand-primary/10 to-brand-primary/5 rounded-lg p-4 sm:p-6 border border-brand-primary/20 sm:col-span-2 lg:col-span-1">
                 <div className="text-sm text-brand-accent-text/70 mb-2 font-medium">
                   Class Position
                 </div>
-                <div className="text-3xl font-bold text-brand-primary mb-1">
+                <div className="text-2xl sm:text-3xl font-bold text-brand-primary mb-1">
                   #{student?.position || "N/A"}
                 </div>
                 <div className="text-xs text-brand-accent-text/60">
@@ -734,7 +808,7 @@ export default function StudentDetailsPage() {
         <div className="mt-6 text-center">
           <Button
             onClick={handleBackToStudents}
-            className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast px-8 py-3"
+            className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base"
             size="lg"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -745,26 +819,28 @@ export default function StudentDetailsPage() {
 
       {/* Success Modal for PDF Download */}
       <Dialog open={showDownloadSuccess} onOpenChange={setShowDownloadSuccess}>
-        <div className="relative bg-white rounded-lg p-6 !max-w-sm !w-auto mx-auto">
+        <div className="relative bg-white rounded-lg p-4 sm:p-6 !max-w-xs sm:!max-w-sm !w-auto mx-auto">
           <div className="text-center pt-2">
             {/* Success Animation */}
             <div className="flex justify-center mb-4">
-              <div className="w-24 h-24">
+              <div className="w-16 h-16 sm:w-24 sm:h-24">
                 <ConfettiCheckmark />
               </div>
             </div>
 
-            <h3 className="text-lg font-bold text-brand-primary mb-2">
+            <h3 className="text-base sm:text-lg font-bold text-brand-primary mb-2">
               Download Successful!
             </h3>
-            <p className="text-brand-accent-text mb-4 text-sm">
+            <p className="text-brand-accent-text mb-4 text-xs sm:text-sm px-2">
               PDF result for{" "}
-              <strong className="text-brand-primary">{getStudentName()}</strong>{" "}
+              <strong className="text-brand-primary break-words">
+                {getStudentName()}
+              </strong>{" "}
               downloaded successfully.
             </p>
             <Button
               onClick={() => setShowDownloadSuccess(false)}
-              className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast px-6 py-2 text-sm"
+              className="bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm"
             >
               Close
             </Button>
