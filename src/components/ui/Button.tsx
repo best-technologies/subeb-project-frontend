@@ -12,7 +12,7 @@ const buttonVariants = cva(
         default: "bg-brand-primary text-white hover:bg-brand-primary-hover",
         destructive: "bg-red-600 text-white hover:bg-red-700",
         outline:
-          "border border-brand-primary text-brand-primary bg-transparent transition-transform duration-200 hover:scale-95",
+          "border border-brand-primary text-brand-primary bg-transparent hover:bg-brand-primary hover:text-white transition-all duration-200",
         secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
         ghost: "hover:bg-brand-secondary hover:text-black",
         link: "text-brand-primary underline-offset-4 hover:underline",
