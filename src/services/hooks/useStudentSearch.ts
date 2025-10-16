@@ -1,30 +1,31 @@
 import { useState, useCallback } from "react";
 import { searchStudents } from "../api";
-import { PerformanceStudent } from "../types/studentsDashboardResponse";
+import { PerformanceStudent, School } from "../types/studentsDashboardResponse";
 
 interface SearchParams {
+  session?: string;
+  term?: string;
   lgaId?: string;
   schoolId?: string;
   classId?: string;
   gender?: string;
-  subject?: string;
   search?: string;
   page?: number;
   limit?: number;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
 }
 
-interface SearchResponse {
-  students: PerformanceStudent[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  filters: {
-    availableSchools?: Array<{ id: string; name: string }>;
-    availableClasses?: Array<{ id: string; name: string }>;
-    availableGenders?: string[];
+interface FilterOptions {
+  schools: Array<{ id: string; name: string; code?: string }>;
+  classes: Array<{ id: string; name: string }>;
+}
+
+interface SchoolStats {
+  name: string;
+  code: string;
+  totalStudents: number;
+  genderBreakdown: {
+    male: number;
+    female: number;
   };
 }
 
@@ -32,176 +33,326 @@ export const useStudentSearch = () => {
   const [searchParams, setSearchParams] = useState<SearchParams>({
     page: 1,
     limit: 10,
-    sortBy: "position",
-    sortOrder: "asc",
   });
 
-  const [data, setData] = useState<SearchResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [students, setStudents] = useState<PerformanceStudent[]>([]);
+  const [originalStudents, setOriginalStudents] = useState<
+    PerformanceStudent[]
+  >([]);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    schools: [],
+    classes: [],
+  });
+  const [schoolStats, setSchoolStats] = useState<SchoolStats | null>(null);
+  // const [loading, setLoading] = useState(false); // Unused variable
   const [error, setError] = useState<string | null>(null);
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Progressive filter states
-  const [availableSchools, setAvailableSchools] = useState<
-    Array<{ id: string; name: string }>
-  >([]);
-  const [availableClasses, setAvailableClasses] = useState<
-    Array<{ id: string; name: string }>
-  >([]);
-  const [availableGenders, setAvailableGenders] = useState<string[]>([]);
+  // Loading states for different operations
+  const [loadingStates, setLoadingStates] = useState({
+    lga: false,
+    school: false,
+    class: false,
+  });
 
-  const performSearch = useCallback(async (params: SearchParams) => {
-    setLoading(true);
-    setError(null);
+  // Store names for loading messages
+  const [selectedLgaName, setSelectedLgaName] = useState<string>("");
+  const [selectedSchoolName, setSelectedSchoolName] = useState<string>("");
 
-    try {
-      const response = await searchStudents(params);
-      setData(response);
-
-      // Update available filters based on response
-      if (response.filters) {
-        if (response.filters.availableSchools) {
-          setAvailableSchools(response.filters.availableSchools);
-        }
-        if (response.filters.availableClasses) {
-          setAvailableClasses(response.filters.availableClasses);
-        }
-        if (response.filters.availableGenders) {
-          setAvailableGenders(response.filters.availableGenders);
-        }
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to search students"
-      );
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Update search parameters and trigger search
-  const updateSearchParams = useCallback(
-    (newParams: Partial<SearchParams>) => {
-      const updatedParams = { ...searchParams, ...newParams, page: 1 }; // Reset to page 1 when filters change
-      setSearchParams(updatedParams);
-      performSearch(updatedParams);
+  // Initialize with original students data
+  const initializeStudents = useCallback(
+    (initialStudents: PerformanceStudent[]) => {
+      setOriginalStudents(initialStudents);
+      setStudents(initialStudents);
+      setTotalStudents(initialStudents.length);
     },
-    [searchParams, performSearch]
+    []
   );
 
-  // Progressive filter functions
+  // Select LGA - fetch schools
   const selectLGA = useCallback(
-    (lgaId: string) => {
-      updateSearchParams({
-        lgaId,
-        schoolId: undefined,
-        classId: undefined,
-        gender: undefined,
-      });
+    async (lgaId: string, lgaName?: string) => {
+      if (!lgaId || lgaId.trim() === "") {
+        // Clear filters and reset to original data
+        setFilterOptions({ schools: [], classes: [] });
+        setSchoolStats(null);
+        setStudents(originalStudents);
+        setTotalStudents(originalStudents.length);
+        setSearchParams({
+          page: 1,
+          limit: 10,
+        });
+        setSelectedLgaName("");
+        setSelectedSchoolName("");
+        return;
+      }
+
+      setLoadingStates((prev) => ({ ...prev, lga: true }));
+      setSelectedLgaName(lgaName || "selected LGA");
+      setError(null);
+
+      try {
+        const response = await searchStudents({
+          lgaId,
+        });
+
+        if (response.success && response.data) {
+          // Extract schools from the response
+          const schools = response.data.schools || [];
+          setFilterOptions((prev) => ({
+            ...prev,
+            schools: schools.map((school: School) => ({
+              id: school.id,
+              name: school.name,
+            })),
+            classes: [], // Clear classes when LGA changes
+          }));
+
+          // Update search params but keep original table data
+          setSearchParams((prev) => ({
+            ...prev,
+            lgaId,
+            schoolId: undefined,
+            classId: undefined,
+          }));
+
+          // Keep original students data visible
+          setStudents(originalStudents);
+          setTotalStudents(originalStudents.length);
+          setSchoolStats(null);
+        } else {
+          throw new Error(response.message || "Failed to fetch schools");
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch schools"
+        );
+        console.error("Error fetching schools:", err);
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, lga: false }));
+      }
     },
-    [updateSearchParams]
+    [originalStudents]
   );
 
+  // Select School - fetch classes
   const selectSchool = useCallback(
-    (schoolId: string) => {
-      updateSearchParams({ schoolId, classId: undefined, gender: undefined });
+    async (schoolId: string, schoolName?: string) => {
+      if (!schoolId || !searchParams.lgaId) return;
+
+      setLoadingStates((prev) => ({ ...prev, school: true }));
+      setSelectedSchoolName(schoolName || "selected school");
+      setError(null);
+
+      try {
+        const response = await searchStudents({
+          lgaId: searchParams.lgaId,
+          schoolId,
+        });
+
+        if (response.success && response.data) {
+          // Extract classes and school stats from the response
+          const classes = response.data.classes || [];
+          const schoolInfo = response.data.school || {};
+
+          setFilterOptions((prev) => ({
+            ...prev,
+            classes: classes,
+          }));
+
+          // Set school statistics
+          setSchoolStats({
+            name: schoolInfo.name || schoolName || "",
+            code: schoolInfo.code || "",
+            totalStudents: schoolInfo.totalStudents || 0,
+            genderBreakdown: schoolInfo.genderBreakdown || {
+              male: 0,
+              female: 0,
+            },
+          });
+
+          // Update search params but keep original table data
+          setSearchParams((prev) => ({
+            ...prev,
+            schoolId,
+            classId: undefined,
+          }));
+
+          // Keep original students data visible
+          setStudents(originalStudents);
+          setTotalStudents(originalStudents.length);
+        } else {
+          throw new Error(response.message || "Failed to fetch classes");
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch classes"
+        );
+        console.error("Error fetching classes:", err);
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, school: false }));
+      }
     },
-    [updateSearchParams]
+    [searchParams.lgaId, originalStudents]
   );
 
+  // Select Class - fetch students (final step that updates table)
   const selectClass = useCallback(
-    (classId: string) => {
-      updateSearchParams({ classId, gender: undefined });
+    async (classId: string) => {
+      if (!classId || !searchParams.lgaId || !searchParams.schoolId) return;
+
+      setLoadingStates((prev) => ({ ...prev, class: true }));
+      setError(null);
+
+      try {
+        const response = await searchStudents({
+          lgaId: searchParams.lgaId,
+          schoolId: searchParams.schoolId,
+          classId,
+          page: searchParams.page || 1,
+          limit: searchParams.limit || 10,
+          search: searchParams.search,
+          gender: searchParams.gender,
+        });
+
+        if (response.success && response.data) {
+          // NOW update the table with filtered students
+          const studentsData = response.data.performanceTable || [];
+          setStudents(studentsData);
+
+          // Extract pagination info from the response
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
+
+          setSearchParams((prev) => ({
+            ...prev,
+            classId,
+          }));
+        } else {
+          throw new Error(response.message || "Failed to fetch students");
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch students"
+        );
+        console.error("Error fetching students:", err);
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, class: false }));
+      }
     },
-    [updateSearchParams]
+    [searchParams]
   );
 
-  const selectGender = useCallback(
-    (gender: string) => {
-      updateSearchParams({ gender });
-    },
-    [updateSearchParams]
-  );
-
-  const updateSearch = useCallback(
-    (search: string) => {
-      updateSearchParams({ search });
-    },
-    [updateSearchParams]
-  );
-
-  const updateAnySearchParam = useCallback(
-    (params: Partial<SearchParams>) => {
-      updateSearchParams(params);
-    },
-    [updateSearchParams]
-  );
-
-  const updateSorting = useCallback(
-    (sortBy: string, sortOrder: "asc" | "desc") => {
-      updateSearchParams({ sortBy, sortOrder });
-    },
-    [updateSearchParams]
-  );
-
-  const changePage = useCallback(
-    (page: number) => {
-      updateSearchParams({ page });
-    },
-    [updateSearchParams]
-  );
-
+  // Clear all filters
   const clearFilters = useCallback(() => {
-    const clearedParams = {
+    setFilterOptions({ schools: [], classes: [] });
+    setSchoolStats(null);
+    setStudents(originalStudents);
+    setTotalStudents(originalStudents.length);
+    setTotalPages(1);
+    setSearchParams({
       page: 1,
       limit: 10,
-      sortBy: "position",
-      sortOrder: "asc" as const,
-    };
-    setSearchParams(clearedParams);
-    setAvailableSchools([]);
-    setAvailableClasses([]);
-    setAvailableGenders([]);
-    performSearch(clearedParams);
-  }, [performSearch]);
+    });
+    setSelectedLgaName("");
+    setSelectedSchoolName("");
+    setError(null);
+  }, [originalStudents]);
 
-  // Don't perform initial search on mount - let the component handle initial data
-  // useEffect(() => {
-  //   performSearch(searchParams);
-  // }, []); // Only run on mount
+  // Update search within class
+  const updateSearch = useCallback(
+    async (searchTerm: string) => {
+      if (!searchParams.classId) return;
+
+      setSearchParams((prev) => ({ ...prev, search: searchTerm, page: 1 }));
+
+      try {
+        const response = await searchStudents({
+          ...searchParams,
+          search: searchTerm,
+          page: 1,
+        });
+
+        if (response.success && response.data) {
+          const studentsData = response.data.performanceTable || [];
+          setStudents(studentsData);
+
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to search students"
+        );
+      }
+    },
+    [searchParams]
+  );
+
+  // Change page
+  const changePage = useCallback(
+    async (page: number) => {
+      if (!searchParams.classId || page === searchParams.page) return;
+
+      setSearchParams((prev) => ({ ...prev, page }));
+
+      try {
+        const response = await searchStudents({
+          ...searchParams,
+          page,
+        });
+
+        if (response.success && response.data) {
+          const studentsData = response.data.performanceTable || [];
+          setStudents(studentsData);
+
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load page");
+      }
+    },
+    [searchParams]
+  );
 
   return {
     // Data
-    students: data?.students || [],
-    total: data?.total || 0,
-    currentPage: data?.page || 1,
-    totalPages: data?.totalPages || 0,
-    limit: data?.limit || 10,
+    students,
+    total: totalStudents,
+    currentPage: searchParams.page || 1,
+    totalPages,
 
     // States
-    loading,
+    loading: Object.values(loadingStates).some(Boolean),
     error,
     searchParams,
 
+    // Loading states for specific operations
+    loadingStates,
+    selectedLgaName,
+    selectedSchoolName,
+
     // Available filters (progressive)
-    availableSchools,
-    availableClasses,
-    availableGenders,
+    availableSchools: filterOptions.schools,
+    availableClasses: filterOptions.classes,
+    schoolStats,
 
     // Actions
     selectLGA,
     selectSchool,
     selectClass,
-    selectGender,
     updateSearch,
-    updateAnySearchParam,
-    updateSorting,
     changePage,
     clearFilters,
+    initializeStudents,
 
     // Check if filters are enabled
     isSchoolEnabled: !!searchParams.lgaId,
     isClassEnabled: !!searchParams.schoolId,
-    isGenderEnabled: !!searchParams.classId,
   };
 };

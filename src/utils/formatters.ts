@@ -69,6 +69,44 @@ export const formatEducationalText = (str: string): string => {
   return capitalizeWords(str);
 };
 
+/**
+ * Utility function to capitalize initials of names while skipping words with numeric initials
+ * This function works with variable-length names (first, middle, last names, school names, LGA names, etc.)
+ * and skips processing only individual words that start with numbers to avoid incorrect formatting
+ * @param name - The input name string to format
+ * @returns The formatted name with properly capitalized initials, skipping only words with numeric initials
+ */
+export const capitalizeInitials = (name: string): string => {
+  if (!name) return "";
+
+  const trimmedName = name.trim();
+  const words = trimmedName.split(/\s+/); // Split by any whitespace
+
+  // Process each word individually
+  return words
+    .map((word) => {
+      if (!word) return word;
+
+      const firstChar = word.charAt(0);
+
+      // Skip processing if the word starts with a number
+      if (/^\d/.test(firstChar)) {
+        return word; // Return the word unchanged
+      }
+
+      const restOfWord = word.slice(1).toLowerCase();
+
+      // Only capitalize if it's actually a letter
+      if (/[a-zA-Z]/.test(firstChar)) {
+        return firstChar.toUpperCase() + restOfWord;
+      }
+
+      // Return word as-is if first character is not a letter or number
+      return word;
+    })
+    .join(" ");
+};
+
 // Utility function to join class names conditionally
 export function cn(...classes: (string | undefined | false)[]) {
   return classes.filter(Boolean).join(" ");

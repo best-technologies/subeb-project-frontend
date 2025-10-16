@@ -12,25 +12,25 @@ export default function StudentsPage() {
     fetchAdminDashboard,
     shouldFetchAdminDashboard,
     getStudentsDataFromAdmin,
-    hasAdminDataForStudents,
+    // hasAdminDataForStudents, // Unused variable
   } = useData();
 
   // Always try to get students data
   const studentsData = getStudentsDataFromAdmin();
 
   // Add debugging
-  console.log("🔍 Students Page Debug:", {
-    hasAdminDataForStudents: hasAdminDataForStudents(),
-    studentsData,
-    adminDashboard: adminDashboard.data,
-    adminDashboardKeys: adminDashboard.data
-      ? Object.keys(adminDashboard.data)
-      : [],
-    loading: adminDashboard.loading,
-    error: adminDashboard.error,
-    timestamp: adminDashboard.timestamp,
-    hasAttempted: adminDashboard.hasAttempted,
-  });
+  // console.log("Students Page Debug:", {
+  //   hasAdminDataForStudents: hasAdminDataForStudents(),
+  //   studentsData,
+  //   adminDashboard: adminDashboard.data,
+  //   adminDashboardKeys: adminDashboard.data
+  //     ? Object.keys(adminDashboard.data)
+  //     : [],
+  //   loading: adminDashboard.loading,
+  //   error: adminDashboard.error,
+  //   timestamp: adminDashboard.timestamp,
+  //   hasAttempted: adminDashboard.hasAttempted,
+  // });
 
   // Determine loading state - if no data and still loading admin
   const loading = !studentsData && adminDashboard.loading;
@@ -41,7 +41,7 @@ export default function StudentsPage() {
   useEffect(() => {
     // Only fetch if we should (prevents infinite loops after errors)
     if (shouldFetchAdminDashboard()) {
-      console.log("🚀 Fetching admin dashboard data for students page");
+      // console.log("Fetching admin dashboard data for students page");
       fetchAdminDashboard();
     }
   }, [shouldFetchAdminDashboard, fetchAdminDashboard]);
@@ -83,9 +83,6 @@ export default function StudentsPage() {
     <StudentsTab
       performanceTable={studentsData.performanceTable}
       lgas={studentsData.lgas}
-      subjects={studentsData.subjects.map(
-        (subject: { name: string }) => subject.name
-      )}
     />
   );
 }

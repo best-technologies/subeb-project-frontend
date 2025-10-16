@@ -16,9 +16,15 @@ interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   onRefresh?: () => void;
+  onNavigate?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onRefresh }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  isOpen,
+  onToggle,
+  onRefresh,
+  onNavigate,
+}) => {
   const pathname = usePathname();
 
   const navigationItems = [
@@ -102,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onRefresh }) => {
                   )}
                 </div>
                 <span className="text-brand-primary-contrast/70 text-sm">
-                  School Management System
+                  Student Management System
                 </span>
               </div>
 
@@ -123,6 +129,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onRefresh }) => {
                 <li key={item.id}>
                   <Link
                     href={item.href}
+                    onClick={() => onNavigate?.()}
                     className={`
                       flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                       ${
@@ -154,6 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onRefresh }) => {
           <div className="p-4 border-t border-white/10">
             <Link
               href="/profile"
+              onClick={() => onNavigate?.()}
               className={`
                 flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
                 ${

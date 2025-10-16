@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const ACCESS_PIN = "2024ASUBEB"; // Change this to your desired pin
 
@@ -204,7 +205,7 @@ export default function EnterGradesPage() {
   }, [showToast]);
 
   return (
-    <>
+    <ProtectedRoute>
       {!authenticated && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <form
@@ -689,6 +690,6 @@ export default function EnterGradesPage() {
           </div>
         </div>
       )}
-    </>
+    </ProtectedRoute>
   );
 }

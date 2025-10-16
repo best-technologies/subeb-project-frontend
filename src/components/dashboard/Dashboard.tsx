@@ -6,6 +6,7 @@ import StudentsTableSkeleton from "@/components/students/StudentsTableSkeleton";
 import CollapsibleCharts from "./CollapsibleCharts";
 import { useGlobalSearchFilter } from "@/services";
 import { AdminDashboardData } from "@/services/types/adminDashboardResponse";
+import { capitalizeInitials } from "@/utils/formatters";
 
 interface DashboardProps {
   dashboardData: AdminDashboardData | null;
@@ -33,8 +34,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   loading = false,
   onSearchParamsChange,
 }) => {
-  // ...existing code...
-
   const [lgaFilter] = useState("");
   const [schoolFilter] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -73,12 +72,12 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       // Debug: Log the search parameters being sent to backend
       // console.log(
-      //   "🔍 Dashboard - Search parameters being sent to backend:",
+      //   "Dashboard - Search parameters being sent to backend:",
       //   params
       // );
-      // console.log("🔍 Dashboard - Search term:", debouncedSearchTerm);
-      // console.log("🔍 Dashboard - Selected session:", selectedSession?.id);
-      // console.log("🔍 Dashboard - Selected term:", selectedTerm?.id);
+      // console.log("Dashboard - Search term:", debouncedSearchTerm);
+      // console.log("Dashboard - Selected session:", selectedSession?.id);
+      // console.log("Dashboard - Selected term:", selectedTerm?.id);
 
       // Only call if we have meaningful changes and valid session/term
       const hasValidParams = Object.values(params).some(
@@ -88,11 +87,11 @@ const Dashboard: React.FC<DashboardProps> = ({
       const hasValidTerm = selectedTerm?.id && selectedTerm.id !== "";
 
       if (hasValidParams && hasValidSession && hasValidTerm) {
-        // console.log("🚀 Dashboard - Calling backend API with params:", params);
+        // console.log("Dashboard - Calling backend API with params:", params);
         onSearchParamsChange(params);
       } else {
         // console.log(
-        //   "⚠️ Dashboard - Skipping API call due to invalid session/term:",
+        //   "Dashboard - Skipping API call due to invalid session/term:",
         //   {
         //     hasValidSession,
         //     hasValidTerm,
@@ -130,11 +129,11 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   // Debug: Log the students data received from backend
   // console.log(
-  //   "📊 Dashboard - Students received from backend:",
+  //   "Dashboard - Students received from backend:",
   //   students.length
   // );
-  // console.log("📊 Dashboard - Search term in UI:", searchTerm);
-  // console.log("📊 Dashboard - Debounced search term:", debouncedSearchTerm);
+  // console.log("Dashboard - Search term in UI:", searchTerm);
+  // console.log("Dashboard - Debounced search term:", debouncedSearchTerm);
 
   return (
     <div className="space-y-8">
@@ -242,10 +241,12 @@ const Dashboard: React.FC<DashboardProps> = ({
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
-                        {student.studentName}
+                        {capitalizeInitials(student.studentName)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {student.school || "N/A"}
+                        {student.school
+                          ? capitalizeInitials(student.school)
+                          : "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {student.class || "N/A"}

@@ -3,6 +3,8 @@ export {
   getAdminDashboard,
   getStudentsDashboard,
   getCurrentSession,
+  getStudentDetails,
+  downloadStudentResultPDF,
 } from "./api";
 
 // Export hooks
@@ -46,3 +48,12 @@ export type {
   Term as SessionTerm,
   CurrentSessionResponse,
 } from "./api/session";
+
+export type {
+  StudentDetailsResponse,
+  StudentDetailsData,
+  PerformanceSummary,
+  SubjectBreakdown,
+  Assessment,
+  StudentDetailsStudent,
+} from "./types/studentDetailsResponse";

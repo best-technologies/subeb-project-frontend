@@ -35,10 +35,11 @@ export interface GenderCount {
   _count: {
     gender: number;
   };
-  gender: 'MALE' | 'FEMALE';
+  gender: "MALE" | "FEMALE";
 }
 
 export interface PerformanceStudent {
+  id: string; // UUID for API calls
   position: number;
   studentName: string;
   examNo: string;
@@ -47,7 +48,7 @@ export interface PerformanceStudent {
   total: number;
   average: number;
   percentage: number;
-  gender: 'MALE' | 'FEMALE';
+  gender: "MALE" | "FEMALE";
 }
 
 export interface StudentsDashboardData {
@@ -84,4 +85,4 @@ export interface ApiErrorResponse {
   message: string;
   statusCode: number;
   error?: string;
-} 
+}

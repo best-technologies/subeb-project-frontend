@@ -7,6 +7,7 @@ import {
   StudentsFilters,
 } from "./types/studentsDashboardResponse";
 import { CurrentSessionResponse } from "./api/session";
+import { StudentDetailsResponse } from "./types/studentDetailsResponse";
 
 // API Configuration
 const API_BASE_URL =
@@ -187,10 +188,10 @@ class ApiClient {
   async getStudentsDashboard(
     filters: StudentsFilters = {}
   ): Promise<StudentsDashboardResponse> {
-    // console.log("🔍 API Client - Students Dashboard Request:");
-    // console.log("  📋 Filters being sent to backend:", filters);
+    // console.log("API Client - Students Dashboard Request:");
+    // console.log("Filters being sent to backend:", filters);
     // console.log(
-    //   "  🎯 Active filters:",
+    //   "Active filters:",
     //   Object.entries(filters)
     //     .filter(([, value]) => value && value !== "")
     //     .map(([key, value]) => `${key}: ${value}`)
@@ -205,8 +206,8 @@ class ApiClient {
     if (filters.gender) queryParams.gender = filters.gender;
     if (filters.subject) queryParams.subject = filters.subject;
 
-    // console.log("  🌐 Endpoint:", "/admin/students/dashboard");
-    // console.log("  📊 Query parameters:", queryParams);
+    // console.log("Endpoint:", "/admin/students/dashboard");
+    // console.log("Query parameters:", queryParams);
 
     try {
       const response = await this.get<StudentsDashboardResponse>(
@@ -214,12 +215,12 @@ class ApiClient {
         queryParams
       );
       // console.log(
-      //   "✅ API Client - Students dashboard response received:",
+      //   "API Client - Students dashboard response received:",
       //   response
       // );
       return response;
     } catch (error) {
-      console.error("❌ API Client - Error in getStudentsDashboard:", error);
+      console.error("API Client - Error in getStudentsDashboard:", error);
       throw error;
     }
   }
@@ -260,7 +261,48 @@ class ApiClient {
       );
       return response;
     } catch (error) {
-      console.error("❌ API Client - Error in getCurrentSession:", error);
+      console.error("API Client - Error in getCurrentSession:", error);
+      throw error;
+    }
+  }
+
+  // Student Details API Method
+  async getStudentDetails(studentId: string): Promise<StudentDetailsResponse> {
+    try {
+      const response = await this.get<StudentDetailsResponse>(
+        `/admin/students/${studentId}/details`
+      );
+      return response;
+    } catch (error) {
+      console.error("API Client - Error in getStudentDetails:", error);
+      throw error;
+    }
+  }
+
+  // Student PDF Result Download API Method
+  async downloadStudentResultPDF(studentId: string): Promise<Blob> {
+    try {
+      const url = `${this.baseURL}/admin/students/${studentId}/result.pdf`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          ...this.defaultHeaders,
+          Accept: "application/pdf",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      return blob;
+    } catch (error) {
+      console.error(
+        "❌ API Client - Error in downloadStudentResultPDF:",
+        error
+      );
       throw error;
     }
   }
@@ -279,25 +321,30 @@ export const getAdminDashboard = (
 export const getStudentsDashboard = (filters?: StudentsFilters) =>
   apiClient.getStudentsDashboard(filters);
 export const getCurrentSession = () => apiClient.getCurrentSession();
+export const getStudentDetails = (studentId: string) =>
+  apiClient.getStudentDetails(studentId);
+export const downloadStudentResultPDF = (studentId: string) =>
+  apiClient.downloadStudentResultPDF(studentId);
 export const setAuthToken = (token: string) => apiClient.setAuthToken(token);
 export const clearAuthToken = () => apiClient.clearAuthToken();
 
 // Export the class for testing or custom instances
 export { ApiClient };
 
-// Student Search and Filter API
+// Student Search and Filter API with progressive filtering
 export const searchStudents = async (params: {
+  session?: string;
+  term?: string;
   lgaId?: string;
   schoolId?: string;
   classId?: string;
   gender?: string;
-  subject?: string;
   search?: string;
   page?: number;
   limit?: number;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
 }) => {
+  // console.log("searchStudents called with params:", params);
+
   const queryParams = new URLSearchParams();
 
   // Add all non-undefined parameters to query string
@@ -307,19 +354,30 @@ export const searchStudents = async (params: {
     }
   });
 
-  const response = await fetch(
-    `${API_BASE_URL}/admin/students/search?${queryParams.toString()}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        // Add any authentication headers if needed
-      },
-    }
-  );
+  // Use the correct endpoint with API version - same as ApiClient
+  const url = `${API_BASE_URL}/api/${API_VERSION}/admin/students/dashboard?${queryParams.toString()}`;
+  // console.log("Making request to:", url);
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      // Add any authentication headers if needed
+    },
+  });
 
   if (!response.ok) {
-    throw new Error(`Failed to search students: ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage =
+      errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+
+    if (response.status === 400) {
+      throw new Error(`Bad request - invalid parameters: ${errorMessage}`);
+    } else if (response.status === 500) {
+      throw new Error(`Internal server error: ${errorMessage}`);
+    } else {
+      throw new Error(`Failed to fetch data: ${errorMessage}`);
+    }
   }
 
   return response.json();

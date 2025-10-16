@@ -247,24 +247,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Function to check if admin data can be used for students page
   const hasAdminDataForStudents = useCallback(() => {
     const hasData = state.adminDashboard.data !== null;
-    const hasTopStudents = state.adminDashboard.data?.performance?.topStudents;
-    const hasLgas = state.adminDashboard.data?.data?.lgas;
+    // const hasTopStudents = state.adminDashboard.data?.performance?.topStudents; // Unused variable
+    // const hasLgas = state.adminDashboard.data?.data?.lgas; // Unused variable
     const isCacheValidNow = state.adminDashboard.data
       ? isCacheValid(state.adminDashboard.timestamp)
       : false;
 
-    console.log("🔍 hasAdminDataForStudents check:", {
-      hasData,
-      hasTopStudents: !!hasTopStudents,
-      hasLgas: !!hasLgas,
-      isCacheValidNow,
-      topStudentsLength: hasTopStudents?.length || 0,
-      lgasLength: hasLgas?.length || 0,
-      timestamp: state.adminDashboard.timestamp,
-      dataStructure: state.adminDashboard.data
-        ? Object.keys(state.adminDashboard.data)
-        : [],
-    });
+    // console.log("🔍 hasAdminDataForStudents check:", {
+    //   hasData,
+    //   hasTopStudents: !!hasTopStudents,
+    //   hasLgas: !!hasLgas,
+    //   isCacheValidNow,
+    //   topStudentsLength: hasTopStudents?.length || 0,
+    //   lgasLength: hasLgas?.length || 0,
+    //   timestamp: state.adminDashboard.timestamp,
+    //   dataStructure: state.adminDashboard.data
+    //     ? Object.keys(state.adminDashboard.data)
+    //     : [],
+    // });
 
     // For now, let's be more lenient and just check if we have data and it's valid
     return !!(hasData && isCacheValidNow);
@@ -274,16 +274,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const getStudentsDataFromAdmin =
     useCallback((): StudentsDashboardData | null => {
       if (!state.adminDashboard.data) {
-        console.log("No admin dashboard data available");
+        // console.log("No admin dashboard data available");
         return null;
       }
 
       const adminData = state.adminDashboard.data;
-      console.log("Transforming admin data for students:", {
-        keys: Object.keys(adminData),
-        performance: adminData.performance,
-        data: adminData.data,
-      });
+      // console.log("Transforming admin data for students:", {
+      //   keys: Object.keys(adminData),
+      //   performance: adminData.performance,
+      //   data: adminData.data,
+      // });
 
       // Transform TopStudent[] to PerformanceStudent[] - handle multiple possible sources
       let topStudents = adminData.performance?.topStudents || [];
@@ -297,6 +297,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
 
       const performanceTable = (topStudents || []).map((student, index) => ({
+        id: student.id, // Include the UUID for API calls
         position: student.position || index + 1,
         studentName: student.studentName,
         examNo: student.examNumber || "",
@@ -334,12 +335,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
           [],
       };
 
-      console.log("Transformed students data:", {
-        performanceTableLength: studentsData.performanceTable.length,
-        lgasLength: studentsData.lgas.length,
-        schoolsLength: studentsData.schools.length,
-        studentsData,
-      });
+      // console.log("Transformed students data:", {
+      //   performanceTableLength: studentsData.performanceTable.length,
+      //   lgasLength: studentsData.lgas.length,
+      //   schoolsLength: studentsData.schools.length,
+      //   studentsData,
+      // });
 
       return studentsData;
     }, [state.adminDashboard.data]);

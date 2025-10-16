@@ -1,16 +1,18 @@
 # ASUBEB School Management System
 
-A comprehensive web-based school management system built with Next.js, designed for the Abia State Universal Basic Education Board (ASUBEB). This application provides administrators with powerful tools to manage schools, students, and educational data with a modern, responsive interface.
+A comprehensive web-based student management system built with Next.js, designed for the Abia State Universal Basic Education Board (ASUBEB). This application provides administrators with powerful tools to manage schools, students, and educational data with a modern, responsive interface.
 
 ## 🚀 Features
 
 ### 📊 Dashboard Analytics
+
 - **Real-time Statistics**: Total students, gender distribution, average scores
 - **Performance Charts**: Subject performance, class performance, gender performance
 - **Interactive Visualizations**: Collapsible charts with detailed analytics
 - **Top Students Tracking**: Real-time ranking and performance metrics
 
 ### 👥 Student Management
+
 - **Comprehensive Student Records**: Name, exam number, school, class, gender
 - **Advanced Search & Filtering**: Search by name, exam number, school, or class
 - **Sorting Capabilities**: Sort by any field (name, score, position, etc.)
@@ -19,12 +21,14 @@ A comprehensive web-based school management system built with Next.js, designed 
 - **Performance Analytics**: Total scores, averages, and class positions
 
 ### 🏫 School Management
+
 - **School Directory**: Complete list of all schools in the system
 - **School Statistics**: Student counts, performance metrics
 - **LGA Integration**: Local Government Area organization
 - **School Details**: Comprehensive school information and analytics
 
 ### 🎯 Key Functionalities
+
 - **Responsive Design**: Mobile-first approach with modern UI
 - **Real-time Data**: Live updates from backend API
 - **Advanced Filtering**: Multi-criteria filtering system
@@ -34,6 +38,7 @@ A comprehensive web-based school management system built with Next.js, designed 
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **Next.js 14**: React framework with App Router
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first CSS framework
@@ -41,12 +46,14 @@ A comprehensive web-based school management system built with Next.js, designed 
 - **Responsive Design**: Mobile-first approach
 
 ### Backend Integration
+
 - **RESTful API**: Integration with backend services
 - **Real-time Data**: Live dashboard updates
 - **Error Handling**: Comprehensive error management
 - **Loading States**: User-friendly loading indicators
 
 ### Development Tools
+
 - **ESLint**: Code quality and consistency
 - **TypeScript**: Static type checking
 - **PostCSS**: CSS processing
@@ -55,19 +62,22 @@ A comprehensive web-based school management system built with Next.js, designed 
 ## 📦 Installation
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm, yarn, pnpm, or bun
 - Backend API server running
 
 ### Setup Instructions
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd asubeb-frontend
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    # or
@@ -78,12 +88,14 @@ A comprehensive web-based school management system built with Next.js, designed 
 
 3. **Environment Configuration**
    Create a `.env.local` file in the root directory:
+
    ```env
    NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
    NEXT_PUBLIC_API_VERSION=v1
    ```
 
 4. **Start the development server**
+
    ```bash
    npm run dev
    # or
@@ -136,27 +148,31 @@ asubeb-frontend/
 ## 🔧 Configuration
 
 ### API Configuration
+
 The application connects to a backend API for data management. Configure the API endpoints in `src/services/api.ts`:
 
 ```typescript
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || "v1";
 ```
 
 ### Environment Variables
+
 - `NEXT_PUBLIC_API_BASE_URL`: Backend API base URL
 - `NEXT_PUBLIC_API_VERSION`: API version
 
 ## 📊 Data Models
 
 ### Student Data
+
 ```typescript
 interface TopStudent {
   id: string;
   position: number;
   studentName: string;
   examNumber: string;
-  gender: 'MALE' | 'FEMALE';
+  gender: "MALE" | "FEMALE";
   totalScore: number;
   school: string;
   class: string;
@@ -164,6 +180,7 @@ interface TopStudent {
 ```
 
 ### School Data
+
 ```typescript
 interface School {
   id: string;
@@ -176,6 +193,7 @@ interface School {
 ```
 
 ### Dashboard Data
+
 ```typescript
 interface AdminDashboardData {
   session: string;
@@ -194,6 +212,7 @@ interface AdminDashboardData {
 ## 🎨 UI/UX Features
 
 ### Design System
+
 - **Modern Interface**: Clean, professional design
 - **Responsive Layout**: Works on all device sizes
 - **Dark Theme**: Easy on the eyes with proper contrast
@@ -201,6 +220,7 @@ interface AdminDashboardData {
 - **Accessibility**: WCAG compliant design
 
 ### Color Scheme
+
 - **Primary**: Blue gradient (#3B82F6 to #8B5CF6)
 - **Success**: Green (#10B981)
 - **Warning**: Amber (#F59E0B)
@@ -208,6 +228,7 @@ interface AdminDashboardData {
 - **Background**: Dark gradient with glass morphism
 
 ### Typography
+
 - **Font**: Geist Sans (optimized by Next.js)
 - **Hierarchy**: Clear heading structure
 - **Readability**: High contrast text
@@ -215,17 +236,20 @@ interface AdminDashboardData {
 ## 🔍 Usage Guide
 
 ### Dashboard Navigation
+
 1. **Main Dashboard**: Overview of all statistics
 2. **Students Tab**: Manage and view student records
 3. **Schools Tab**: School management and analytics
 
 ### Student Management
+
 1. **Search Students**: Use the search bar to find specific students
 2. **Filter Options**: Filter by school, class, gender, or subject
 3. **Sort Data**: Click column headers to sort data
 4. **View Details**: Click "View Details" for comprehensive student information
 
 ### Data Export
+
 - Export functionality for reports and analytics
 - CSV format support
 - Print-friendly layouts
@@ -233,18 +257,21 @@ interface AdminDashboardData {
 ## 🚀 Deployment
 
 ### Production Build
+
 ```bash
 npm run build
 npm start
 ```
 
 ### Environment Setup
+
 1. Set production environment variables
 2. Configure API endpoints
 3. Set up database connections
 4. Configure SSL certificates
 
 ### Deployment Platforms
+
 - **Vercel**: Recommended for Next.js applications
 - **Netlify**: Alternative deployment option
 - **AWS**: Enterprise deployment
@@ -253,11 +280,13 @@ npm start
 ## 🧪 Testing
 
 ### Running Tests
+
 ```bash
 npm test
 ```
 
 ### Test Coverage
+
 - Unit tests for components
 - Integration tests for API calls
 - E2E tests for user workflows
@@ -265,6 +294,7 @@ npm test
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -272,6 +302,7 @@ npm test
 5. Submit a pull request
 
 ### Code Standards
+
 - Follow TypeScript best practices
 - Use ESLint for code quality
 - Write meaningful commit messages
@@ -280,11 +311,13 @@ npm test
 ## 📝 API Documentation
 
 ### Endpoints
+
 - `GET /api/v1/admin/dashboard`: Fetch dashboard data
 - `GET /api/v1/students`: Get student records
 - `GET /api/v1/schools`: Get school information
 
 ### Response Format
+
 ```json
 {
   "success": true,
@@ -299,11 +332,13 @@ npm test
 ## 🔒 Security
 
 ### Authentication
+
 - PIN-based access system
 - Session management
 - Role-based access control
 
 ### Data Protection
+
 - HTTPS encryption
 - Input validation
 - XSS protection
@@ -312,11 +347,13 @@ npm test
 ## 📞 Support
 
 ### Getting Help
+
 - Check the documentation
 - Review existing issues
 - Contact the development team
 
 ### Reporting Issues
+
 - Use the issue tracker
 - Provide detailed bug reports
 - Include steps to reproduce

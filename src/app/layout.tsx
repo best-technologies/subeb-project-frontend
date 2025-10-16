@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ASUBEB School Management System",
+  title: "ASUBEB Student Management System",
   description:
-    "Comprehensive school management system for Abia State Universal Basic Education Board",
+    "Comprehensive student management system for Abia State Universal Basic Education Board",
 };
 
 export default function RootLayout({

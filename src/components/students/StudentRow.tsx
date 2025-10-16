@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Mars, Venus, Eye, UserRoundPen } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
-import { formatEducationalText } from "@/utils/formatters";
+import { formatEducationalText, capitalizeInitials } from "@/utils/formatters";
 import { StudentNameText, SchoolNameText } from "@/utils/truncateText";
 
 interface StudentRowProps {
@@ -11,7 +12,6 @@ interface StudentRowProps {
   getScoreColor: (score: number) => string;
   getScoreBgColor: (score: number) => string;
   getPositionBadge: (position: number) => string;
-  onViewDetails: (student: PerformanceStudent) => void;
   onEditStudent: (student: PerformanceStudent) => void;
 }
 
@@ -20,9 +20,14 @@ const StudentRow: React.FC<StudentRowProps> = ({
   getScoreColor,
   getScoreBgColor,
   // getPositionBadge,
-  onViewDetails,
   onEditStudent,
 }) => {
+  const router = useRouter();
+
+  const handleViewDetails = () => {
+    // Use the student UUID (id) for API calls, not examNo
+    router.push(`/students/${student.id}`);
+  };
   return (
     <tr
       key={`${student.examNo}-${student.position}`}
@@ -45,7 +50,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
           <div>
             <div className="text-sm font-semibold text-brand-primary-2 group-hover:text-brand-primary transition-colors duration-200">
               <StudentNameText
-                text={formatEducationalText(student.studentName)}
+                text={capitalizeInitials(student.studentName)}
                 className="font-semibold"
               />
             </div>
@@ -61,16 +66,11 @@ const StudentRow: React.FC<StudentRowProps> = ({
         </div>
       </td>
       <td className="px-3 py-4 whitespace-nowrap">
-        <div>
-          <div className="text-sm font-medium text-brand-primary-2">
-            <SchoolNameText
-              text={formatEducationalText(student.school)}
-              className="font-medium"
-            />
-          </div>
-          <div className="text-sm text-brand-light-accent-1">
-            {formatEducationalText(student.class)}
-          </div>
+        <div className="text-sm font-medium text-brand-primary-2">
+          <SchoolNameText
+            text={capitalizeInitials(student.school)}
+            className="font-medium"
+          />
         </div>
       </td>
       <td className="px-3 py-4 whitespace-nowrap">
@@ -106,7 +106,7 @@ const StudentRow: React.FC<StudentRowProps> = ({
             variant="ghost"
             size="icon"
             aria-label="View student details"
-            onClick={() => onViewDetails(student)}
+            onClick={handleViewDetails}
             className="h-8 w-8 text-brand-primary hover:text-brand-primary-2 hover:bg-brand-primary/10"
           >
             <Eye className="w-4 h-4" />
