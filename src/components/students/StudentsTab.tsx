@@ -235,23 +235,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
       : 0
   );
 
-  // Show loading state only for search operations
-  if (loading && hasActiveFilters && students.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-primary mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-brand-primary mb-2">
-            Loading Students Data
-          </h2>
-          <p className="text-brand-accent-text">
-            Please wait while we fetch the latest information...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   // Show error state only for search operations
   if (error && hasActiveFilters && students.length === 0) {
     return (
@@ -332,10 +315,15 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         onSave={handleSaveStudent}
       />
 
-      {/* Loading Modal for progressive filtering */}
+      {/* Loading Modal for progressive filtering and search */}
       <LoadingModal
         isOpen={
-          loadingStates.lga || loadingStates.school || loadingStates.class
+          !!(
+            loadingStates.lga ||
+            loadingStates.school ||
+            loadingStates.class ||
+            (loading && hasActiveFilters && students.length === 0)
+          )
         }
         message={
           loadingStates.lga
@@ -344,6 +332,8 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
             ? `Fetching the classes under ${selectedSchoolName}`
             : loadingStates.class
             ? "Fetching students in the selected class"
+            : loading && hasActiveFilters
+            ? "Loading students data..."
             : "Loading..."
         }
       />
