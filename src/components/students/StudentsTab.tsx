@@ -40,16 +40,13 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("position");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  // const [filters] = useState<StudentsFiltersType>({});
-  const studentsPerPage = 10;
 
   // Use the new search hook
   const {
     // Data
     students: searchStudents,
     total: searchTotal,
-    currentPage,
-    // totalPages, // Unused variable
+    // currentPage, // Not used since we removed pagination
 
     // States
     loading: searchLoading,
@@ -64,14 +61,12 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     // Available filters (progressive)
     availableSchools,
     availableClasses,
-    // schoolStats, // Unused variable
 
     // Actions
     selectLGA,
     selectSchool,
     selectClass,
     updateSearch,
-    // changePage, // Unused variable
     clearFilters,
     initializeStudents,
 
@@ -94,21 +89,13 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   }, [searchParams]);
 
   // Only use search results when filters are applied, otherwise show empty
-  const students = searchParams.classId ? searchStudents : [];
+  const students = useMemo(() => {
+    return searchParams.classId ? searchStudents : [];
+  }, [searchParams.classId, searchStudents]);
+
   const total = searchParams.classId ? searchTotal : 0;
   const loading = searchLoading;
   const error = searchError;
-
-  // Only show students when class is selected (no client-side filtering)
-  const filteredAndSortedStudents = useMemo(() => {
-    if (hasActiveFilters) return students; // Use search results
-    return []; // Empty array when no filters applied
-  }, [hasActiveFilters, students]);
-
-  // Only show students when class is selected
-  const paginatedStudents = useMemo(() => {
-    return students; // Return search results or empty array
-  }, [students]);
 
   const handleEditStudent = (student: PerformanceStudent) => {
     setStudentToEdit(student);
@@ -131,12 +118,10 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     console.log("Student updated:", updatedStudent);
   };
 
-  const handleSort = (field: string) => {
+  const handleSort = () => {
     // Sorting is disabled when no data is loaded
-    if (!searchParams.classId) {
-      return; // Do nothing if no class is selected
-    }
     // For server-side sorting when class is selected, this can be implemented later
+    return;
   };
 
   const handleSearch = (search: string) => {
@@ -297,7 +282,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
 
       {/* Table Component */}
       <StudentsTable
-        students={paginatedStudents}
+        students={students}
         sortBy={sortBy}
         sortOrder={sortOrder}
         onSort={handleSort}
