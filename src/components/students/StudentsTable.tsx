@@ -141,16 +141,20 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center">
+                <td colSpan={8} className="px-3 py-12 text-center">
                   <div className="text-brand-light-accent-1">
                     <div className="flex justify-center mb-4">
-                      <Squirrel className="w-16 h-16 text-brand-primary-2" />
+                      <Squirrel className="w-20 h-20 text-brand-primary-2" />
                     </div>
-                    <p className="text-lg font-medium text-brand-accent-text">
-                      No students found
+                    <p className="text-xl font-semibold text-brand-primary mb-2">
+                      Select Filters to View Students
                     </p>
-                    <p className="text-sm">
-                      Try adjusting your filters or search terms
+                    <p className="text-base text-brand-accent-text mb-1">
+                      Please use the filters above to select an LGA, School, and
+                      Class
+                    </p>
+                    <p className="text-sm text-brand-accent-text/70">
+                      This will load the student data from the backend
                     </p>
                   </div>
                 </td>

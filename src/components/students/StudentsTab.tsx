@@ -40,16 +40,13 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("position");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  // const [filters] = useState<StudentsFiltersType>({});
-  const studentsPerPage = 10;
 
   // Use the new search hook
   const {
     // Data
     students: searchStudents,
     total: searchTotal,
-    currentPage,
-    // totalPages, // Unused variable
+    // currentPage, // Not used since we removed pagination
 
     // States
     loading: searchLoading,
@@ -64,14 +61,12 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     // Available filters (progressive)
     availableSchools,
     availableClasses,
-    // schoolStats, // Unused variable
 
     // Actions
     selectLGA,
     selectSchool,
     selectClass,
     updateSearch,
-    // changePage, // Unused variable
     clearFilters,
     initializeStudents,
 
@@ -93,92 +88,14 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     );
   }, [searchParams]);
 
-  // Use search results if class is selected, otherwise use initial data
-  const students = searchParams.classId ? searchStudents : performanceTable;
-  const total = searchParams.classId ? searchTotal : performanceTable.length;
+  // Only use search results when filters are applied, otherwise show empty
+  const students = useMemo(() => {
+    return searchParams.classId ? searchStudents : [];
+  }, [searchParams.classId, searchStudents]);
+
+  const total = searchParams.classId ? searchTotal : 0;
   const loading = searchLoading;
   const error = searchError;
-
-  // Client-side filtering for initial data
-  const filteredAndSortedStudents = useMemo(() => {
-    if (hasActiveFilters) return students; // Use search results
-
-    if (!performanceTable || !Array.isArray(performanceTable)) {
-      return [];
-    }
-
-    const filtered = performanceTable.filter((student) => {
-      const search = searchTerm.trim().toLowerCase();
-      return (
-        student.studentName.trim().toLowerCase().includes(search) ||
-        student.examNo.trim().toLowerCase().includes(search) ||
-        student.school.trim().toLowerCase().includes(search) ||
-        student.class.trim().toLowerCase().includes(search)
-      );
-    });
-
-    // Sort students
-    filtered.sort((a, b) => {
-      let aValue: string | number, bValue: string | number;
-
-      if (sortBy === "position") {
-        aValue = a.position;
-        bValue = b.position;
-      } else if (sortBy === "studentName") {
-        aValue = a.studentName;
-        bValue = b.studentName;
-      } else if (sortBy === "examNo") {
-        aValue = a.examNo;
-        bValue = b.examNo;
-      } else if (sortBy === "school") {
-        aValue = a.school;
-        bValue = b.school;
-      } else if (sortBy === "class") {
-        aValue = a.class;
-        bValue = b.class;
-      } else if (sortBy === "total") {
-        aValue = a.total;
-        bValue = b.total;
-      } else if (sortBy === "average") {
-        aValue = a.average;
-        bValue = b.average;
-      } else if (sortBy === "percentage") {
-        aValue = a.percentage;
-        bValue = b.percentage;
-      } else {
-        aValue = a[sortBy as keyof PerformanceStudent] as string | number;
-        bValue = b[sortBy as keyof PerformanceStudent] as string | number;
-      }
-
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortOrder === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-
-      return sortOrder === "asc"
-        ? (aValue as number) - (bValue as number)
-        : (bValue as number) - (aValue as number);
-    });
-
-    return filtered;
-  }, [
-    performanceTable,
-    searchTerm,
-    sortBy,
-    sortOrder,
-    hasActiveFilters,
-    students,
-  ]);
-
-  // Pagination for client-side data
-  const paginatedStudents = useMemo(() => {
-    if (hasActiveFilters) return students; // Use search results
-
-    const startIndex = (currentPage - 1) * studentsPerPage;
-    const endIndex = startIndex + studentsPerPage;
-    return filteredAndSortedStudents.slice(startIndex, endIndex);
-  }, [filteredAndSortedStudents, currentPage, hasActiveFilters, students]);
 
   const handleEditStudent = (student: PerformanceStudent) => {
     setStudentToEdit(student);
@@ -201,17 +118,10 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     console.log("Student updated:", updatedStudent);
   };
 
-  const handleSort = (field: string) => {
-    // Only do client-side sorting when no class is selected
-    if (!searchParams.classId) {
-      if (sortBy === field) {
-        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-      } else {
-        setSortBy(field);
-        setSortOrder("asc");
-      }
-    }
+  const handleSort = () => {
+    // Sorting is disabled when no data is loaded
     // For server-side sorting when class is selected, this can be implemented later
+    return;
   };
 
   const handleSearch = (search: string) => {
@@ -220,17 +130,13 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
       // Use server-side search when class is selected
       updateSearch(search);
     }
-    // For client-side search, the useMemo will handle the filtering
   };
 
   const handleClearFilters = () => {
-    if (searchParams.classId || searchParams.lgaId || searchParams.schoolId) {
-      clearFilters();
-    } else {
-      setSearchTerm("");
-      setSortBy("position");
-      setSortOrder("asc");
-    }
+    clearFilters();
+    setSearchTerm("");
+    setSortBy("position");
+    setSortOrder("asc");
   };
 
   // Wrapper functions to handle special "all-*" values
@@ -297,17 +203,14 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
       selectedSchoolName &&
       selectedClassName;
     const hasSearchOnly = searchParams.search && searchParams.search.trim();
-    const hasClientSideSearch =
-      !searchParams.classId && searchTerm && searchTerm.trim();
 
-    return !!(hasFullFilters || hasSearchOnly || hasClientSideSearch);
+    return !!(hasFullFilters || hasSearchOnly);
   }, [
     searchParams.classId,
     searchParams.search,
     selectedLgaName,
     selectedSchoolName,
     selectedClassName,
-    searchTerm,
   ]);
 
   const averageScore = Math.round(
@@ -316,23 +219,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
           students.length
       : 0
   );
-
-  // Show loading state only for search operations
-  if (loading && hasActiveFilters && students.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-primary mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-brand-primary mb-2">
-            Loading Students Data
-          </h2>
-          <p className="text-brand-accent-text">
-            Please wait while we fetch the latest information...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   // Show error state only for search operations
   if (error && hasActiveFilters && students.length === 0) {
@@ -396,7 +282,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
 
       {/* Table Component */}
       <StudentsTable
-        students={paginatedStudents}
+        students={students}
         sortBy={sortBy}
         sortOrder={sortOrder}
         onSort={handleSort}
@@ -414,10 +300,15 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         onSave={handleSaveStudent}
       />
 
-      {/* Loading Modal for progressive filtering */}
+      {/* Loading Modal for progressive filtering and search */}
       <LoadingModal
         isOpen={
-          loadingStates.lga || loadingStates.school || loadingStates.class
+          !!(
+            loadingStates.lga ||
+            loadingStates.school ||
+            loadingStates.class ||
+            (loading && hasActiveFilters && students.length === 0)
+          )
         }
         message={
           loadingStates.lga
@@ -426,6 +317,8 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
             ? `Fetching the classes under ${selectedSchoolName}`
             : loadingStates.class
             ? "Fetching students in the selected class"
+            : loading && hasActiveFilters
+            ? "Loading students data..."
             : "Loading..."
         }
       />
