@@ -15,6 +15,11 @@
   --color-brand-accent-contrast: #171717;
   --color-brand-accent-background: #f0f0f0;
   --color-brand-accent-background-contrast: #171717;
+  /* New Brand Colors */
+  --color-brand-black: #121212;
+  --color-brand-black-accent: #5a5a5a;
+  --color-brand-green: #08854c;
+  --color-brand-green-accent: #08854c80;
   /* Text Colors */
   --color-brand-heading: #111827;
   --color-brand-light-accent-1: #64748b;
@@ -109,6 +114,33 @@ body {
 }
 .text-brand-accent-text {
   color: var(--color-brand-accent-text) !important;
+}
+.bg-brand-black {
+  background-color: var(--color-brand-black) !important;
+}
+.text-brand-black {
+  color: var(--color-brand-black) !important;
+}
+.bg-brand-black-accent {
+  background-color: var(--color-brand-black-accent) !important;
+}
+.text-brand-black-accent {
+  color: var(--color-brand-black-accent) !important;
+}
+.bg-brand-green {
+  background-color: var(--color-brand-green) !important;
+}
+.text-brand-green {
+  color: var(--color-brand-green) !important;
+}
+.hover\:bg-brand-green:hover {
+  background-color: var(--color-brand-green) !important;
+}
+.bg-brand-green-accent {
+  background-color: var(--color-brand-green-accent) !important;
+}
+.border-brand-green-accent {
+  border-color: var(--color-brand-green-accent) !important;
 }
 .bg-background {
   background-color: var(--color-background) !important;
