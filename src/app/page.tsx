@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Header from "@/components/shared/Header";
 
 export default function Home() {
@@ -15,17 +16,17 @@ export default function Home() {
       <Header />
       {/* Hero Section */}
       <section
-        className="-mt-24 pt-20 pb-24 px-4 sm:px-6 lg:px-8"
+        className="-mt-24 pt-20 pb-16 sm:pb-20 md:pb-24 px-4 sm:px-6 lg:px-8"
         style={{ backgroundColor: "#D7F5DC" }}
       >
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 pt-20">
-            <h1 className="text-5xl md:text-6xl font-semibold text-gray-900 mb-6 leading-tight">
+          <div className="text-center mb-8 sm:mb-10 md:mb-12 pt-8 lg:pt-20">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-900 mb-4 sm:mb-5 md:mb-6 leading-tight px-2">
               Manage Results. Improve
               <br />
               Accuracy. Simplify Administration.
             </h1>
-            <p className="text-lg text-brand-black-accent max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-brand-black-accent max-w-3xl mx-auto px-4">
               Our result management platform helps schools and institutions
               automate result uploads, performance tracking, and academic
               reporting — all from one secure dashboard.
@@ -35,11 +36,14 @@ export default function Home() {
           {/* Dashboard Preview */}
           <div className="relative max-w-6xl mx-auto">
             {/* Glassmorphism border container */}
-            <div className="relative p-5 rounded-3xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl">
-              <img
+            <div className="relative p-2 sm:p-3 md:p-4 lg:p-5 rounded-2xl sm:rounded-3xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl">
+              <Image
                 src="/svgs/dashboard.svg"
                 alt="Dashboard Preview"
-                className="w-full h-auto rounded-2xl shadow-2xl"
+                width={1200}
+                height={800}
+                className="w-full h-auto rounded-xl sm:rounded-2xl shadow-2xl"
+                priority
               />
             </div>
           </div>
@@ -187,11 +191,12 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-gray-900 rounded-lg overflow-hidden">
-              <img
+            <div className="bg-gray-900 rounded-lg overflow-hidden relative h-[600px]">
+              <Image
                 src="/api/placeholder/600/800"
                 alt="Workflow illustration"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           </div>
