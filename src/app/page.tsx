@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/shared/Header";
+import BenefitCard from "@/components/shared/BenefitCard";
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -53,10 +54,10 @@ export default function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-sm font-semibold text-green-600 uppercase tracking-wide">
+            <span className="text-sm font-semibold text-green-600 uppercase tracking-wide border border-brand-green-accent px-5 py-2 rounded-full bg-brand-green-accent/5">
               OUR BENEFITS
             </span>
-            <h2 className="text-4xl font-bold text-gray-900 mt-4">
+            <h2 className="text-4xl font-medium text-brand-black mt-4">
               Explore the benefits of our platform
             </h2>
             <p className="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">
@@ -66,49 +67,26 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-gray-100 rounded-lg p-8 h-64"></div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Smart Result Uploads
-              </h3>
-              <p className="text-gray-600">
-                Upload scores in bulk, validate instantly, and reduce entry
-                errors with our intuitive upload system.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Real-Time Oversight
-              </h3>
-              <p className="text-gray-600">
-                Get a complete view of performance across classes, terms, and
-                subjects — all from your admin dashboard.
-              </p>
-            </div>
-            <div className="bg-gray-100 rounded-lg p-8 h-64"></div>
-
-            <div className="bg-gray-100 rounded-lg p-8 h-64"></div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Secure & Reliable
-              </h3>
-              <p className="text-gray-600">
-                Your data is encrypted and automatically backed up, ensuring
-                accuracy and protection at every step.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Analytics That Matter
-              </h3>
-              <p className="text-gray-600">
-                Make informed decisions with automated reports, charts, and
-                comparative analytics.
-              </p>
-            </div>
-            <div className="bg-gray-100 rounded-lg p-8 h-64"></div>
+            <BenefitCard
+              image="/svgs/rectangle.svg"
+              title="Smart Result Uploads"
+              description="Upload scores in bulk, validate instantly, and reduce entry errors with our intuitive upload system."
+            />
+            <BenefitCard
+              image="/svgs/rectangle.svg"
+              title="Real-Time Oversight"
+              description="Get a complete view of performance across classes, terms, and subjects — all from your admin dashboard."
+            />
+            <BenefitCard
+              image="/svgs/rectangle.svg"
+              title="Secure & Reliable"
+              description="Your data is encrypted and automatically backed up, ensuring accuracy and protection at every step."
+            />
+            <BenefitCard
+              image="/svgs/rectangle.svg"
+              title="Analytics That Matter"
+              description="Make informed decisions with automated reports, charts, and comparative analytics."
+            />
           </div>
         </div>
       </section>
