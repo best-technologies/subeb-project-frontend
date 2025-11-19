@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/shared/Header";
 import BenefitCard from "@/components/shared/BenefitCard";
+import Badge from "@/components/shared/Badge";
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -54,9 +55,7 @@ export default function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-sm font-semibold text-green-600 uppercase tracking-wide border border-brand-green-accent px-5 py-2 rounded-full bg-brand-green-accent/5">
-              OUR BENEFITS
-            </span>
+            <Badge text="OUR BENEFITS" />
             <h2 className="text-4xl font-medium text-brand-black mt-4">
               Explore the benefits of our platform
             </h2>
