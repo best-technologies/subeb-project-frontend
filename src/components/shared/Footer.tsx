@@ -11,15 +11,16 @@ export default function Footer() {
       <div className="px-5 pb-5">
         <div className="bg-brand-black rounded-3xl">
           {/* CTA Section */}
-          <section className="px-4 sm:px-6 lg:px-8 pt-8 pb-12">
-            <div className="bg-white rounded-3xl py-14 px-4 sm:px-6 lg:px-8">
+          <section className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 lg:pb-12">
+            <div className="bg-white rounded-3xl py-6 lg:py-14 px-4 sm:px-6 lg:px-8">
               <div className="max-w-4xl mx-auto text-center">
-                <h2 className="text-4xl md:text-5xl font-semibold text-brand-green mb-6 leading-tight">
+                <h2 className="text-lg sm:text-4xl lg:text-5xl font-semibold text-brand-green mb-2 md:mb-6 leading-tight">
                   Join Institutions That Trust Us For
-                  <br />
+                  <br className="hidden md:block" />{" "}
+                  <span className="md:hidden"> </span>
                   Seamless Result Management
                 </h2>
-                <p className="text-brand-black-accent mb-8 max-w-3xl mx-auto">
+                <p className="text-sm sm:text-base text-brand-black-accent mb-8 max-w-3xl mx-auto">
                   Move from scattered spreadsheets to a structured, automated
                   system that keeps your data secure and accessible. Designed
                   for modern schools that want efficiency without complexity.
@@ -60,7 +61,7 @@ export default function Footer() {
                   </p>
                 </div>
 
-                <div className="flex gap-12 md:gap-16">
+                <div className="flex flex-col md:flex-row gap-12 md:gap-16">
                   <div>
                     <h3 className="font-medium text-white mb-4">LEGAL</h3>
                     <ul className="space-y-4 text-[#A0A0A0] text-sm">
