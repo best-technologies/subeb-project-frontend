@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
+import { getAccessToken, setTokens, clearTokens } from "./tokens";
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -10,7 +11,26 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for logging and future auth token injection
+// Track if we're currently refreshing token to prevent multiple refresh requests
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve();
+    }
+  });
+
+  failedQueue = [];
+};
+
+// Request interceptor for injecting auth token
 api.interceptors.request.use(
   (config) => {
     // Log requests in development
@@ -19,11 +39,18 @@ api.interceptors.request.use(
       console.log("Request data:", config.data);
     }
 
-    // Future: Add auth token here
-    // const token = getAuthToken();
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // Skip adding token for auth endpoints
+    const isAuthEndpoint =
+      config.url?.includes("/auth/login") ||
+      config.url?.includes("/auth/register") ||
+      config.url?.includes("/auth/refresh");
+
+    if (!isAuthEndpoint) {
+      const token = getAccessToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
 
     return config;
   },
@@ -33,7 +60,7 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor for error handling and token refresh
 api.interceptors.response.use(
   (response) => {
     // Log successful responses in development
@@ -43,18 +70,86 @@ api.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
     // Handle common HTTP errors
     if (error.response) {
       const { status, data } = error.response;
       console.error(`API Error ${status}:`, data);
 
-      // Future: Handle auth errors
-      // if (status === 401) {
-      //   // Handle unauthorized - logout user
-      //   clearAuthToken();
-      //   window.location.href = '/login';
-      // }
+      // Handle 401 Unauthorized - attempt token refresh
+      if (status === 401 && !originalRequest._retry) {
+        // Skip refresh for auth endpoints
+        const isAuthEndpoint =
+          originalRequest.url?.includes("/auth/login") ||
+          originalRequest.url?.includes("/auth/register") ||
+          originalRequest.url?.includes("/auth/refresh");
+
+        if (isAuthEndpoint) {
+          return Promise.reject(error);
+        }
+
+        if (isRefreshing) {
+          // If already refreshing, queue this request
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          })
+            .then(() => {
+              return api(originalRequest);
+            })
+            .catch((err) => {
+              return Promise.reject(err);
+            });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          // Dynamically import to avoid circular dependency
+          const { refreshToken } = await import("@/services/api/auth");
+          const response = await refreshToken();
+
+          if (response.success && response.data) {
+            const {
+              accessToken,
+              refreshToken: newRefreshToken,
+              expiresIn,
+            } = response.data;
+
+            // Update tokens in storage
+            setTokens(accessToken, newRefreshToken, expiresIn);
+
+            // Update failed queue and retry requests
+            processQueue(null);
+            isRefreshing = false;
+
+            // Retry the original request with new token
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            return api(originalRequest);
+          } else {
+            throw new Error("Token refresh failed");
+          }
+        } catch (refreshError) {
+          // Token refresh failed - logout user
+          processQueue(refreshError);
+          isRefreshing = false;
+
+          clearTokens();
+
+          // Dynamically import to avoid circular dependency
+          if (typeof window !== "undefined") {
+            const { useAuthStore } = await import("@/store/authStore");
+            useAuthStore.getState().logout();
+            window.location.href = "/login";
+          }
+
+          return Promise.reject(refreshError);
+        }
+      }
     } else if (error.request) {
       console.error("Network Error:", error.message);
     } else {
