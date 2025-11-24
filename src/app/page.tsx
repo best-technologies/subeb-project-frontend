@@ -23,7 +23,7 @@ export default function Home() {
       >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8 sm:mb-10 md:mb-12 pt-8 lg:pt-20">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-900 mb-4 sm:mb-5 md:mb-6 leading-tight px-2">
+            <h1 className="text-lg sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-900 mb-4 sm:mb-5 md:mb-6 leading-tight px-2">
               Manage Results. Improve
               <br />
               Accuracy. Simplify Administration.
@@ -52,14 +52,14 @@ export default function Home() {
         </div>
       </section>{" "}
       {/* Benefits Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <Badge text="OUR BENEFITS" />
-            <h2 className="text-4xl font-medium text-brand-black mt-4">
+            <h2 className="text-lg sm:text-4xl font-medium text-brand-black mt-4">
               Explore the benefits of our platform
             </h2>
-            <p className="text-lg text-brand-black-accent mt-4 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-brand-black-accent mt-4 max-w-2xl mx-auto">
               Explore how our platform simplifies your administrative tasks with
               cutting-edge implementation and seamless user experience
             </p>
@@ -90,19 +90,19 @@ export default function Home() {
         </div>
       </section>
       {/* How It Works Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-12 lg:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <Badge text="HOW IT WORKS" />
-            <h2 className="text-4xl font-medium text-brand-black mt-4">
+            <h2 className="text-lg sm:text-4xl font-medium text-brand-black mt-4">
               Your Workflow in Four Steps
             </h2>
-            <p className="text-lg text-brand-black-accent mt-4 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-brand-black-accent mt-4 max-w-2xl mx-auto">
               Streamlined steps designed to save you time
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-[150px] items-center">
+          <div className="grid md:grid-cols-2 gap-16 lg:gap-[150px] items-center">
             <div className="space-y-8 relative">
               {/* Vertical dashed line */}
               <div className="absolute left-[10px] top-[2px] h-[calc(100%-76px)] w-[2px] border-l border-dashed border-brand-green" />
@@ -110,10 +110,10 @@ export default function Home() {
               <div className="flex items-start space-x-4 relative">
                 <div className="w-5 h-5 bg-brand-green rounded-full flex-shrink-0 z-10 mt-[2px]" />
                 <div>
-                  <h3 className="text-xl font-medium text-brand-black mb-2">
+                  <h3 className="text-lg sm:text-xl font-medium text-brand-black mb-2">
                     Add Users & Set Roles
                   </h3>
-                  <p className="text-brand-black-accent">
+                  <p className="text-sm sm:text-base md:text-lg text-brand-black-accent">
                     Admins invite staff and assign permissions, ensuring the
                     right people can upload, review, or approve results.
                   </p>
@@ -123,10 +123,10 @@ export default function Home() {
               <div className="flex items-start space-x-4 relative">
                 <div className="w-5 h-5 bg-brand-green rounded-full flex-shrink-0 z-10 mt-[2px]" />
                 <div>
-                  <h3 className="text-xl font-medium text-brand-black mb-2">
+                  <h3 className="text-lg sm:text-xl font-medium text-brand-black mb-2">
                     Upload Results Easily
                   </h3>
-                  <p className="text-brand-black-accent">
+                  <p className="text-sm sm:text-base md:text-lg text-brand-black-accent">
                     Teachers or designated officers upload results using simple
                     forms or spreadsheets—no complex setup required.
                   </p>
@@ -136,10 +136,10 @@ export default function Home() {
               <div className="flex items-start space-x-4 relative">
                 <div className="w-5 h-5 bg-brand-green rounded-full flex-shrink-0 z-10 mt-[2px]" />
                 <div>
-                  <h3 className="text-xl font-medium text-brand-black mb-2">
+                  <h3 className="text-lg sm:text-xl font-medium text-brand-black mb-2">
                     Review & Approve Entries
                   </h3>
-                  <p className="text-brand-black-accent">
+                  <p className="text-sm sm:text-base md:text-lg text-brand-black-accent">
                     Admins verify submissions, correct errors, and approve
                     results to ensure accuracy before publishing.
                   </p>
@@ -149,10 +149,10 @@ export default function Home() {
               <div className="flex items-start space-x-4 relative">
                 <div className="w-5 h-5 bg-brand-green rounded-full flex-shrink-0 z-10 mt-[2px]" />
                 <div>
-                  <h3 className="text-xl font-medium text-brand-black mb-2">
+                  <h3 className="text-lg sm:text-xl font-medium text-brand-black mb-2">
                     Publish & Track Performance
                   </h3>
-                  <p className="text-brand-black-accent">
+                  <p className="text-sm sm:text-base md:text-lg text-brand-black-accent">
                     Once approved, results are released instantly, and admins
                     can monitor activity, generate reports, and keep everything
                     organized.
@@ -161,32 +161,32 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-gray-900 rounded-lg overflow-hidden relative h-[600px]">
+            <div className="bg-gray-900 rounded-lg overflow-hidden relative h-60 lg:h-[600px]">
               <Image
                 src="/imgs/how-it-works-image.jpg"
                 alt="Workflow illustration"
                 fill
-                className="object-cover"
+                className="object-cover rounded-lg"
               />
             </div>
           </div>
         </div>
       </section>
       {/* FAQ Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <Badge text="FAQ'S" />
-            <h2 className="text-4xl font-medium text-brand-black mt-4">
+            <h2 className="text-lg sm:text-4xl font-medium text-brand-black mt-4">
               Got Questions? We&apos;ve Got You Covered
             </h2>
-            <p className="text-lg text-brand-black-accent mt-4 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-brand-black-accent mt-4 max-w-2xl mx-auto">
               Here&apos;s everything you need to know about using our platform
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 md:gap-12 lg:gap-24 items-start">
-            <div className="overflow-hidden aspect-square relative">
+            <div className="overflow-hidden aspect-square relative mb-12 md:mb-0">
               <Image
                 src="/imgs/question-mark.jpg"
                 alt="FAQ illustration"
@@ -230,7 +230,7 @@ export default function Home() {
                 </button>
                 {openFaq === 0 && (
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <p className="text-brand-black-accent">
+                    <p className="text-sm sm:text-base text-brand-black-accent">
                       You can upload, manage & track student results in one
                       place. The platform streamlines workflows for exam
                       officers & administrators making result processing faster.
@@ -272,7 +272,7 @@ export default function Home() {
                 </button>
                 {openFaq === 1 && (
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <p className="text-brand-black-accent">
+                    <p className="text-sm sm:text-base text-brand-black-accent">
                       Only authorized users with proper permissions can upload
                       results. Administrators can assign roles and control
                       access levels for different staff members.
@@ -314,7 +314,7 @@ export default function Home() {
                 </button>
                 {openFaq === 2 && (
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <p className="text-brand-black-accent">
+                    <p className="text-sm sm:text-base text-brand-black-accent">
                       Yes! Multiple users can work simultaneously without
                       conflicts. The system tracks all changes and maintains
                       data integrity across concurrent sessions.
@@ -356,7 +356,7 @@ export default function Home() {
                 </button>
                 {openFaq === 3 && (
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <p className="text-brand-black-accent">
+                    <p className="text-sm sm:text-base text-brand-black-accent">
                       Student data is highly secure with encryption, automatic
                       backups, and strict access controls. We comply with data
                       protection standards to ensure privacy.
@@ -398,7 +398,7 @@ export default function Home() {
                 </button>
                 {openFaq === 4 && (
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <p className="text-brand-black-accent">
+                    <p className="text-sm sm:text-base text-brand-black-accent">
                       Yes! The platform maintains detailed audit logs showing
                       who uploaded, modified, or approved results, along with
                       timestamps for complete transparency.
