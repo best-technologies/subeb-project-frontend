@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PageHeader from "@/components/shared/PageHeader";
 
 const genders = ["Male", "Female"];
 const subjectKeys = Object.keys(subjectNames) as (keyof typeof subjectNames)[];
@@ -187,7 +188,7 @@ export default function EnterGradesPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-brand-accent-background py-8 px-4">
+      <div className="min-h-screen bg-white pb-8">
         {/* Toast Notification */}
         {showToast && (error || success) && (
           <div
@@ -204,34 +205,22 @@ export default function EnterGradesPage() {
           </div>
         )}
 
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
+        {/* Header */}
+        <PageHeader />
+        <div className="max-w-6xl mx-auto">
+          {/* Page Title - Centered */}
           <div className="text-center mb-8">
-            <div className="flex flex-col items-center justify-center gap-3 mb-2">
-              {/* ASUBEB | Logo */}
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-brand-secondary rounded-lg flex items-center justify-center">
-                  <span className="text-brand-secondary-contrast font-bold text-sm">
-                    A
-                  </span>
-                </div>
-                <span className="text-brand-primary  font-bold text-lg">
-                  ASUBEB
-                </span>
-              </div>
-              {/* <AcademicCapIcon className="w-10 h-10 text-brand-primary" /> */}
-              <h1 className="text-3xl font-bold text-brand-primary">
-                Student Grades Entry
-              </h1>
-            </div>
+            <h1 className="text-3xl font-bold text-brand-primary mb-2">
+              Student Grades Entry
+            </h1>
             <p className="text-gray-600">
               Manage and submit student examination scores
             </p>
           </div>
 
           {/* Tab Navigation */}
-          <div className="bg-white rounded-lg shadow-sm mb-6">
-            <div className="flex border-b">
+          <div className="bg-white rounded-lg shadow-sm mb-6 max-w-4xl mx-auto">
+            <div className="flex">
               <button
                 onClick={() => setActiveTab("session")}
                 className={`flex-1 px-6 py-4 font-medium text-center transition-colors ${
@@ -272,7 +261,7 @@ export default function EnterGradesPage() {
           </div>
 
           {/* Tab Content */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 max-w-4xl mx-auto">
             {/* Session Info Tab */}
             {activeTab === "session" && (
               <div className="space-y-6">
