@@ -21,8 +21,8 @@ export default function BenefitCard({
 
       {/* Content Section */}
       <div className="px-5 py-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-4">{title}</h3>
-        <p className="text-gray-600">{description}</p>
+        <h3 className="text-xl font-medium text-brand-black mb-2">{title}</h3>
+        <p className="text-brand-black-accent">{description}</p>
       </div>
     </div>
   );
