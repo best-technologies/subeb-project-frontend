@@ -36,8 +36,8 @@ export default function PageHeader() {
           <div className="w-[30px] h-[30px] bg-brand-green rounded-full flex items-center justify-center">
             <UserRound className="w-4 h-4 text-white" />
           </div>
-          {user?.firstName ? (
-            <span className="text-gray-700 font-medium">{user.firstName}</span>
+          {user?.email ? (
+            <span className="text-gray-700 font-medium">{user.email}</span>
           ) : (
             <span className="text-red-600 font-medium text-sm">
               Error loading user
