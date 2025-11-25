@@ -23,7 +23,7 @@ import PageHeader from "@/components/shared/PageHeader";
 const genders = ["Male", "Female"];
 const subjectKeys = Object.keys(subjectNames) as (keyof typeof subjectNames)[];
 
-// Helper function to convert term format
+// Helper function to convert term format from backend (e.g., "FIRST_TERM" -> "First")
 const formatTermName = (termName: string): string => {
   if (termName.includes("FIRST")) return "First";
   if (termName.includes("SECOND")) return "Second";
@@ -272,11 +272,16 @@ export default function EnterGradesPage() {
                     Academic Session
                   </Label>
                   <Select value={session} onValueChange={setSession} disabled>
-                    <SelectTrigger className="opacity-50">
+                    <SelectTrigger className="opacity-50 cursor-not-allowed focus:ring-brand-green hover:border-brand-green/40">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={session}>{session}</SelectItem>
+                    <SelectContent className="border-brand-green/20 text-brand-green">
+                      <SelectItem
+                        value={session}
+                        className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
+                      >
+                        {session}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   {sessionLoading && (
@@ -291,11 +296,16 @@ export default function EnterGradesPage() {
                     Term
                   </Label>
                   <Select value={term} onValueChange={setTerm} disabled>
-                    <SelectTrigger className="opacity-50">
-                      <SelectValue />
+                    <SelectTrigger className="opacity-50 cursor-not-allowed focus:ring-brand-green hover:border-brand-green/40">
+                      <SelectValue placeholder="Select term" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={term}>{term} Term</SelectItem>
+                    <SelectContent className="border-brand-green/20 text-brand-green">
+                      <SelectItem
+                        value="First"
+                        className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
+                      >
+                        First Term
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -304,12 +314,16 @@ export default function EnterGradesPage() {
                     Local Government Area
                   </Label>
                   <Select value={lgaValue} onValueChange={setLgaValue}>
-                    <SelectTrigger>
+                    <SelectTrigger className="focus:ring-brand-green hover:border-brand-green/40">
                       <SelectValue placeholder="Select LGA" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-brand-green/20 text-brand-green">
                       {lgas.map((lga) => (
-                        <SelectItem key={lga} value={lga}>
+                        <SelectItem
+                          key={lga}
+                          value={lga}
+                          className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
+                        >
                           {lga}
                         </SelectItem>
                       ))}
@@ -325,7 +339,11 @@ export default function EnterGradesPage() {
                     onValueChange={setSchool}
                     disabled={!lgaValue || filteredSchools.length === 0}
                   >
-                    <SelectTrigger className={!lgaValue ? "opacity-50" : ""}>
+                    <SelectTrigger
+                      className={`focus:ring-brand-green hover:border-brand-green/40 ${
+                        !lgaValue ? "opacity-50" : ""
+                      }`}
+                    >
                       <SelectValue
                         placeholder={
                           !lgaValue
@@ -336,9 +354,13 @@ export default function EnterGradesPage() {
                         }
                       />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-brand-green/20 text-brand-green">
                       {filteredSchools.map((s) => (
-                        <SelectItem key={s.id} value={s.name}>
+                        <SelectItem
+                          key={s.id}
+                          value={s.name}
+                          className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
+                        >
                           {s.name}
                         </SelectItem>
                       ))}
@@ -350,6 +372,7 @@ export default function EnterGradesPage() {
                 <Button
                   onClick={() => canProceedToStudent && setActiveTab("student")}
                   disabled={!canProceedToStudent}
+                  className="bg-brand-green"
                 >
                   Continue to Add Students
                 </Button>
@@ -398,12 +421,16 @@ export default function EnterGradesPage() {
                       handleSelectChange("class", value)
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="focus:ring-brand-green hover:border-brand-green/40">
                       <SelectValue placeholder="Select class" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-brand-green/20 text-brand-green">
                       {classes.map((c) => (
-                        <SelectItem key={c} value={c}>
+                        <SelectItem
+                          key={c}
+                          value={c}
+                          className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
+                        >
                           {c}
                         </SelectItem>
                       ))}
@@ -418,12 +445,16 @@ export default function EnterGradesPage() {
                       handleSelectChange("gender", value)
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="focus:ring-brand-green hover:border-brand-green/40">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-brand-green/20 text-brand-green">
                       {genders.map((g) => (
-                        <SelectItem key={g} value={g}>
+                        <SelectItem
+                          key={g}
+                          value={g}
+                          className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
+                        >
                           {g}
                         </SelectItem>
                       ))}

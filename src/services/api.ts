@@ -11,7 +11,7 @@ import { StudentDetailsResponse } from "./types/studentDetailsResponse";
 
 // API Configuration
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://asubeb-backend.onrender.com";
 const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || "v1";
 
 //  Debug logging: log the API configuration commented out by Juwon in order clean up the code.
