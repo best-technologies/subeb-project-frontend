@@ -22,14 +22,14 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
       <div className="relative z-10 bg-white rounded-xl shadow-2xl p-8 max-w-md mx-4">
         <div className="flex flex-col items-center space-y-4">
           {/* Spinner */}
-          <Loader2 className="w-12 h-12 text-brand-primary animate-spin" />
+          <Loader2 className="w-12 h-12 text-brand-green animate-spin" />
 
           {/* Message */}
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-brand-primary mb-2">
+            <h3 className="text-lg font-semibold text-brand-green mb-2">
               Loading...
             </h3>
-            <p className="text-brand-accent-text text-sm">{message}</p>
+            <p className="text-gray-600 text-sm">{message}</p>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import {
   TrashIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
+import { SquarePen } from "lucide-react";
 import { useGlobalAdminDashboard, useCurrentSession } from "@/services";
 import { subjectNames } from "@/types/student";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/shared/PageHeader";
+import { LoadingModal } from "@/components/ui/LoadingModal";
 
 const genders = ["Male", "Female"];
 const subjectKeys = Object.keys(subjectNames) as (keyof typeof subjectNames)[];
@@ -65,7 +67,8 @@ export default function EnterGradesPage() {
   );
 
   // Fetch real data from API
-  const { data: dashboardData } = useGlobalAdminDashboard();
+  const { data: dashboardData, loading: dashboardLoading } =
+    useGlobalAdminDashboard();
   const {
     session: currentSession,
     loading: sessionLoading,
@@ -110,6 +113,18 @@ export default function EnterGradesPage() {
     if (!lgaValue || !schools) return [];
     return schools.filter((school) => school.lga === lgaValue);
   }, [schools, lgaValue]);
+
+  // Loading state for schools when LGA is selected
+  const [isLoadingSchools, setIsLoadingSchools] = useState(false);
+
+  // Simulate schools loading when LGA changes (if needed for API call)
+  React.useEffect(() => {
+    if (lgaValue && dashboardLoading) {
+      setIsLoadingSchools(true);
+    } else {
+      setIsLoadingSchools(false);
+    }
+  }, [lgaValue, dashboardLoading]);
 
   // Reset school selection when LGA changes
   React.useEffect(() => {
@@ -168,6 +183,14 @@ export default function EnterGradesPage() {
     setShowToast(true);
   };
 
+  const handleEditStudent = (index: number) => {
+    const studentToEdit = students[index];
+    setStudent(studentToEdit);
+    setStudents((prev) => prev.filter((_, i) => i !== index));
+    setSuccess("Student loaded for editing.");
+    setShowToast(true);
+  };
+
   const handleRemoveStudent = (index: number) => {
     setStudents((prev) => prev.filter((_, i) => i !== index));
     setSuccess("Student removed.");
@@ -187,6 +210,20 @@ export default function EnterGradesPage() {
 
   return (
     <div className="min-h-screen bg-white pb-8">
+      {/* Loading Dialogs */}
+      <LoadingModal
+        isOpen={sessionLoading}
+        message="Loading academic session and term information..."
+      />
+      <LoadingModal
+        isOpen={dashboardLoading && !sessionLoading && lgas.length === 0}
+        message="Loading local government areas..."
+      />
+      <LoadingModal
+        isOpen={isLoadingSchools && !!lgaValue}
+        message="Loading schools in selected LGA..."
+      />
+
       {/* Toast Notification */}
       {showToast && (error || success) && (
         <div
@@ -384,37 +421,19 @@ export default function EnterGradesPage() {
           {activeTab === "student" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-brand-black">
                   Add Students
                 </h2>
-                <span className="bg-brand-primary/10 text-brand-primary px-3 py-1 rounded-full text-sm font-medium">
+                <span className="bg-[#F2F7F5] text-brand-green px-3 py-1 rounded-full text-sm font-medium">
                   {students.length} student
                   {students.length !== 1 ? "s" : ""} added
                 </span>
               </div>
 
               {/* Student Form */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg">
                 <div className="space-y-2">
-                  <Label>Student Name</Label>
-                  <Input
-                    name="studentName"
-                    value={student.studentName}
-                    onChange={handleStudentChange}
-                    placeholder="Enter full name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Exam Number</Label>
-                  <Input
-                    name="examNumber"
-                    value={student.examNumber}
-                    onChange={handleStudentChange}
-                    placeholder="Enter exam number"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Class</Label>
+                  <Label className="text-brand-black-accent">Class</Label>
                   <Select
                     value={student.class}
                     onValueChange={(value) =>
@@ -438,7 +457,27 @@ export default function EnterGradesPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Gender</Label>
+                  <Label className="text-brand-black-accent">
+                    Student Name
+                  </Label>
+                  <Input
+                    name="studentName"
+                    value={student.studentName}
+                    onChange={handleStudentChange}
+                    placeholder="Enter full name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-brand-black-accent">Exam Number</Label>
+                  <Input
+                    name="examNumber"
+                    value={student.examNumber}
+                    onChange={handleStudentChange}
+                    placeholder="Enter exam number"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-brand-black-accent">Gender</Label>
                   <Select
                     value={student.gender}
                     onValueChange={(value) =>
@@ -465,13 +504,15 @@ export default function EnterGradesPage() {
 
               {/* Subjects Scores */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-lg font-medium text-brand-black mb-4">
                   Subject Scores
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {subjectKeys.map((key) => (
                     <div key={key} className="space-y-2">
-                      <Label className="text-sm">{subjectNames[key]}</Label>
+                      <Label className="text-sm text-brand-black-accent">
+                        {subjectNames[key]}
+                      </Label>
                       <Input
                         type="number"
                         min={0}
@@ -492,12 +533,13 @@ export default function EnterGradesPage() {
                 <Button
                   variant="outline"
                   onClick={() => setActiveTab("session")}
+                  className="text-brand-black-accent"
                 >
-                  Back
+                  Go back to Session Info
                 </Button>
                 <Button
                   onClick={handleAddStudent}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 !bg-[#E5E7EA] text-brand-black hover:bg-[#d5d7da]"
                 >
                   <PlusIcon className="w-4 h-4" />
                   Add Student
@@ -507,42 +549,55 @@ export default function EnterGradesPage() {
               {/* Added Students List */}
               {students.length > 0 && (
                 <div className="mt-8">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Added Students
+                  <h3 className="text-lg font-medium text-brand-black mb-4">
+                    Added Students ({students.length})
                   </h3>
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {students.map((stu, idx) => (
                       <div
                         key={idx}
                         className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-md"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-brand-primary text-brand-primary-foreground flex items-center justify-center text-sm font-medium">
+                          <div className="w-8 h-8 rounded-full bg-brand-green text-white flex items-center justify-center text-sm font-medium">
                             {getInitials(stu.studentName)}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-brand-black">
                               {stu.studentName}
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-brand-black-accent">
                               {stu.examNumber} • {stu.class} • {stu.gender}
                             </p>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveStudent(idx)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditStudent(idx)}
+                            className="text-brand-black-accent hover:text-brand-black"
+                          >
+                            <SquarePen className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveStudent(idx)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
                   <div className="flex justify-end mt-4">
-                    <Button onClick={() => setActiveTab("review")}>
-                      Review & Submit
+                    <Button
+                      className="bg-brand-green"
+                      onClick={() => setActiveTab("review")}
+                    >
+                      Continue to Review & Submit
                     </Button>
                   </div>
                 </div>
@@ -553,37 +608,41 @@ export default function EnterGradesPage() {
           {/* Review Tab */}
           {activeTab === "review" && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-brand-black">
                 Review & Submit
               </h2>
 
               {/* Session Summary */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-medium text-gray-900 mb-2">
+                <h3 className="font-medium text-brand-black mb-2">
                   Session Information
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600">Session:</span>{" "}
+                    <span className="text-brand-black-accent">Session:</span>{" "}
                     <span className="font-medium">{session}</span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Term:</span>{" "}
+                    <span className="text-brand-black-accent">Term:</span>{" "}
                     <span className="font-medium">{term}</span>
                   </div>
                   <div>
-                    <span className="text-gray-600">School:</span>{" "}
-                    <span className="font-medium">{school}</span>
+                    <span className="text-brand-black-accent">School:</span>{" "}
+                    <span className="font-medium" title={school}>
+                      {school.length > 10
+                        ? `${school.slice(0, 10)}...`
+                        : school}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">LGA:</span>{" "}
+                    <span className="text-brand-black-accent">LGA:</span>{" "}
                     <span className="font-medium">{lgaValue}</span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h3 className="font-medium text-gray-900 mb-4">
+                <h3 className="font-medium text-brand-black mb-4">
                   Students ({students.length})
                 </h3>
                 <div className="space-y-2">
@@ -594,7 +653,7 @@ export default function EnterGradesPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-brand-primary text-brand-primary-foreground flex items-center justify-center text-sm font-medium">
+                          <div className="w-8 h-8 rounded-full bg-brand-green text-white text-brand-primary-foreground flex items-center justify-center text-sm font-medium">
                             {getInitials(stu.studentName)}
                           </div>
                           <div>
@@ -639,7 +698,7 @@ export default function EnterGradesPage() {
                     setActiveTab("session");
                     setShowToast(true);
                   }}
-                  className="flex items-center gap-2 font-medium"
+                  className="flex items-center gap-2 font-medium bg-brand-green"
                 >
                   <CheckCircleIcon className="w-5 h-5" />
                   Submit All Grades
