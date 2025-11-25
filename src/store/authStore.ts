@@ -1,7 +1,12 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { AuthStore, User } from "@/services/types/auth";
-import { clearTokens } from "@/lib/tokens";
+import {
+  clearTokens,
+  syncTokensToCookies,
+  clearTokenCookies,
+  getTokens,
+} from "@/lib/tokens";
 
 /**
  * Zustand store for authentication state management
@@ -9,7 +14,7 @@ import { clearTokens } from "@/lib/tokens";
  */
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Initial state
       user: null,
       accessToken: null,
@@ -26,6 +31,8 @@ export const useAuthStore = create<AuthStore>()(
           isAuthenticated: true,
           isLoading: false,
         });
+        // Sync tokens and role to cookies so middleware can access them
+        syncTokensToCookies(user.role);
       },
 
       // Update user information
@@ -39,11 +46,14 @@ export const useAuthStore = create<AuthStore>()(
           accessToken,
           refreshToken,
         });
+        // Sync updated tokens to cookies
+        syncTokensToCookies();
       },
 
       // Clear authentication state on logout
       logout: () => {
         clearTokens();
+        clearTokenCookies();
         set({
           user: null,
           accessToken: null,
@@ -61,11 +71,28 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: "asubeb-auth-storage", // localStorage key
       storage: createJSONStorage(() => localStorage),
-      // Only persist user data, not tokens (tokens are managed separately in src/lib/tokens.ts)
+      // Only persist user data, not tokens or isAuthenticated flag
+      // isAuthenticated should be derived from presence of valid tokens, not persisted
       partialize: (state) => ({
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
       }),
+      // After hydration, check if we have valid tokens and update auth state accordingly
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          const tokens = getTokens();
+          if (tokens && state.user) {
+            // We have both user data and tokens, mark as authenticated
+            state.isAuthenticated = true;
+            state.accessToken = tokens.accessToken;
+            state.refreshToken = tokens.refreshToken;
+          } else {
+            // No tokens, ensure not authenticated
+            state.isAuthenticated = false;
+            state.accessToken = null;
+            state.refreshToken = null;
+          }
+        }
+      },
     }
   )
 );

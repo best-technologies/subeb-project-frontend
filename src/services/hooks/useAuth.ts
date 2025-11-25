@@ -11,25 +11,15 @@ import type {
 
 /**
  * Hook for user registration
+ * Note: Registration does NOT auto-login. User must login after registration.
  */
 export function useRegister() {
-  const { setAuth } = useAuthStore();
-
   return useMutation({
     mutationFn: (data: RegisterRequest) => register(data),
 
     onSuccess: (response: AuthResponse) => {
       console.log("Registration successful!", response);
-
-      if (response.success && response.data) {
-        const { user, accessToken, refreshToken, expiresIn } = response.data;
-
-        // Store tokens
-        setTokens(accessToken, refreshToken, expiresIn);
-
-        // Update Zustand store
-        setAuth(user, accessToken, refreshToken);
-      }
+      // Registration success - user must now login
     },
 
     onError: (error: unknown) => {
@@ -40,7 +30,7 @@ export function useRegister() {
 }
 
 /**
- * Hook for user login
+ * Hook for user login with role-based redirect
  */
 export function useLogin() {
   const { setAuth } = useAuthStore();
@@ -52,16 +42,24 @@ export function useLogin() {
       console.log("Login successful!", response);
 
       if (response.success && response.data) {
-        const { user, accessToken, refreshToken, expiresIn } = response.data;
+        const { access_token, user } = response.data;
 
-        // Store tokens
-        setTokens(accessToken, refreshToken, expiresIn);
+        // Transform backend user to frontend User type
+        const transformedUser = {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          sub: user.sub,
+        };
+
+        // Store tokens (using 7 days for refresh token as specified)
+        const expiresIn = 7 * 24 * 60 * 60; // 7 days in seconds
+        setTokens(access_token, access_token, expiresIn);
 
         // Update Zustand store
-        setAuth(user, accessToken, refreshToken);
+        setAuth(transformedUser, access_token, access_token);
 
-        // Redirect will be handled in the component
-        // to access searchParams for intended route
+        // Redirect will be handled in the component based on role
       }
     },
 
@@ -104,6 +102,58 @@ export function useLogout() {
       router.push("/login");
     },
   });
+}
+
+/**
+ * Get redirect path based on user role with access validation
+ */
+export function getRoleBasedRedirect(
+  role: string,
+  intendedPath?: string
+): string {
+  // Define role-based access
+  const roleAccess = {
+    admin: [
+      "/dashboard",
+      "/profile",
+      "/schools",
+      "/students",
+      "/enrol-officer",
+      "/enter-grades",
+    ],
+    "grade-entry-officer": ["/enter-grades"],
+  };
+
+  // If there's an intended path, validate user has access to it
+  if (
+    intendedPath &&
+    intendedPath !== "/login" &&
+    intendedPath !== "/register" &&
+    intendedPath !== "/"
+  ) {
+    // Check if user has access to the intended path
+    if (role === "admin") {
+      // Admin has access to all routes
+      return intendedPath;
+    } else if (role === "grade-entry-officer") {
+      // Check if grade-entry-officer has access
+      const hasAccess = roleAccess["grade-entry-officer"].some((route) =>
+        intendedPath.startsWith(route)
+      );
+      if (hasAccess) {
+        return intendedPath;
+      }
+    }
+    // If no access to intended path, fall through to default
+  }
+
+  // Role-based default redirects
+  if (role === "grade-entry-officer") {
+    return "/enter-grades";
+  }
+
+  // Admin or default fallback
+  return "/dashboard";
 }
 
 /**

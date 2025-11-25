@@ -3,9 +3,10 @@
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  role?: string;
+  firstName?: string;
+  lastName?: string;
+  role: string;
+  sub?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -26,10 +27,13 @@ export interface AuthResponse {
   success: boolean;
   message: string;
   data?: {
-    user: User;
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number; // Token expiry in seconds (e.g., 900 for 15 minutes)
+    access_token: string;
+    user: {
+      sub: string;
+      id: string;
+      email: string;
+      role: string;
+    };
   };
   error?: string | string[];
   statusCode?: number;

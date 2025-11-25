@@ -12,7 +12,11 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { LoadingModal } from "@/components/ui/LoadingModal";
 import { Dialog } from "@/components/ui/dialog";
-import { useLogin, getAuthErrorMessage } from "@/services/hooks/useAuth";
+import {
+  useLogin,
+  getAuthErrorMessage,
+  getRoleBasedRedirect,
+} from "@/services/hooks/useAuth";
 import { useAuthStore } from "@/store/authStore";
 import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 
@@ -35,11 +39,19 @@ const Login = () => {
   // Get redirect URL from query params or default to dashboard
   const redirectTo = searchParams.get("redirect") || "/dashboard";
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated with valid tokens
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push(redirectTo);
-    }
+    const checkAuthAndRedirect = async () => {
+      if (isAuthenticated) {
+        // Verify we actually have tokens before redirecting
+        const tokens = localStorage.getItem("asubeb_access_token");
+        if (tokens) {
+          router.push(redirectTo);
+        }
+      }
+    };
+
+    checkAuthAndRedirect();
   }, [isAuthenticated, router, redirectTo]);
 
   const form = useForm<LoginFormValues>({
@@ -58,8 +70,13 @@ const Login = () => {
         // Clear form for security
         form.reset();
 
-        // Redirect to intended page or dashboard
-        router.push(redirectTo);
+        // Get role-based redirect path
+        const intendedPath = searchParams.get("redirect") || undefined;
+        const userRole = response.data?.user?.role || "admin";
+        const redirectPath = getRoleBasedRedirect(userRole, intendedPath);
+
+        // Redirect based on user role
+        router.push(redirectPath);
       } else {
         setErrorMessage(getAuthErrorMessage(response));
         setShowErrorDialog(true);

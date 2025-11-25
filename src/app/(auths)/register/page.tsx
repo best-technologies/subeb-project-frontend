@@ -129,7 +129,7 @@ const Register = () => {
 
   const handleSuccessClose = () => {
     setShowSuccessDialog(false);
-    router.push("/dashboard");
+    router.push("/login");
   };
 
   return (
@@ -141,21 +141,20 @@ const Register = () => {
       />
 
       {/* Success Dialog */}
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+      <Dialog open={showSuccessDialog} onOpenChange={handleSuccessClose}>
         <div className="p-6">
           <div className="flex flex-col items-center text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <CheckCircleIcon className="w-10 h-10 text-green-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Registration Successful!
+              Successfully Registered!
             </h3>
             <p className="text-gray-600 mb-6">
-              Your account has been created successfully. You can now access the
-              dashboard.
+              Your account has been created successfully. Now, try and login.
             </p>
             <Button onClick={handleSuccessClose} className="w-full">
-              Go to Dashboard
+              Go to Login
             </Button>
           </div>
         </div>
