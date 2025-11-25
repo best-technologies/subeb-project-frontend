@@ -21,6 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/shared/PageHeader";
 import { LoadingModal } from "@/components/ui/LoadingModal";
+import { Dialog } from "@/components/ui/dialog";
 
 const genders = ["Male", "Female"];
 const subjectKeys = Object.keys(subjectNames) as (keyof typeof subjectNames)[];
@@ -65,6 +66,10 @@ export default function EnterGradesPage() {
   const [activeTab, setActiveTab] = useState<"session" | "student" | "review">(
     "session"
   );
+  const [showNavigationWarning, setShowNavigationWarning] = useState(false);
+  const [pendingTab, setPendingTab] = useState<
+    "session" | "student" | "review" | null
+  >(null);
 
   // Fetch real data from API
   const { data: dashboardData, loading: dashboardLoading } =
@@ -201,6 +206,31 @@ export default function EnterGradesPage() {
   const canProceedToStudent = session && term && school && lgaValue;
   const canProceedToReview = students.length > 0;
 
+  const handleTabChange = (tab: "session" | "student" | "review") => {
+    // Only warn when navigating from review to session tab with unsubmitted students
+    if (activeTab === "review" && students.length > 0 && tab === "session") {
+      setPendingTab(tab);
+      setShowNavigationWarning(true);
+    } else {
+      setActiveTab(tab);
+    }
+  };
+
+  const handleConfirmNavigation = () => {
+    setStudents([]);
+    setStudent(initialStudentState);
+    setShowNavigationWarning(false);
+    if (pendingTab) {
+      setActiveTab(pendingTab);
+      setPendingTab(null);
+    }
+  };
+
+  const handleCancelNavigation = () => {
+    setShowNavigationWarning(false);
+    setPendingTab(null);
+  };
+
   React.useEffect(() => {
     if (showToast) {
       const timer = setTimeout(() => setShowToast(false), 3000);
@@ -223,6 +253,51 @@ export default function EnterGradesPage() {
         isOpen={isLoadingSchools && !!lgaValue}
         message="Loading schools in selected LGA..."
       />
+
+      {/* Navigation Warning Dialog */}
+      <Dialog
+        open={showNavigationWarning}
+        onOpenChange={handleCancelNavigation}
+        showCloseButton={false}
+      >
+        <div className="p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <ExclamationCircleIcon className="w-6 h-6 text-amber-500 flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="text-lg font-semibold text-brand-black mb-2">
+                Unsaved Changes Warning
+              </h3>
+              <p className="text-sm text-brand-black-accent mb-3">
+                You have {students.length} student
+                {students.length !== 1 ? "s" : ""} with grades that haven&apos;t
+                been submitted yet. If you navigate away now, all entered data
+                will be lost.
+              </p>
+              <p className="text-sm text-brand-black-accent">
+                If you want to make changes to the grades, please close this
+                dialog and go back to the{" "}
+                <span className="font-medium">&quot;2. Add Students&quot;</span>{" "}
+                tab instead.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <Button
+              onClick={handleCancelNavigation}
+              variant="outline"
+              className="flex-1 order-2 sm:order-1"
+            >
+              Close Dialog
+            </Button>
+            <Button
+              onClick={handleConfirmNavigation}
+              className="flex-1 text-white order-1 sm:order-2 bg-destructive hover:bg-destructive/90"
+            >
+              Clear All & Go Back
+            </Button>
+          </div>
+        </div>
+      </Dialog>
 
       {/* Toast Notification */}
       {showToast && (error || success) && (
@@ -257,7 +332,7 @@ export default function EnterGradesPage() {
         <div className="bg-[#FCFCFC] rounded-lg mb-6 max-w-4xl mx-auto">
           <div className="flex">
             <button
-              onClick={() => setActiveTab("session")}
+              onClick={() => handleTabChange("session")}
               className={`flex-1 px-6 py-4 font-medium text-center transition-colors rounded-bl-lg rounded-tl-lg ${
                 activeTab === "session"
                   ? "text-brand-green border-b-4 border-brand-green bg-brand-green/4"
@@ -267,7 +342,7 @@ export default function EnterGradesPage() {
               1. Session Info
             </button>
             <button
-              onClick={() => canProceedToStudent && setActiveTab("student")}
+              onClick={() => canProceedToStudent && handleTabChange("student")}
               disabled={!canProceedToStudent}
               className={`flex-1 px-6 py-4 font-medium text-center transition-colors ${
                 activeTab === "student"
@@ -280,7 +355,7 @@ export default function EnterGradesPage() {
               2. Add Students
             </button>
             <button
-              onClick={() => canProceedToReview && setActiveTab("review")}
+              onClick={() => canProceedToReview && handleTabChange("review")}
               disabled={!canProceedToReview}
               className={`flex-1 px-6 py-4 font-medium text-center transition-colors rounded-br-lg rounded-tr-lg ${
                 activeTab === "review"
@@ -407,7 +482,9 @@ export default function EnterGradesPage() {
               </div>
               <div className="flex justify-end pt-4">
                 <Button
-                  onClick={() => canProceedToStudent && setActiveTab("student")}
+                  onClick={() =>
+                    canProceedToStudent && handleTabChange("student")
+                  }
                   disabled={!canProceedToStudent}
                   className="bg-brand-green"
                 >
@@ -532,7 +609,7 @@ export default function EnterGradesPage() {
               <div className="flex justify-between pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setActiveTab("session")}
+                  onClick={() => handleTabChange("session")}
                   className="text-brand-black-accent"
                 >
                   Go back to Session Info
@@ -595,7 +672,7 @@ export default function EnterGradesPage() {
                   <div className="flex justify-end mt-4">
                     <Button
                       className="bg-brand-green"
-                      onClick={() => setActiveTab("review")}
+                      onClick={() => handleTabChange("review")}
                     >
                       Continue to Review & Submit
                     </Button>
@@ -686,7 +763,7 @@ export default function EnterGradesPage() {
               <div className="flex justify-between pt-6">
                 <Button
                   variant="outline"
-                  onClick={() => setActiveTab("student")}
+                  onClick={() => handleTabChange("student")}
                 >
                   Back to Edit
                 </Button>
