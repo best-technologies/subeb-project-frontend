@@ -14,7 +14,7 @@ import {
  */
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Initial state
       user: null,
       accessToken: null,

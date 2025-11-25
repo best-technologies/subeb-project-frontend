@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useMemo } from "react";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -20,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/shared/PageHeader";
-import { useAuthStore } from "@/store/authStore";
 
 const genders = ["Male", "Female"];
 const subjectKeys = Object.keys(subjectNames) as (keyof typeof subjectNames)[];
@@ -53,8 +51,6 @@ function getInitials(name: string) {
 }
 
 export default function EnterGradesPage() {
-  const router = useRouter();
-  const { user } = useAuthStore();
   const [session, setSession] = useState("2024/2025");
   const [term, setTerm] = useState("First");
   const [school, setSchool] = useState("");
