@@ -58,13 +58,13 @@ export default function Header() {
           <div className="hidden lg:flex items-center space-x-3">
             <Button
               variant="outline"
-              className="rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] px-[26px] py-[15px] gap-[10px]"
+              className="!rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px]"
             >
               <Youtube className="w-4 h-4" />
               <span>Watch a Demo</span>
             </Button>
             <Link href="/login">
-              <Button className="rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] px-[26px] py-[15px] gap-[10px]">
+              <Button className="!rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] gap-[10px]">
                 Get Started - It&apos;s free
               </Button>
             </Link>
@@ -102,14 +102,14 @@ export default function Header() {
         <div className="flex flex-col p-8 pt-24 space-y-6">
           <Button
             variant="outline"
-            className="w-full rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] px-[26px] py-[15px] gap-[10px] justify-center"
+            className="w-full !rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px] justify-center"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <Youtube className="w-4 h-4" />
             <span>Watch a Demo</span>
           </Button>
           <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-            <Button className="w-full rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] px-[26px] py-[15px] gap-[10px] justify-center">
+            <Button className="w-full !rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] gap-[10px] justify-center">
               Get Started - It&apos;s free
             </Button>
           </Link>

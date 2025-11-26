@@ -28,13 +28,13 @@ export default function Footer() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Button
                     variant="outline"
-                    className="rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] px-[26px] py-[15px] gap-[10px]"
+                    className="!rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px]"
                   >
                     <Youtube className="w-5 h-5" />
                     <span>Watch a Demo</span>
                   </Button>
                   <Link href="/login">
-                    <Button className="rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] px-[26px] py-[15px] gap-[10px]">
+                    <Button className="!rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] gap-[10px]">
                       Get Started - It&apos;s free
                     </Button>
                   </Link>
