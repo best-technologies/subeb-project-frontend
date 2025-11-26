@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +28,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const Login = () => {
+const LoginContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const loginMutation = useLogin();
@@ -217,6 +217,20 @@ const Login = () => {
         </div>
       </div>
     </>
+  );
+};
+
+const Login = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <LoadingModal isOpen={true} message="Loading..." />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 };
 
