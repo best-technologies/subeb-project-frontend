@@ -135,6 +135,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Scenario 3: Authenticated user trying to access route they don't have permission for
+  // Skip this check for public routes (like homepage)
   if (hasValidToken && userRole && !isPublicRoute && !isAuthRoute) {
     if (!hasRoleAccess(userRole, pathname)) {
       // Redirect to their default page based on role

@@ -1,32 +1,13 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
 import BenefitCard from "@/components/shared/BenefitCard";
 import Badge from "@/components/shared/Badge";
-import { useAuthStore } from "@/store/authStore";
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-
-  // Redirect authenticated users to dashboard
-  useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      if (isAuthenticated) {
-        // Verify we actually have tokens before redirecting
-        const tokens = localStorage.getItem("asubeb_access_token");
-        if (tokens) {
-          router.push("/dashboard");
-        }
-      }
-    };
-
-    checkAuthAndRedirect();
-  }, [isAuthenticated, router]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
