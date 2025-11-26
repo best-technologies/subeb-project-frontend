@@ -16,7 +16,7 @@ export default function PageHeader() {
   };
 
   return (
-    <div className="border-b border-gray-200 pb-4 pt-4 mb-8 bg-white px-4 sm:px-6 lg:px-8">
+    <div className="border-b border-gray-200 pb-4 pt-4 bg-white px-4 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo - Left */}
         <div className="flex items-center gap-2">

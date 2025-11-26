@@ -70,9 +70,9 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
 
     return (
       <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
-        <div className="flex flex-col h-screen">
-          {/* Navigation */}
-          <nav className="flex-1 p-6">
+        <div className="flex flex-col h-full">
+          {/* Navigation - Top */}
+          <nav className="p-6">
             <ul className="space-y-2">
               {navigationItems.map((item) => (
                 <li key={item.id}>
@@ -96,7 +96,10 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
             </ul>
           </nav>
 
-          {/* Logout Button */}
+          {/* Spacer to push logout to bottom */}
+          <div className="flex-1"></div>
+
+          {/* Logout Button - Bottom */}
           <div className="p-6 border-t border-gray-200">
             <button
               onClick={handleLogout}
@@ -105,11 +108,6 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
               <LogOut size={20} />
               <span className="font-medium">Logout</span>
             </button>
-
-            {/* Copyright Footer */}
-            <div className="mt-6 text-center text-xs text-gray-500">
-              © SUBEB 2025. All rights reserved
-            </div>
           </div>
         </div>
       </div>

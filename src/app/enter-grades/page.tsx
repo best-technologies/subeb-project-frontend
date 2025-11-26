@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/shared/PageHeader";
 import { LoadingModal } from "@/components/ui/LoadingModal";
 import { Dialog } from "@/components/ui/dialog";
+import { SimpleFooter } from "@/components/shared/Footer";
 
 const genders = ["Male", "Female"];
 const subjectKeys = Object.keys(subjectNames) as (keyof typeof subjectNames)[];
@@ -239,7 +240,7 @@ export default function EnterGradesPage() {
   }, [showToast]);
 
   return (
-    <div className="min-h-screen bg-white pb-8">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Loading Dialogs */}
       <LoadingModal
         isOpen={sessionLoading}
@@ -785,6 +786,9 @@ export default function EnterGradesPage() {
           )}
         </div>
       </div>
+
+      {/* Footer */}
+      <SimpleFooter />
     </div>
   );
 }

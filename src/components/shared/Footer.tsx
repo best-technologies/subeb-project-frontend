@@ -5,6 +5,18 @@ import Image from "next/image";
 import { Youtube, Linkedin, Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
+// Simple footer for officer/authenticated pages
+export function SimpleFooter() {
+  return (
+    <footer className="bg-white border-t border-gray-200 py-4">
+      <div className="text-center text-xs text-gray-500">
+        © SUBEB 2025. All rights reserved
+      </div>
+    </footer>
+  );
+}
+
+// Full footer for landing page (default export)
 export default function Footer() {
   return (
     <footer className="bg-white">

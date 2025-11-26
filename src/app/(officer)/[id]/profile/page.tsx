@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useParams, useRouter, notFound } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +13,6 @@ import {
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
 import { UserRound } from "lucide-react";
-import Sidebar from "@/components/shared/Sidebar";
 
 export default function ProfilePage() {
   const params = useParams();
@@ -129,151 +127,142 @@ export default function ProfilePage() {
         </div>
       </Dialog>
 
-      <div className="min-h-screen bg-gray-50">
-        <PageHeader />
+      {/* Main Content */}
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-4xl">
+          <div className="bg-white rounded-lg shadow-sm p-6 sm:p-8">
+            {/* Profile Picture Section */}
+            <div className="flex items-start gap-6 mb-8 pb-8 border-b border-gray-200">
+              <div className="w-20 h-20 bg-brand-green rounded-full flex items-center justify-center flex-shrink-0">
+                <UserRound className="w-10 h-10 text-white" />
+              </div>
+              <div className="flex-1">
+                <Button
+                  variant="outline"
+                  className="text-sm border-gray-300 text-gray-700"
+                >
+                  Upload profile picture
+                </Button>
+              </div>
+            </div>
 
-        <div className="flex">
-          {/* Sidebar */}
-          <Sidebar variant="officer" activeItem="profile" userId={profileId} />
-
-          {/* Main Content */}
-          <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
-            <div className="max-w-4xl">
-              <div className="bg-white rounded-lg shadow-sm p-6 sm:p-8">
-                {/* Profile Picture Section */}
-                <div className="flex items-start gap-6 mb-8 pb-8 border-b border-gray-200">
-                  <div className="w-20 h-20 bg-brand-green rounded-full flex items-center justify-center flex-shrink-0">
-                    <UserRound className="w-10 h-10 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <Button
-                      variant="outline"
-                      className="text-sm border-gray-300 text-gray-700"
-                    >
-                      Upload profile picture
-                    </Button>
-                  </div>
+            {/* Profile Form */}
+            <div className="space-y-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="name"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Name
+                  </Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={profileData.name}
+                    onChange={handleProfileChange}
+                    placeholder="Jane Doe"
+                    className="w-full"
+                  />
                 </div>
 
-                {/* Profile Form */}
-                <div className="space-y-6 mb-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="name"
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        Name
-                      </Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={profileData.name}
-                        onChange={handleProfileChange}
-                        placeholder="Jane Doe"
-                        className="w-full"
-                      />
-                    </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="email"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={profileData.email}
+                    onChange={handleProfileChange}
+                    placeholder="myself@gmail.com"
+                    className="w-full"
+                  />
+                </div>
+              </div>
 
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="email"
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        Email
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={profileData.email}
-                        onChange={handleProfileChange}
-                        placeholder="myself@gmail.com"
-                        className="w-full"
-                      />
-                    </div>
-                  </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="phoneNumber"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Phone number
+                </Label>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={profileData.phoneNumber}
+                  onChange={handleProfileChange}
+                  placeholder="+234"
+                  className="w-full max-w-md"
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="phoneNumber"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Phone number
-                    </Label>
-                    <Input
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      value={profileData.phoneNumber}
-                      onChange={handleProfileChange}
-                      placeholder="+234"
-                      className="w-full max-w-md"
-                    />
-                  </div>
+              <div>
+                <Button
+                  onClick={handleSaveProfile}
+                  className="bg-gray-200 text-gray-700 hover:bg-gray-300"
+                >
+                  Save changes
+                </Button>
+              </div>
+            </div>
 
-                  <div>
-                    <Button
-                      onClick={handleSaveProfile}
-                      className="bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    >
-                      Save changes
-                    </Button>
-                  </div>
+            {/* Change Password Section */}
+            <div className="pt-8 border-t border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">
+                Change password
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="oldPassword"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Old password
+                  </Label>
+                  <Input
+                    id="oldPassword"
+                    name="oldPassword"
+                    type="password"
+                    value={passwordData.oldPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Enter your old password"
+                    className="w-full"
+                  />
                 </div>
 
-                {/* Change Password Section */}
-                <div className="pt-8 border-t border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                    Change password
-                  </h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="oldPassword"
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        Old password
-                      </Label>
-                      <Input
-                        id="oldPassword"
-                        name="oldPassword"
-                        type="password"
-                        value={passwordData.oldPassword}
-                        onChange={handlePasswordChange}
-                        placeholder="Enter your old password"
-                        className="w-full"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="newPassword"
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        New password
-                      </Label>
-                      <Input
-                        id="newPassword"
-                        name="newPassword"
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={handlePasswordChange}
-                        placeholder="Enter your new password"
-                        className="w-full"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Button
-                      onClick={handleChangePassword}
-                      className="bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    >
-                      Save changes
-                    </Button>
-                  </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="newPassword"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    New password
+                  </Label>
+                  <Input
+                    id="newPassword"
+                    name="newPassword"
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Enter your new password"
+                    className="w-full"
+                  />
                 </div>
+              </div>
+
+              <div>
+                <Button
+                  onClick={handleChangePassword}
+                  className="bg-gray-200 text-gray-700 hover:bg-gray-300"
+                >
+                  Save changes
+                </Button>
               </div>
             </div>
           </div>
