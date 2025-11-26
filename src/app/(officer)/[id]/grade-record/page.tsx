@@ -16,7 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { LoadingModal } from "@/components/ui/LoadingModal";
 import { useGlobalAdminDashboard, useCurrentSession } from "@/services";
-import { OfficerSidebar } from "@/components/shared/Sidebar";
+import Sidebar from "@/components/shared/Sidebar";
 import { MagnifyingGlassIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import { Download } from "lucide-react";
 
@@ -118,7 +118,11 @@ export default function GradeRecordPage() {
 
         <div className="flex">
           {/* Sidebar */}
-          <OfficerSidebar activeItem="grade-record" userId={userId} />
+          <Sidebar
+            variant="officer"
+            activeItem="grade-record"
+            userId={userId}
+          />
 
           {/* Main Content */}
           <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">

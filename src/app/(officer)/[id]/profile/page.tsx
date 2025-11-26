@@ -14,7 +14,7 @@ import {
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
 import { UserRound } from "lucide-react";
-import { OfficerSidebar } from "@/components/shared/Sidebar";
+import Sidebar from "@/components/shared/Sidebar";
 
 export default function ProfilePage() {
   const params = useParams();
@@ -134,7 +134,7 @@ export default function ProfilePage() {
 
         <div className="flex">
           {/* Sidebar */}
-          <OfficerSidebar activeItem="profile" userId={profileId} />
+          <Sidebar variant="officer" activeItem="profile" userId={profileId} />
 
           {/* Main Content */}
           <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">

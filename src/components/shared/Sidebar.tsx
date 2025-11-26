@@ -16,27 +16,109 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
 
-interface SidebarProps {
+type SidebarVariant = "admin" | "officer";
+
+interface BaseSidebarProps {
+  onNavigate?: () => void;
+}
+
+interface AdminSidebarProps extends BaseSidebarProps {
+  variant?: "admin";
   isOpen: boolean;
   onToggle: () => void;
   onRefresh?: () => void;
-  onNavigate?: () => void;
 }
 
-interface OfficerSidebarProps {
+interface OfficerSidebarProps extends BaseSidebarProps {
+  variant: "officer";
   activeItem: "profile" | "grade-record";
   userId: string;
-  onNavigate?: () => void;
 }
 
-// Original Admin Sidebar (Default Export)
-const Sidebar: React.FC<SidebarProps> = ({
-  isOpen,
-  onToggle,
-  onRefresh,
-  onNavigate,
-}) => {
+type SidebarProps = AdminSidebarProps | OfficerSidebarProps;
+
+const Sidebar: React.FC<SidebarProps> = (props) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuthStore();
+
+  const variant = props.variant || "admin";
+
+  // Officer Sidebar
+  if (variant === "officer") {
+    const { activeItem, userId, onNavigate } = props as OfficerSidebarProps;
+
+    const handleLogout = () => {
+      logout();
+      router.push("/login");
+    };
+
+    const navigationItems = [
+      {
+        id: "profile",
+        label: "My profile",
+        icon: <UserRound size={20} />,
+        href: `/${userId}/profile`,
+      },
+      {
+        id: "grade-record",
+        label: "Grade record",
+        icon: <ClipboardList size={20} />,
+        href: `/${userId}/grade-record`,
+      },
+    ];
+
+    return (
+      <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+        <div className="flex flex-col h-screen">
+          {/* Navigation */}
+          <nav className="flex-1 p-6">
+            <ul className="space-y-2">
+              {navigationItems.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    href={item.href}
+                    onClick={() => onNavigate?.()}
+                    className={`
+                      flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+                      ${
+                        activeItem === item.id
+                          ? "bg-brand-green/10 text-brand-green"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }
+                    `}
+                  >
+                    <span>{item.icon}</span>
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Logout Button */}
+          <div className="p-6 border-t border-gray-200">
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 w-full transition-all duration-200"
+            >
+              <LogOut size={20} />
+              <span className="font-medium">Logout</span>
+            </button>
+
+            {/* Copyright Footer */}
+            <div className="mt-6 text-center text-xs text-gray-500">
+              © SUBEB 2025. All rights reserved
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin Sidebar
+  const { isOpen, onToggle, onRefresh, onNavigate } =
+    props as AdminSidebarProps;
 
   const navigationItems = [
     {
@@ -192,83 +274,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
     </>
-  );
-};
-
-// Officer Sidebar (Named Export)
-export const OfficerSidebar: React.FC<OfficerSidebarProps> = ({
-  activeItem,
-  userId,
-  onNavigate,
-}) => {
-  const router = useRouter();
-  const { logout } = useAuthStore();
-
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
-
-  const navigationItems = [
-    {
-      id: "profile",
-      label: "My profile",
-      icon: <UserRound size={20} />,
-      href: `/${userId}/profile`,
-    },
-    {
-      id: "grade-record",
-      label: "Grade record",
-      icon: <ClipboardList size={20} />,
-      href: `/${userId}/grade-record`,
-    },
-  ];
-
-  return (
-    <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
-      <div className="flex flex-col h-screen">
-        {/* Navigation */}
-        <nav className="flex-1 p-6">
-          <ul className="space-y-2">
-            {navigationItems.map((item) => (
-              <li key={item.id}>
-                <Link
-                  href={item.href}
-                  onClick={() => onNavigate?.()}
-                  className={`
-                    flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-                    ${
-                      activeItem === item.id
-                        ? "bg-brand-green/10 text-brand-green"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }
-                  `}
-                >
-                  <span>{item.icon}</span>
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* Logout Button */}
-        <div className="p-6 border-t border-gray-200">
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 w-full transition-all duration-200"
-          >
-            <LogOut size={20} />
-            <span className="font-medium">Logout</span>
-          </button>
-
-          {/* Copyright Footer */}
-          <div className="mt-6 text-center text-xs text-gray-500">
-            © SUBEB 2025. All rights reserved
-          </div>
-        </div>
-      </div>
-    </div>
   );
 };
 
