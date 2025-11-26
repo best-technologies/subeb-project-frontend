@@ -52,6 +52,13 @@ function hasRoleAccess(role: string, pathname: string): boolean {
 
   // Check if grade-entry-officer has access
   if (role === "grade-entry-officer") {
+    // Check dynamic routes: /:id/profile and /:id/grade-record
+    const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
+    if (dynamicRoutePattern.test(pathname)) {
+      return true;
+    }
+
+    // Check static routes
     return roleRoutes["grade-entry-officer"].some((route) =>
       pathname.startsWith(route)
     );
