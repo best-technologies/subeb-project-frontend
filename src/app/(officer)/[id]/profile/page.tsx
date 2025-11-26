@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useParams, useRouter, notFound } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -16,7 +16,6 @@ import { UserRound } from "lucide-react";
 
 export default function ProfilePage() {
   const params = useParams();
-  const router = useRouter();
   const { user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);

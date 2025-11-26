@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from "react";
 import { useParams, notFound } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
@@ -18,15 +17,6 @@ import { LoadingModal } from "@/components/ui/LoadingModal";
 import { useGlobalAdminDashboard, useCurrentSession } from "@/services";
 import { MagnifyingGlassIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import { Download } from "lucide-react";
-
-// Mock data for when no results are found
-const EMPTY_STATE_DATA = {
-  academicYear: "2024/2025",
-  term: "First",
-  lga: "Ugwunagbo",
-  school: "Abayi Nchokoro",
-  class: "Primary 1",
-};
 
 export default function GradeRecordPage() {
   const params = useParams();
@@ -51,10 +41,17 @@ export default function GradeRecordPage() {
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(true);
 
   // Mock grades data (will be replaced with API)
-  const [grades] = useState<any[]>([]);
+  const [grades] = useState<
+    Array<{
+      id: string;
+      studentName: string;
+      examNumber: string;
+      gender: string;
+      subjectRecorded: string;
+    }>
+  >([]);
 
   // Extract data from API
   const schools = useMemo(
@@ -64,16 +61,16 @@ export default function GradeRecordPage() {
 
   const lgas = useMemo(
     () =>
-      dashboardData?.data?.lgas?.map((l: any) => l.name) ||
-      dashboardData?.lgas?.map((l: any) => l.name) ||
+      dashboardData?.data?.lgas?.map((l: { name: string }) => l.name) ||
+      dashboardData?.lgas?.map((l: { name: string }) => l.name) ||
       [],
     [dashboardData]
   );
 
   const classes = useMemo(
     () =>
-      dashboardData?.data?.classes?.map((c: any) => c.name) ||
-      dashboardData?.classes?.map((c: any) => c.name) ||
+      dashboardData?.data?.classes?.map((c: { name: string }) => c.name) ||
+      dashboardData?.classes?.map((c: { name: string }) => c.name) ||
       [],
     [dashboardData]
   );
@@ -81,14 +78,18 @@ export default function GradeRecordPage() {
   // Filter schools by selected LGA
   const filteredSchools = useMemo(() => {
     if (!selectedLga || !schools) return [];
-    return schools.filter((school: any) => school.lga === selectedLga);
+    return schools.filter(
+      (school: { lga?: string }) => school.lga === selectedLga
+    );
   }, [schools, selectedLga]);
 
   // Auto-populate from current session
   React.useEffect(() => {
     if (currentSession) {
       setSelectedYear(currentSession.name);
-      const currentTerm = currentSession.terms.find((t: any) => t.isCurrent);
+      const currentTerm = currentSession.terms.find(
+        (t: { isCurrent: boolean; name: string }) => t.isCurrent
+      );
       if (currentTerm) {
         const termName = currentTerm.name.includes("FIRST")
           ? "First"
@@ -210,41 +211,8 @@ export default function GradeRecordPage() {
                     <SelectValue placeholder="Select school" />
                   </SelectTrigger>
                   <SelectContent className="border-brand-green/20 text-brand-green">
-                    {filteredSchools.map((school: any) => (
-                      <SelectItem
-                        key={school.id}
-                        value={school.name}
-                        className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5"
-                      >
-                        {school.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Second Row: School and Class */}
-            {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-2 lg:col-start-1">
-                  <Label className="text-sm font-medium text-gray-700">
-                    School Name
-                  </Label>
-                  <Select
-                    value={selectedSchool}
-                    onValueChange={setSelectedSchool}
-                    disabled={!selectedLga}
-                  >
-                    <SelectTrigger
-                      className={`w-full focus:ring-brand-green hover:border-brand-green/40 border-brand-green ${
-                        !selectedLga ? "opacity-50" : ""
-                      }`}
-                    >
-                      <SelectValue placeholder="Select school" />
-                    </SelectTrigger>
-                    <SelectContent className="border-brand-green/20 text-brand-green">
-                      {filteredSchools.map((school: any) => (
+                    {filteredSchools.map(
+                      (school: { id: string; name: string }) => (
                         <SelectItem
                           key={school.id}
                           value={school.name}
@@ -252,37 +220,37 @@ export default function GradeRecordPage() {
                         >
                           {school.name}
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    Class
-                  </Label>
-                  <Select
-                    value={selectedClass}
-                    onValueChange={setSelectedClass}
-                  >
-                    <SelectTrigger className="w-full focus:ring-brand-green hover:border-brand-green/40">
-                      <SelectValue placeholder="Select class" />
-                    </SelectTrigger>
-                    <SelectContent className="border-brand-green/20 text-brand-green">
-                      {classes.map((cls: string) => (
-                        <SelectItem
-                          key={cls}
-                          value={cls}
-                          className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5"
-                        >
-                          {cls}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
+            </div>
+
+            {/* Second Row: Class */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">
+                  Class
+                </Label>
+                <Select value={selectedClass} onValueChange={setSelectedClass}>
+                  <SelectTrigger className="w-full focus:ring-brand-green hover:border-brand-green/40">
+                    <SelectValue placeholder="Select class" />
+                  </SelectTrigger>
+                  <SelectContent className="border-brand-green/20 text-brand-green">
+                    {classes.map((cls: string) => (
+                      <SelectItem
+                        key={cls}
+                        value={cls}
+                        className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5"
+                      >
+                        {cls}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
             {/* Search and Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
@@ -352,7 +320,7 @@ export default function GradeRecordPage() {
                 </thead>
                 <tbody>
                   {hasResults ? (
-                    grades.map((grade: any, idx: number) => (
+                    grades.map((grade, idx: number) => (
                       <tr key={idx} className="border-b border-gray-100">
                         <td className="py-4 px-4 text-sm text-gray-900">
                           {grade.studentName}

@@ -16,8 +16,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
 
-type SidebarVariant = "admin" | "officer";
-
 interface BaseSidebarProps {
   onNavigate?: () => void;
 }
