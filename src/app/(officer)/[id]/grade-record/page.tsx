@@ -40,7 +40,6 @@ export default function GradeRecordPage() {
   const [selectedTerm, setSelectedTerm] = useState("First");
   const [selectedLga, setSelectedLga] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("");
-  const [selectedClass, setSelectedClass] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Mock grades data (will be replaced with API)
@@ -64,14 +63,6 @@ export default function GradeRecordPage() {
     () =>
       dashboardData?.data?.lgas?.map((l: { name: string }) => l.name) ||
       dashboardData?.lgas?.map((l: { name: string }) => l.name) ||
-      [],
-    [dashboardData]
-  );
-
-  const classes = useMemo(
-    () =>
-      dashboardData?.data?.classes?.map((c: { name: string }) => c.name) ||
-      dashboardData?.classes?.map((c: { name: string }) => c.name) ||
       [],
     [dashboardData]
   );

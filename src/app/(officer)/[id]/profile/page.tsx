@@ -11,8 +11,9 @@ import { Dialog } from "@/components/ui/dialog";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/solid";
-import { Image } from "lucide-react";
+// import { Image } from "lucide-react";
 
 export default function ProfilePage() {
   const params = useParams();
@@ -133,7 +134,7 @@ export default function ProfilePage() {
             {/* Profile Picture Section */}
             <div className="flex items-start gap-6 mb-8 pb-8">
               <div className="w-15 h-15 bg-[#F5FAF8] rounded-full flex items-center justify-center flex-shrink-0">
-                <Image className="w-6 h-6 text-brand-green" />
+                <PhotoIcon className="w-6 h-6 text-brand-green" />
               </div>
               <div className="flex-1">
                 <Button size="sm" className="bg-brand-green">
