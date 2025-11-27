@@ -27,7 +27,7 @@ export default function OfficerLayout({
       {/* Sidebar and Content - Flex grow */}
       <div className="flex flex-1">
         <Sidebar variant="officer" activeItem={activeItem} userId={userId} />
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 w-full lg:w-auto">{children}</div>
       </div>
 
       {/* Footer - Full Width */}

@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
     ];
 
     return (
-      <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+      <div className="hidden lg:flex w-64 bg-white border-r border-gray-200 flex-shrink-0">
         <div className="flex flex-col h-full">
           {/* Navigation - Top */}
           <nav className="p-0">
