@@ -323,7 +323,7 @@ export default function GradeRecordPage() {
                               src="/svgs/scroll-icon.svg"
                               alt="Scroll Icon"
                               fill
-                              className="object-contain text-red-400"
+                              className="object-contain"
                             />
                           </div>
                           <p className="text-gray-600 text-sm max-w-md">
