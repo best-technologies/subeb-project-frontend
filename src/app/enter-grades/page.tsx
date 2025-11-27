@@ -318,7 +318,7 @@ export default function EnterGradesPage() {
 
       {/* Header */}
       <PageHeader />
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-0 pt-6">
         {/* Page Title - Centered */}
         <div className="text-center mb-8">
           <h1 className="text-lg lg:text-3xl font-medium text-brand-black mb-2">
@@ -334,7 +334,7 @@ export default function EnterGradesPage() {
           <div className="flex">
             <button
               onClick={() => handleTabChange("session")}
-              className={`flex-1 px-6 py-4 font-medium text-center transition-colors rounded-bl-lg rounded-tl-lg ${
+              className={`flex-1 px-2 sm:px-4 md:px-6 py-3 md:py-4 font-medium text-xs sm:text-sm md:text-base text-center transition-colors rounded-bl-lg rounded-tl-lg ${
                 activeTab === "session"
                   ? "text-brand-green border-b-4 border-brand-green bg-brand-green/4"
                   : "text-gray-500 hover:text-gray-700"
@@ -345,7 +345,7 @@ export default function EnterGradesPage() {
             <button
               onClick={() => canProceedToStudent && handleTabChange("student")}
               disabled={!canProceedToStudent}
-              className={`flex-1 px-6 py-4 font-medium text-center transition-colors ${
+              className={`flex-1 px-2 sm:px-4 md:px-6 py-3 md:py-4 font-medium text-xs sm:text-sm md:text-base text-center transition-colors ${
                 activeTab === "student"
                   ? "text-brand-green border-b-4 border-brand-green bg-brand-green/4"
                   : canProceedToStudent
@@ -358,7 +358,7 @@ export default function EnterGradesPage() {
             <button
               onClick={() => canProceedToReview && handleTabChange("review")}
               disabled={!canProceedToReview}
-              className={`flex-1 px-6 py-4 font-medium text-center transition-colors rounded-br-lg rounded-tr-lg ${
+              className={`flex-1 px-2 sm:px-4 md:px-6 py-3 md:py-4 font-medium text-xs sm:text-sm md:text-base text-center transition-colors rounded-br-lg rounded-tr-lg ${
                 activeTab === "review"
                   ? "text-brand-green border-b-4 border-brand-green bg-brand-green/4"
                   : canProceedToReview
