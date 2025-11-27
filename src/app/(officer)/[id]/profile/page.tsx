@@ -12,7 +12,7 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
-import { UserRound } from "lucide-react";
+import { Image } from "lucide-react";
 
 export default function ProfilePage() {
   const params = useParams();
@@ -127,31 +127,29 @@ export default function ProfilePage() {
       </Dialog>
 
       {/* Main Content */}
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-4xl">
-          <div className="bg-white rounded-lg shadow-sm p-6 sm:p-8">
+      <div className="bg-white">
+        <div>
+          <div className="p-6 sm:p-8">
             {/* Profile Picture Section */}
-            <div className="flex items-start gap-6 mb-8 pb-8 border-b border-gray-200">
-              <div className="w-20 h-20 bg-brand-green rounded-full flex items-center justify-center flex-shrink-0">
-                <UserRound className="w-10 h-10 text-white" />
+            <div className="flex items-start gap-6 mb-8 pb-8">
+              <div className="w-15 h-15 bg-[#F5FAF8] rounded-full flex items-center justify-center flex-shrink-0">
+                <Image className="w-6 h-6 text-brand-green" />
               </div>
               <div className="flex-1">
-                <Button
-                  variant="outline"
-                  className="text-sm border-gray-300 text-gray-700"
-                >
+                <Button size="sm" className="bg-brand-green">
                   Upload profile picture
                 </Button>
               </div>
             </div>
 
-            {/* Profile Form */}
-            <div className="space-y-6 mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Profile Form - Two Column Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Left Column - Profile Section */}
+              <div className="space-y-6">
                 <div className="space-y-2">
                   <Label
                     htmlFor="name"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-brand-black-accent"
                   >
                     Name
                   </Label>
@@ -160,7 +158,7 @@ export default function ProfilePage() {
                     name="name"
                     value={profileData.name}
                     onChange={handleProfileChange}
-                    placeholder="Jane Doe"
+                    placeholder="Ade Chuckwudi"
                     className="w-full"
                   />
                 </div>
@@ -168,7 +166,7 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="email"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-brand-black-accent"
                   >
                     Email
                   </Label>
@@ -178,50 +176,48 @@ export default function ProfilePage() {
                     type="email"
                     value={profileData.email}
                     onChange={handleProfileChange}
-                    placeholder="myself@gmail.com"
+                    placeholder="adechuckwudi@gmail.com"
                     className="w-full"
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="phoneNumber"
+                    className="text-sm font-medium text-brand-black-accent"
+                  >
+                    Phone number
+                  </Label>
+                  <Input
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    value={profileData.phoneNumber}
+                    onChange={handleProfileChange}
+                    placeholder="+234 801 234 5678"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <Button
+                    onClick={handleSaveProfile}
+                    className="bg-brand-green"
+                  >
+                    Save changes
+                  </Button>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor="phoneNumber"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Phone number
-                </Label>
-                <Input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={profileData.phoneNumber}
-                  onChange={handleProfileChange}
-                  placeholder="+234"
-                  className="w-full max-w-md"
-                />
-              </div>
+              {/* Right Column - Password Section */}
+              <div className="space-y-6">
+                <h2 className="text-lg font-medium text-brand-black">
+                  Change password
+                </h2>
 
-              <div>
-                <Button
-                  onClick={handleSaveProfile}
-                  className="bg-gray-200 text-gray-700 hover:bg-gray-300"
-                >
-                  Save changes
-                </Button>
-              </div>
-            </div>
-
-            {/* Change Password Section */}
-            <div className="pt-8 border-t border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                Change password
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="space-y-2">
                   <Label
                     htmlFor="oldPassword"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-brand-black-accent"
                   >
                     Old password
                   </Label>
@@ -239,7 +235,7 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="newPassword"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-brand-black-accent"
                   >
                     New password
                   </Label>
@@ -253,15 +249,15 @@ export default function ProfilePage() {
                     className="w-full"
                   />
                 </div>
-              </div>
 
-              <div>
-                <Button
-                  onClick={handleChangePassword}
-                  className="bg-gray-200 text-gray-700 hover:bg-gray-300"
-                >
-                  Save changes
-                </Button>
+                <div>
+                  <Button
+                    onClick={handleChangePassword}
+                    className="bg-brand-green"
+                  >
+                    Save changes
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
