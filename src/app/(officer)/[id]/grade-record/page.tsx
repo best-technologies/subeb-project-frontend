@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Image from "next/image";
 import { useParams, notFound } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/Button";
@@ -114,16 +115,18 @@ export default function GradeRecordPage() {
       <LoadingModal isOpen={isLoading} message="Loading grade records..." />
 
       {/* Main Content */}
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-7xl">
+      <div>
+        <div className="max-w-7xl bg-white">
           {/* Filters Section */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Filter</h2>
+          <div className="bg-white p-6 mb-6">
+            <h2 className="text-lg font-semibold text-brand-black mb-6">
+              Filter
+            </h2>
 
             {/* First Row: Year, Term, LGA, School */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
+                <Label className="text-sm font-medium text-brand-black-accent">
                   Academic Year
                 </Label>
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
@@ -142,7 +145,7 @@ export default function GradeRecordPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
+                <Label className="text-sm font-medium text-brand-black-accent">
                   Term
                 </Label>
                 <Select value={selectedTerm} onValueChange={setSelectedTerm}>
@@ -173,7 +176,7 @@ export default function GradeRecordPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
+                <Label className="text-sm font-medium text-brand-black-accent">
                   Local Government Area
                 </Label>
                 <Select value={selectedLga} onValueChange={setSelectedLga}>
@@ -195,7 +198,7 @@ export default function GradeRecordPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
+                <Label className="text-sm font-medium text-brand-black-accent">
                   School Name
                 </Label>
                 <Select
@@ -227,33 +230,8 @@ export default function GradeRecordPage() {
               </div>
             </div>
 
-            {/* Second Row: Class */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  Class
-                </Label>
-                <Select value={selectedClass} onValueChange={setSelectedClass}>
-                  <SelectTrigger className="w-full focus:ring-brand-green hover:border-brand-green/40">
-                    <SelectValue placeholder="Select class" />
-                  </SelectTrigger>
-                  <SelectContent className="border-brand-green/20 text-brand-green">
-                    {classes.map((cls: string) => (
-                      <SelectItem
-                        key={cls}
-                        value={cls}
-                        className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5"
-                      >
-                        {cls}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             {/* Search and Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-6">
+            <div className="flex flex-col sm:flex-row gap-4 mt-10 border p-4 pt-6 rounded-lg justify-between items-center">
               <div className="flex-1 relative">
                 <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <Input
@@ -263,37 +241,37 @@ export default function GradeRecordPage() {
                   className="pl-10 w-full"
                 />
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 mb-2">
                 <Button
                   variant="outline"
-                  className="flex items-center gap-2 border-gray-300"
+                  className="flex items-center gap-2 border-gray-300 h-12"
                 >
-                  <FunnelIcon className="w-4 h-4" />
                   Filter
+                  <FunnelIcon className="w-4 h-4" />
                 </Button>
                 <Button
                   onClick={handleDownload}
-                  className="flex items-center gap-2 bg-brand-green hover:bg-brand-green/90 text-white"
+                  className="flex items-center gap-2 bg-brand-green hover:bg-brand-green/90 text-white h-12"
                 >
-                  <Download className="w-4 h-4" />
                   Download
+                  <Download className="w-4 h-4" />
                 </Button>
               </div>
             </div>
           </div>
 
           {/* Results Section */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white p-6">
             {/* Results Header */}
             <div className="mb-6">
               <p className="text-sm text-gray-600">
                 Showing ({grades.length}) results for{" "}
                 <span className="font-semibold text-gray-900">
-                  &quot;{selectedSchool || "Abayi Nchokoro"}&quot;
+                  &quot;{selectedSchool || "nill"}&quot;
                 </span>{" "}
                 school of{" "}
                 <span className="font-semibold text-gray-900">
-                  &quot;{selectedLga || "Ugwunagbo"}&quot;
+                  &quot;{selectedLga || "nill"}&quot;
                 </span>{" "}
                 LGA
               </p>
@@ -303,17 +281,17 @@ export default function GradeRecordPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 uppercase">
+                  <tr className="bg-[#F4F6F8]">
+                    <th className="text-left py-3 px-4 text-sm font-medium text-brand-black-accent uppercase">
                       Student Name
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 uppercase">
+                    <th className="text-left py-3 px-4 text-sm font-medium text-brand-black-accent uppercase">
                       Exam Number
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 uppercase">
+                    <th className="text-left py-3 px-4 text-sm font-medium text-brand-black-accent uppercase">
                       Gender
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 uppercase">
+                    <th className="text-left py-3 px-4 text-sm font-medium text-brand-black-accent uppercase">
                       Subject Recorded
                     </th>
                   </tr>
@@ -340,46 +318,13 @@ export default function GradeRecordPage() {
                     <tr>
                       <td colSpan={4} className="py-16">
                         <div className="flex flex-col items-center justify-center text-center">
-                          <div className="w-32 h-32 mb-4 opacity-20">
-                            <svg
-                              viewBox="0 0 200 200"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <circle cx="100" cy="100" r="80" fill="#E5E7EB" />
-                              <rect
-                                x="60"
-                                y="70"
-                                width="80"
-                                height="60"
-                                rx="4"
-                                fill="#9CA3AF"
-                              />
-                              <line
-                                x1="75"
-                                y1="85"
-                                x2="125"
-                                y2="85"
-                                stroke="white"
-                                strokeWidth="3"
-                              />
-                              <line
-                                x1="75"
-                                y1="100"
-                                x2="110"
-                                y2="100"
-                                stroke="white"
-                                strokeWidth="3"
-                              />
-                              <line
-                                x1="75"
-                                y1="115"
-                                x2="120"
-                                y2="115"
-                                stroke="white"
-                                strokeWidth="3"
-                              />
-                            </svg>
+                          <div className="w-32 h-32 mb-4 opacity-20 relative">
+                            <Image
+                              src="/svgs/scroll-icon.svg"
+                              alt="Scroll Icon"
+                              fill
+                              className="object-contain text-red-400"
+                            />
                           </div>
                           <p className="text-gray-600 text-sm max-w-md">
                             Looks like you have no results recorded. Once you
