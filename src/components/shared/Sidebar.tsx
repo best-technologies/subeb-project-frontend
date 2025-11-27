@@ -70,19 +70,19 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
       <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
         <div className="flex flex-col h-full">
           {/* Navigation - Top */}
-          <nav className="p-6">
-            <ul className="space-y-2">
+          <nav className="p-0">
+            <ul className="space-y-0">
               {navigationItems.map((item) => (
                 <li key={item.id}>
                   <Link
                     href={item.href}
                     onClick={() => onNavigate?.()}
                     className={`
-                      flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+                      flex items-center space-x-3 px-6 py-4 transition-all duration-200 w-full
                       ${
                         activeItem === item.id
-                          ? "bg-brand-green/10 text-brand-green"
-                          : "text-gray-700 hover:bg-gray-100"
+                          ? "bg-[#F5FAF8] text-brand-green border-l-6 border-brand-green"
+                          : "text-gray-700 hover:bg-gray-50"
                       }
                     `}
                   >
