@@ -46,8 +46,9 @@ export const useAuthStore = create<AuthStore>()(
           accessToken,
           refreshToken,
         });
-        // Sync updated tokens to cookies
-        syncTokensToCookies();
+        // Sync updated tokens to cookies with user role
+        const currentState = useAuthStore.getState();
+        syncTokensToCookies(currentState.user?.role);
       },
 
       // Clear authentication state on logout

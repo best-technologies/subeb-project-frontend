@@ -35,7 +35,8 @@ const roleRoutes = {
  * Get default redirect path based on user role
  */
 function getRoleDefaultPath(role: string): string {
-  if (role === "grade-entry-officer") {
+  const normalizedRole = role.toLowerCase();
+  if (normalizedRole === "grade-entry-officer") {
     return "/enter-grades";
   }
   return "/dashboard";
@@ -45,13 +46,15 @@ function getRoleDefaultPath(role: string): string {
  * Check if user has access to a specific path based on their role
  */
 function hasRoleAccess(role: string, pathname: string): boolean {
-  // Admin has access to all routes
-  if (role === "admin") {
+  const normalizedRole = role.toLowerCase();
+
+  // Admin and SUPER_ADMIN have access to all routes
+  if (normalizedRole === "admin" || normalizedRole === "super_admin") {
     return true;
   }
 
   // Check if grade-entry-officer has access
-  if (role === "grade-entry-officer") {
+  if (normalizedRole === "grade-entry-officer") {
     // Check dynamic routes: /:id/profile and /:id/grade-record
     const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
     if (dynamicRoutePattern.test(pathname)) {
@@ -148,10 +151,11 @@ export function middleware(request: NextRequest) {
   // Scenario 3: Authenticated user trying to access route they don't have permission for
   // Skip this check for public routes (like homepage)
   if (hasValidToken && userRole && !isPublicRoute && !isAuthRoute) {
+    const hasAccess = hasRoleAccess(userRole, pathname);
     const defaultPath = getRoleDefaultPath(userRole);
 
-    // Prevent redirect loop: don't redirect if already on default path
-    if (!hasRoleAccess(userRole, pathname) && pathname !== defaultPath) {
+    // Prevent redirect loop: don't redirect if already on default path or if user has access
+    if (!hasAccess && pathname !== defaultPath) {
       // Redirect to their default page based on role
       const redirectUrl = new URL(defaultPath, request.url);
 
