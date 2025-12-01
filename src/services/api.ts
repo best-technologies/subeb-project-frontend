@@ -8,6 +8,7 @@ import {
 } from "./types/studentsDashboardResponse";
 import { CurrentSessionResponse } from "./api/session";
 import { StudentDetailsResponse } from "./types/studentDetailsResponse";
+import { getAccessToken } from "@/lib/tokens";
 
 // API Configuration
 const API_BASE_URL =
@@ -44,16 +45,26 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
 
+    // Get access token and add to headers if available
+    const token = getAccessToken();
+    const authHeaders: HeadersInit = token
+      ? { Authorization: `Bearer ${token}` }
+      : {};
+
     const config: RequestInit = {
       ...options,
       headers: {
         ...this.defaultHeaders,
+        ...authHeaders,
         ...options.headers,
       },
     };
 
     // console.log("API Client - Making request to:", url);
     // console.log("API Client - Request config:", config);
+    if (process.env.NODE_ENV === "development" && token) {
+      console.log("API Client - Token added:", token.substring(0, 20) + "...");
+    }
 
     try {
       const response = await fetch(url, config);

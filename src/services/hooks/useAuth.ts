@@ -52,12 +52,17 @@ export function useLogin() {
           sub: user.sub,
         };
 
-        // Store tokens (using 7 days for refresh token as specified)
+        // Store tokens
+        // Since backend doesn't provide a separate refresh token yet,
+        // we'll use the access token for both (with a long expiry)
+        // TODO: Update when backend implements proper refresh token flow
         const expiresIn = 7 * 24 * 60 * 60; // 7 days in seconds
         setTokens(access_token, access_token, expiresIn);
 
-        // Update Zustand store
+        // Update Zustand store and sync to cookies for middleware
         setAuth(transformedUser, access_token, access_token);
+
+        console.log("Tokens stored and synced to cookies");
 
         // Redirect will be handled in the component based on role
       }

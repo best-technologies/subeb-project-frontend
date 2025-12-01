@@ -131,22 +131,28 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Scenario 2: Authenticated user trying to access auth pages (login/register)
-  if (hasValidToken && isAuthRoute) {
+  // Scenario 2: Authenticated user trying to access auth pages (login/register) or homepage
+  if (hasValidToken && (isAuthRoute || pathname === "/")) {
     // Check if there's a redirect parameter
     const redirectParam = request.nextUrl.searchParams.get("redirect");
     const defaultPath = getRoleDefaultPath(userRole || "admin");
-    const redirectUrl = new URL(redirectParam || defaultPath, request.url);
+    const targetPath = redirectParam || defaultPath;
 
-    return NextResponse.redirect(redirectUrl);
+    // Prevent redirect loop: only redirect if not already on target path
+    if (pathname !== targetPath) {
+      const redirectUrl = new URL(targetPath, request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   // Scenario 3: Authenticated user trying to access route they don't have permission for
   // Skip this check for public routes (like homepage)
   if (hasValidToken && userRole && !isPublicRoute && !isAuthRoute) {
-    if (!hasRoleAccess(userRole, pathname)) {
+    const defaultPath = getRoleDefaultPath(userRole);
+
+    // Prevent redirect loop: don't redirect if already on default path
+    if (!hasRoleAccess(userRole, pathname) && pathname !== defaultPath) {
       // Redirect to their default page based on role
-      const defaultPath = getRoleDefaultPath(userRole);
       const redirectUrl = new URL(defaultPath, request.url);
 
       return NextResponse.redirect(redirectUrl);

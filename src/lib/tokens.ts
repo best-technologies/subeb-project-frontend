@@ -53,7 +53,14 @@ export function getTokens(): StoredTokens | null {
  * Get only the access token
  */
 export function getAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      "getAccessToken called:",
+      token ? `Token found (${token.substring(0, 20)}...)` : "No token"
+    );
+  }
+  return token;
 }
 
 /**

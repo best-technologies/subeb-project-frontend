@@ -80,16 +80,29 @@ export const useAuthStore = create<AuthStore>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           const tokens = getTokens();
+          console.log(
+            "Auth store hydrating, tokens:",
+            tokens ? "Found" : "Not found"
+          );
+          console.log(
+            "Auth store hydrating, user:",
+            state.user ? "Found" : "Not found"
+          );
+
           if (tokens && state.user) {
             // We have both user data and tokens, mark as authenticated
             state.isAuthenticated = true;
             state.accessToken = tokens.accessToken;
             state.refreshToken = tokens.refreshToken;
+            // Sync to cookies after hydration
+            syncTokensToCookies(state.user.role);
+            console.log("Auth state restored from storage");
           } else {
             // No tokens, ensure not authenticated
             state.isAuthenticated = false;
             state.accessToken = null;
             state.refreshToken = null;
+            console.log("No valid auth state to restore");
           }
         }
       },

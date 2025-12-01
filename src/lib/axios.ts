@@ -49,6 +49,17 @@ api.interceptors.request.use(
       const token = getAccessToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            "Token added to request:",
+            token.substring(0, 20) + "..."
+          );
+        }
+      } else {
+        console.warn(
+          "No access token found for protected endpoint:",
+          config.url
+        );
       }
     }
 
