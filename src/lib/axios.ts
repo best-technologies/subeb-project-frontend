@@ -4,7 +4,6 @@ import { getAccessToken, setTokens, clearTokens } from "./tokens";
 // Create axios instance with base configuration
 const api = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/${process.env.NEXT_PUBLIC_API_VERSION}`,
-  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
