@@ -12,11 +12,7 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { LoadingModal } from "@/components/ui/LoadingModal";
 import { Dialog } from "@/components/ui/dialog";
-import {
-  useLogin,
-  getAuthErrorMessage,
-  getRoleBasedRedirect,
-} from "@/services/hooks/useAuth";
+import { useLogin, getAuthErrorMessage } from "@/services/hooks/useAuth";
 import { useAuthStore } from "@/store/authStore";
 import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 
@@ -70,13 +66,9 @@ const LoginContent = () => {
         // Clear form for security
         form.reset();
 
-        // Get role-based redirect path
-        const intendedPath = searchParams.get("redirect") || undefined;
-        const userRole = response.data?.user?.role || "admin";
-        const redirectPath = getRoleBasedRedirect(userRole, intendedPath);
-
-        // Redirect based on user role
-        router.push(redirectPath);
+        // Redirect all users to homepage after login
+        // Users can then navigate to their role-specific pages from the header
+        router.push("/");
       } else {
         setErrorMessage(getAuthErrorMessage(response));
         setShowErrorDialog(true);

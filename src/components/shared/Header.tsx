@@ -1,12 +1,49 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Youtube, Menu, X } from "lucide-react";
+import { Youtube, Menu, X, LayoutDashboard, PenSquare } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Header() {
+  const { user, isAuthenticated } = useAuthStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Determine button props based on user role
+  const getActionButton = () => {
+    if (!isAuthenticated || !user) {
+      return {
+        text: "Get Started - It's free",
+        href: "/login",
+        icon: null,
+      };
+    }
+
+    const normalizedRole = user.role.toLowerCase();
+    if (normalizedRole === "super_admin") {
+      return {
+        text: "Go to Dashboard",
+        href: "/dashboard",
+        icon: <LayoutDashboard className="w-4 h-4" />,
+      };
+    } else if (normalizedRole === "subeb_officer") {
+      return {
+        text: "Enter Grades",
+        href: "/enter-grades",
+        icon: <PenSquare className="w-4 h-4" />,
+      };
+    }
+
+    // Fallback for unknown roles
+    return {
+      text: "Get Started - It's free",
+      href: "/login",
+      icon: null,
+    };
+  };
+
+  const actionButton = getActionButton();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,16 +93,19 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-3">
-            <Button
-              variant="outline"
-              className="!rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px]"
-            >
-              <Youtube className="w-4 h-4" />
-              <span>Watch a Demo</span>
-            </Button>
-            <Link href="/login">
+            {!isAuthenticated && (
+              <Button
+                variant="outline"
+                className="!rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px]"
+              >
+                <Youtube className="w-4 h-4" />
+                <span>Watch a Demo</span>
+              </Button>
+            )}
+            <Link href={actionButton.href}>
               <Button className="!rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] gap-[10px]">
-                Get Started - It&apos;s free
+                {actionButton.icon}
+                <span>{actionButton.text}</span>
               </Button>
             </Link>
           </div>
@@ -100,17 +140,23 @@ export default function Header() {
         }`}
       >
         <div className="flex flex-col p-8 pt-24 space-y-6">
-          <Button
-            variant="outline"
-            className="w-full !rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px] justify-center"
+          {!isAuthenticated && (
+            <Button
+              variant="outline"
+              className="w-full !rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px] justify-center"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Youtube className="w-4 h-4" />
+              <span>Watch a Demo</span>
+            </Button>
+          )}
+          <Link
+            href={actionButton.href}
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            <Youtube className="w-4 h-4" />
-            <span>Watch a Demo</span>
-          </Button>
-          <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
             <Button className="w-full !rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] gap-[10px] justify-center">
-              Get Started - It&apos;s free
+              {actionButton.icon}
+              <span>{actionButton.text}</span>
             </Button>
           </Link>
         </div>
