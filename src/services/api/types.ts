@@ -4,7 +4,8 @@ export interface OfficerData {
   lastName: string;
   email: string;
   phone: string;
-  nin: string;
+  address: string;
+  designation: string;
 }
 
 export interface ApiResponse<T = unknown> {
