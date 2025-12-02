@@ -116,17 +116,18 @@ export function getRoleBasedRedirect(
   role: string,
   intendedPath?: string
 ): string {
+  const normalizedRole = role.toLowerCase();
+
   // Define role-based access
   const roleAccess = {
-    admin: [
+    super_admin: [
       "/dashboard",
       "/profile",
       "/schools",
       "/students",
       "/enrol-officer",
-      "/enter-grades",
     ],
-    "grade-entry-officer": ["/enter-grades"],
+    subeb_officer: ["/enter-grades"],
   };
 
   // If there's an intended path, validate user has access to it
@@ -137,12 +138,31 @@ export function getRoleBasedRedirect(
     intendedPath !== "/"
   ) {
     // Check if user has access to the intended path
-    if (role === "admin") {
-      // Admin has access to all routes
-      return intendedPath;
-    } else if (role === "grade-entry-officer") {
-      // Check if grade-entry-officer has access
-      const hasAccess = roleAccess["grade-entry-officer"].some((route) =>
+    if (normalizedRole === "super_admin") {
+      // Check if trying to access officer dynamic routes
+      const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
+      if (dynamicRoutePattern.test(intendedPath)) {
+        return "/dashboard"; // Redirect to dashboard instead
+      }
+      // Check if trying to access /enter-grades
+      if (intendedPath.startsWith("/enter-grades")) {
+        return "/dashboard"; // Redirect to dashboard instead
+      }
+      // SUPER_ADMIN has access to dashboard routes
+      const hasAccess = roleAccess.super_admin.some((route) =>
+        intendedPath.startsWith(route)
+      );
+      if (hasAccess) {
+        return intendedPath;
+      }
+    } else if (normalizedRole === "subeb_officer") {
+      // Check dynamic routes: /:id/profile and /:id/grade-record
+      const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
+      if (dynamicRoutePattern.test(intendedPath)) {
+        return intendedPath;
+      }
+      // Check if SUBEB_OFFICER has access
+      const hasAccess = roleAccess.subeb_officer.some((route) =>
         intendedPath.startsWith(route)
       );
       if (hasAccess) {
@@ -153,11 +173,11 @@ export function getRoleBasedRedirect(
   }
 
   // Role-based default redirects
-  if (role === "grade-entry-officer") {
+  if (normalizedRole === "subeb_officer") {
     return "/enter-grades";
   }
 
-  // Admin or default fallback
+  // SUPER_ADMIN or default fallback
   return "/dashboard";
 }
 

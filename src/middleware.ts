@@ -20,15 +20,14 @@ const authRoutes = ["/login", "/register"];
 
 // Role-based route access
 const roleRoutes = {
-  admin: [
+  SUPER_ADMIN: [
     "/dashboard",
     "/profile",
     "/schools",
     "/students",
     "/enrol-officer",
-    "/enter-grades",
   ],
-  "grade-entry-officer": ["/enter-grades"],
+  SUBEB_OFFICER: ["/enter-grades"],
 } as const;
 
 /**
@@ -36,7 +35,7 @@ const roleRoutes = {
  */
 function getRoleDefaultPath(role: string): string {
   const normalizedRole = role.toLowerCase();
-  if (normalizedRole === "grade-entry-officer") {
+  if (normalizedRole === "subeb_officer") {
     return "/enter-grades";
   }
   return "/dashboard";
@@ -48,13 +47,23 @@ function getRoleDefaultPath(role: string): string {
 function hasRoleAccess(role: string, pathname: string): boolean {
   const normalizedRole = role.toLowerCase();
 
-  // Admin and SUPER_ADMIN have access to all routes
-  if (normalizedRole === "admin" || normalizedRole === "super_admin") {
-    return true;
+  // SUPER_ADMIN has access to dashboard routes only (not officer routes or /enter-grades)
+  if (normalizedRole === "super_admin") {
+    // Check if trying to access officer dynamic routes
+    const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
+    if (dynamicRoutePattern.test(pathname)) {
+      return false;
+    }
+    // Check if trying to access /enter-grades
+    if (pathname.startsWith("/enter-grades")) {
+      return false;
+    }
+    // Allow access to SUPER_ADMIN routes
+    return roleRoutes.SUPER_ADMIN.some((route) => pathname.startsWith(route));
   }
 
-  // Check if grade-entry-officer has access
-  if (normalizedRole === "grade-entry-officer") {
+  // SUBEB_OFFICER has access to /enter-grades and officer dynamic routes
+  if (normalizedRole === "subeb_officer") {
     // Check dynamic routes: /:id/profile and /:id/grade-record
     const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
     if (dynamicRoutePattern.test(pathname)) {
@@ -62,9 +71,7 @@ function hasRoleAccess(role: string, pathname: string): boolean {
     }
 
     // Check static routes
-    return roleRoutes["grade-entry-officer"].some((route) =>
-      pathname.startsWith(route)
-    );
+    return roleRoutes.SUBEB_OFFICER.some((route) => pathname.startsWith(route));
   }
 
   return false;
@@ -134,11 +141,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Scenario 2: Authenticated user trying to access auth pages (login/register) or homepage
-  if (hasValidToken && (isAuthRoute || pathname === "/")) {
+  // Scenario 2: Authenticated user trying to access auth pages (login/register)
+  if (hasValidToken && isAuthRoute) {
     // Check if there's a redirect parameter
     const redirectParam = request.nextUrl.searchParams.get("redirect");
-    const defaultPath = getRoleDefaultPath(userRole || "admin");
+    const defaultPath = getRoleDefaultPath(userRole || "super_admin");
     const targetPath = redirectParam || defaultPath;
 
     // Prevent redirect loop: only redirect if not already on target path

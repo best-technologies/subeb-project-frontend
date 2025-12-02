@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -7,6 +7,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { SquarePen } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useGlobalAdminDashboard, useCurrentSession } from "@/services";
 import { subjectNames } from "@/types/student";
 import { Button } from "@/components/ui/Button";
@@ -23,6 +24,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import { LoadingModal } from "@/components/ui/LoadingModal";
 import { Dialog } from "@/components/ui/dialog";
 import { SimpleFooter } from "@/components/shared/Footer";
+import { useAuthStore } from "@/store/authStore";
 
 const genders = ["Male", "Female"];
 const subjectKeys = Object.keys(subjectNames) as (keyof typeof subjectNames)[];
@@ -55,6 +57,9 @@ function getInitials(name: string) {
 }
 
 export default function EnterGradesPage() {
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuthStore();
+  const [isValidating, setIsValidating] = useState(true);
   const [session, setSession] = useState("2024/2025");
   const [term, setTerm] = useState("First");
   const [school, setSchool] = useState("");
@@ -71,6 +76,22 @@ export default function EnterGradesPage() {
   const [pendingTab, setPendingTab] = useState<
     "session" | "student" | "review" | null
   >(null);
+
+  // Validate role on mount - only SUBEB_OFFICER can access
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const normalizedRole = user.role.toLowerCase();
+
+      // Only SUBEB_OFFICER can access enter-grades
+      if (normalizedRole !== "subeb_officer") {
+        // Redirect SUPER_ADMIN to their default page
+        router.replace("/dashboard");
+        return;
+      }
+    }
+
+    setIsValidating(false);
+  }, [isAuthenticated, user, router]);
 
   // Fetch real data from API
   const { data: dashboardData, loading: dashboardLoading } =
@@ -238,6 +259,18 @@ export default function EnterGradesPage() {
       return () => clearTimeout(timer);
     }
   }, [showToast]);
+
+  // Show loading state while validating role
+  if (isValidating) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

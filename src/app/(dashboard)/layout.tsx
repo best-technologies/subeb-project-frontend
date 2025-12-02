@@ -1,7 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/components/shared/Sidebar";
+import { useAuthStore } from "@/store/authStore";
 
 export default function DashboardLayout({
   children,
@@ -9,6 +11,25 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isValidating, setIsValidating] = useState(true);
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuthStore();
+
+  // Validate role on mount
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const normalizedRole = user.role.toLowerCase();
+
+      // Only SUPER_ADMIN can access dashboard routes
+      if (normalizedRole !== "super_admin") {
+        // Redirect SUBEB_OFFICER to their default page
+        router.replace("/enter-grades");
+        return;
+      }
+    }
+
+    setIsValidating(false);
+  }, [isAuthenticated, user, router]);
 
   // Refresh function to be passed to sidebar
   const handleRefresh = () => {
@@ -20,6 +41,18 @@ export default function DashboardLayout({
   const handleMobileNavigation = () => {
     setSidebarOpen(false);
   };
+
+  // Show loading state while validating role
+  if (isValidating) {
+    return (
+      <div className="min-h-screen bg-brand-accent-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-brand-accent-background">
