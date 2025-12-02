@@ -20,7 +20,16 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Wait for auth store to hydrate to prevent flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAuthLoading(false);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Get role-based dropdown menu items
   const getDropdownItems = () => {
@@ -133,7 +142,13 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-3">
-            {!isAuthenticated ? (
+            {isAuthLoading ? (
+              <>
+                {/* Loading skeleton for buttons */}
+                <div className="w-40 h-[51px] bg-gray-200 animate-pulse rounded-full" />
+                <div className="w-48 h-[51px] bg-gray-200 animate-pulse rounded-full" />
+              </>
+            ) : !isAuthenticated ? (
               <>
                 <Button
                   variant="outline"
@@ -219,7 +234,13 @@ export default function Header() {
         }`}
       >
         <div className="flex flex-col p-8 pt-24 space-y-6">
-          {!isAuthenticated ? (
+          {isAuthLoading ? (
+            <>
+              {/* Loading skeleton for mobile menu */}
+              <div className="w-full h-[51px] bg-gray-200 animate-pulse rounded-full" />
+              <div className="w-full h-[51px] bg-gray-200 animate-pulse rounded-full" />
+            </>
+          ) : !isAuthenticated ? (
             <>
               <Button
                 variant="outline"
