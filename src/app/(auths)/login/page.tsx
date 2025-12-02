@@ -14,7 +14,11 @@ import { LoadingModal } from "@/components/ui/LoadingModal";
 import { Dialog } from "@/components/ui/dialog";
 import { useLogin, getAuthErrorMessage } from "@/services/hooks/useAuth";
 import { useAuthStore } from "@/store/authStore";
-import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import {
+  ExclamationCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from "@heroicons/react/24/solid";
 
 // Login validation schema
 const loginSchema = z.object({
@@ -31,6 +35,7 @@ const LoginContent = () => {
   const { isAuthenticated } = useAuthStore();
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Get redirect URL from query params or default to dashboard
   const redirectTo = searchParams.get("redirect") || "/dashboard";
@@ -158,11 +163,23 @@ const LoginContent = () => {
               <div className="relative mt-1">
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   className="w-full pr-10"
                   {...form.register("password")}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="w-5 h-5" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5" />
+                  )}
+                </button>
               </div>
               {form.formState.errors.password && (
                 <p className="text-xs text-red-600 mt-1">
