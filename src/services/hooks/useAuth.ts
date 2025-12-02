@@ -162,14 +162,17 @@ export function getRoleBasedRedirect(
 }
 
 /**
- * Extract error message from auth response
+ * Extract error message from auth response and return user-friendly message
  */
 export function getAuthErrorMessage(error: unknown): string {
-  if (!error) return "An unexpected error occurred";
+  if (!error) return "Something went wrong. Please try again.";
 
   // Type guard for error objects
   if (typeof error === "object" && error !== null) {
     const errorObj = error as Record<string, unknown>;
+
+    // Log the technical error for debugging
+    console.error("Auth error details:", errorObj);
 
     // Handle backend error response
     if ("message" in errorObj && errorObj.message) {
@@ -178,17 +181,18 @@ export function getAuthErrorMessage(error: unknown): string {
         return errorObj.message.join(", ");
       }
       if (typeof errorObj.message === "string") {
+        // Return the message as-is if it's already user-friendly
+        // Backend should send user-friendly messages
         return errorObj.message;
       }
     }
 
     // Handle network errors
     if ("error" in errorObj && errorObj.error) {
-      return typeof errorObj.error === "string"
-        ? errorObj.error
-        : "Network error occurred";
+      console.error("Network error:", errorObj.error);
+      return "Unable to connect to the server. Please check your internet connection.";
     }
   }
 
-  return "An unexpected error occurred";
+  return "Something went wrong. Please try again.";
 }

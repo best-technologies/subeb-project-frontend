@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
-import { getAdminDashboard } from '../api';
-import { AdminDashboardResponse, AdminDashboardData } from '../types/adminDashboardResponse';
+import { useState, useEffect } from "react";
+import { getAdminDashboard } from "../api";
+import {
+  AdminDashboardResponse,
+  AdminDashboardData,
+} from "../types/adminDashboardResponse";
 
 interface UseAdminDashboardReturn {
   data: AdminDashboardData | null;
@@ -18,18 +21,18 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response: AdminDashboardResponse = await getAdminDashboard();
-      
+
       if (response.success) {
         setData(response.data);
       } else {
-        setError(response.message || 'Failed to fetch dashboard data');
+        console.error("Failed to fetch dashboard data:", response.message);
+        setError("Unable to load dashboard data. Please try again.");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      console.error('Error fetching admin dashboard data:', err);
+      console.error("Error fetching admin dashboard data:", err);
+      setError("Unable to load dashboard data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -49,4 +52,4 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
     error,
     refetch,
   };
-}; 
+};

@@ -142,7 +142,8 @@ api.interceptors.response.use(
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             return api(originalRequest);
           } else {
-            throw new Error("Token refresh failed");
+            console.error("Token refresh failed - response not successful");
+            throw new Error("Your session has expired. Please sign in again.");
           }
         } catch (refreshError) {
           // Token refresh failed - logout user

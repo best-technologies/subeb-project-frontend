@@ -85,20 +85,24 @@ class ApiClient {
       // console.log("API Client - Response data:", data);
       return data as T;
     } catch (error) {
-      // console.error("API Client - Request failed:", error);
+      console.error("API Client - Request failed:", error);
 
-      // If it's a network error (API not available), throw error
+      // If it's a network error (API not available), throw user-friendly error
       if (error instanceof TypeError && error.message.includes("fetch")) {
-        // console.log("API Client - Network error, API not available");
+        console.log(
+          "API Client - Network error, API not available at:",
+          API_BASE_URL
+        );
         throw new Error(
-          `API not available - please check if your backend is accessible at ${API_BASE_URL}`
+          "Unable to connect to the server. Please check your internet connection and try again."
         );
       }
 
       if (error instanceof Error) {
-        throw new Error(`API request failed. Error message: ${error.message}`);
+        console.error("API Client - Error details:", error.message);
+        throw new Error("Something went wrong. Please try again later.");
       }
-      throw new Error("API request failed: Unknown error");
+      throw new Error("Something went wrong. Please try again later.");
     }
   }
 
@@ -304,7 +308,10 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error(`PDF download failed with status: ${response.status}`);
+        throw new Error(
+          "Unable to download the student result. Please try again."
+        );
       }
 
       const blob = await response.blob();
@@ -314,7 +321,9 @@ class ApiClient {
         "❌ API Client - Error in downloadStudentResultPDF:",
         error
       );
-      throw error;
+      throw new Error(
+        "Unable to download the student result. Please try again."
+      );
     }
   }
 }
@@ -382,12 +391,16 @@ export const searchStudents = async (params: {
     const errorMessage =
       errorData.message || `HTTP ${response.status}: ${response.statusText}`;
 
+    console.error("Search students error:", response.status, errorMessage);
+
     if (response.status === 400) {
-      throw new Error(`Bad request - invalid parameters: ${errorMessage}`);
+      throw new Error(
+        "Invalid search criteria. Please check your filters and try again."
+      );
     } else if (response.status === 500) {
-      throw new Error(`Internal server error: ${errorMessage}`);
+      throw new Error("Server error occurred. Please try again later.");
     } else {
-      throw new Error(`Failed to fetch data: ${errorMessage}`);
+      throw new Error("Unable to load data. Please try again.");
     }
   }
 

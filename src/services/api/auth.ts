@@ -21,12 +21,13 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
       response?: { data?: unknown; status?: number };
       message?: string;
     };
+    console.error("Registration error:", err);
     if (err.response?.data) {
       throw err.response.data;
     }
     throw {
       success: false,
-      message: err.message || "Registration failed. Please try again.",
+      message: "Unable to create your account. Please try again.",
       statusCode: err.response?.status || 500,
     };
   }
@@ -46,12 +47,14 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
       response?: { data?: unknown; status?: number };
       message?: string;
     };
+    console.error("Login error:", err);
     if (err.response?.data) {
       throw err.response.data;
     }
     throw {
       success: false,
-      message: err.message || "Login failed. Please try again.",
+      message:
+        "Unable to sign you in. Please check your credentials and try again.",
       statusCode: err.response?.status || 500,
     };
   }
@@ -66,9 +69,10 @@ export async function refreshToken(): Promise<RefreshTokenResponse> {
     const refreshTokenValue = getRefreshToken();
 
     if (!refreshTokenValue) {
+      console.error("Token refresh - No refresh token available");
       throw {
         success: false,
-        message: "No refresh token available",
+        message: "Your session has expired. Please sign in again.",
         statusCode: 401,
       };
     }
@@ -84,12 +88,13 @@ export async function refreshToken(): Promise<RefreshTokenResponse> {
       response?: { data?: unknown; status?: number };
       message?: string;
     };
+    console.error("Token refresh error:", err);
     if (err.response?.data) {
       throw err.response.data;
     }
     throw {
       success: false,
-      message: err.message || "Token refresh failed. Please login again.",
+      message: "Your session has expired. Please sign in again.",
       statusCode: err.response?.status || 500,
     };
   }

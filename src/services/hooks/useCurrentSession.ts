@@ -35,7 +35,7 @@ export const useCurrentSession = () => {
           setState({
             session: null,
             loading: false,
-            error: response.message || "Failed to fetch current session",
+            error: "Unable to load session information. Please try again.",
           });
         }
       } catch (error) {
@@ -43,10 +43,7 @@ export const useCurrentSession = () => {
         setState({
           session: null,
           loading: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to fetch current session",
+          error: "Unable to load session information. Please try again.",
         });
       }
     };

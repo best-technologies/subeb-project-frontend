@@ -122,13 +122,16 @@ export const useStudentSearch = () => {
           setTotalStudents(originalStudents.length);
           setSchoolStats(null);
         } else {
-          throw new Error(response.message || "Failed to fetch schools");
+          console.error("Failed to fetch schools:", response.message);
+          throw new Error("Unable to load schools. Please try again.");
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch schools"
-        );
         console.error("Error fetching schools:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load schools. Please try again."
+        );
       } finally {
         setLoadingStates((prev) => ({ ...prev, lga: false }));
       }
@@ -183,13 +186,16 @@ export const useStudentSearch = () => {
           setStudents(originalStudents);
           setTotalStudents(originalStudents.length);
         } else {
-          throw new Error(response.message || "Failed to fetch classes");
+          console.error("Failed to fetch classes:", response.message);
+          throw new Error("Unable to load classes. Please try again.");
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch classes"
-        );
         console.error("Error fetching classes:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load classes. Please try again."
+        );
       } finally {
         setLoadingStates((prev) => ({ ...prev, school: false }));
       }
@@ -231,13 +237,16 @@ export const useStudentSearch = () => {
             classId,
           }));
         } else {
-          throw new Error(response.message || "Failed to fetch students");
+          console.error("Failed to fetch students:", response.message);
+          throw new Error("Unable to load students. Please try again.");
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch students"
-        );
         console.error("Error fetching students:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load students. Please try again."
+        );
       } finally {
         setLoadingStates((prev) => ({ ...prev, class: false }));
       }
@@ -284,8 +293,11 @@ export const useStudentSearch = () => {
           setTotalPages(pagination.totalPages || 1);
         }
       } catch (err) {
+        console.error("Error searching students:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to search students"
+          err instanceof Error
+            ? err.message
+            : "Unable to search students. Please try again."
         );
       }
     },
@@ -314,7 +326,12 @@ export const useStudentSearch = () => {
           setTotalPages(pagination.totalPages || 1);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load page");
+        console.error("Error loading page:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load page. Please try again."
+        );
       }
     },
     [searchParams]

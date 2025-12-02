@@ -109,7 +109,8 @@ const EditStudentDialog: React.FC<EditStudentDialogProps> = ({
             setError("Server error. Please try again later.");
             return;
           default:
-            setError(`Failed to update student: ${response.statusText}`);
+            console.error("Failed to update student:", response.statusText);
+            setError("Unable to update student. Please try again.");
             return;
         }
       }
@@ -128,7 +129,7 @@ const EditStudentDialog: React.FC<EditStudentDialogProps> = ({
         onSave(form as PerformanceStudent);
         onOpenChange(false);
       } else {
-        setError("An unexpected error occurred. Please try again.");
+        setError("Unable to update student. Please try again.");
       }
     } finally {
       setIsLoading(false);
