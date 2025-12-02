@@ -61,16 +61,21 @@ export default function EnrolOfficerPage() {
 
     // Call the API through our new hook
     enrollOfficerMutation.mutate(submissionData, {
-      onSuccess: (response) => {
+      onSuccess: () => {
         console.log("Enrollment successful, resetting form");
         form.reset();
         setShowSuccessDialog(true);
       },
-      onError: (error: any) => {
+      onError: (error: unknown) => {
         console.error("Enrollment failed:", error);
         const message =
-          error?.response?.data?.message ||
-          error?.message ||
+          (
+            error as {
+              response?: { data?: { message?: string } };
+              message?: string;
+            }
+          )?.response?.data?.message ||
+          (error as { message?: string })?.message ||
           "Failed to enroll officer. Please try again.";
         setErrorMessage(message);
         setShowErrorDialog(true);
