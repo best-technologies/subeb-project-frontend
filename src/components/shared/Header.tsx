@@ -1,7 +1,17 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Youtube, Menu, X, LayoutDashboard, PenSquare } from "lucide-react";
+import {
+  Youtube,
+  Menu,
+  X,
+  LayoutDashboard,
+  PenSquare,
+  UserRound,
+  ChevronDown,
+  ClipboardList,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
 
@@ -9,41 +19,71 @@ export default function Header() {
   const { user, isAuthenticated } = useAuthStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Determine button props based on user role
-  const getActionButton = () => {
-    if (!isAuthenticated || !user) {
-      return {
-        text: "Get Started - It's free",
-        href: "/login",
-        icon: null,
-      };
-    }
+  // Get role-based dropdown menu items
+  const getDropdownItems = () => {
+    if (!user) return [];
 
     const normalizedRole = user.role.toLowerCase();
     if (normalizedRole === "super_admin") {
-      return {
-        text: "Go to Dashboard",
-        href: "/dashboard",
-        icon: <LayoutDashboard className="w-4 h-4" />,
-      };
+      return [
+        {
+          label: "Dashboard",
+          href: "/dashboard",
+          icon: <LayoutDashboard className="w-4 h-4" />,
+        },
+        {
+          label: "Profile",
+          href: "/profile",
+          icon: <User className="w-4 h-4" />,
+        },
+      ];
     } else if (normalizedRole === "subeb_officer") {
-      return {
-        text: "Enter Grades",
-        href: "/enter-grades",
-        icon: <PenSquare className="w-4 h-4" />,
-      };
+      return [
+        {
+          label: "Enter Grades",
+          href: "/enter-grades",
+          icon: <PenSquare className="w-4 h-4" />,
+        },
+        {
+          label: "Profile",
+          href: `/${user.id}/profile`,
+          icon: <User className="w-4 h-4" />,
+        },
+        {
+          label: "Grade Record",
+          href: `/${user.id}/grade-record`,
+          icon: <ClipboardList className="w-4 h-4" />,
+        },
+      ];
     }
 
-    // Fallback for unknown roles
-    return {
-      text: "Get Started - It's free",
-      href: "/login",
-      icon: null,
-    };
+    return [];
   };
 
-  const actionButton = getActionButton();
+  const dropdownItems = getDropdownItems();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -93,21 +133,60 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-3">
-            {!isAuthenticated && (
-              <Button
-                variant="outline"
-                className="!rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px]"
-              >
-                <Youtube className="w-4 h-4" />
-                <span>Watch a Demo</span>
-              </Button>
+            {!isAuthenticated ? (
+              <>
+                <Button
+                  variant="outline"
+                  className="!rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px]"
+                >
+                  <Youtube className="w-4 h-4" />
+                  <span>Watch a Demo</span>
+                </Button>
+                <Link href="/login">
+                  <Button className="!rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] gap-[10px]">
+                    <span>Get Started - It&apos;s free</span>
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <div className="w-8 h-8 bg-brand-green rounded-full flex items-center justify-center">
+                    <UserRound className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-gray-700 font-medium max-w-[200px] truncate">
+                    {user?.email}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-500 transition-transform ${
+                      isDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    {dropdownItems.map((item, index) => (
+                      <Link
+                        key={index}
+                        href={item.href}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                      >
+                        {item.icon}
+                        <span className="text-gray-700 font-medium">
+                          {item.label}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
-            <Link href={actionButton.href}>
-              <Button className="!rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] gap-[10px]">
-                {actionButton.icon}
-                <span>{actionButton.text}</span>
-              </Button>
-            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -140,25 +219,52 @@ export default function Header() {
         }`}
       >
         <div className="flex flex-col p-8 pt-24 space-y-6">
-          {!isAuthenticated && (
-            <Button
-              variant="outline"
-              className="w-full !rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px] justify-center"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Youtube className="w-4 h-4" />
-              <span>Watch a Demo</span>
-            </Button>
+          {!isAuthenticated ? (
+            <>
+              <Button
+                variant="outline"
+                className="w-full !rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px] justify-center"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Youtube className="w-4 h-4" />
+                <span>Watch a Demo</span>
+              </Button>
+              <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full !rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] gap-[10px] justify-center">
+                  <span>Get Started - It&apos;s free</span>
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              {/* User Info */}
+              <div className="flex items-center space-x-3 px-4 py-3 bg-gray-50 rounded-lg">
+                <div className="w-10 h-10 bg-brand-green rounded-full flex items-center justify-center">
+                  <UserRound className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-gray-700 font-medium text-sm truncate">
+                  {user?.email}
+                </span>
+              </div>
+
+              {/* Menu Items */}
+              <div className="space-y-2">
+                {dropdownItems.map((item, index) => (
+                  <Link
+                    key={index}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    {item.icon}
+                    <span className="text-gray-700 font-medium">
+                      {item.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </>
           )}
-          <Link
-            href={actionButton.href}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <Button className="w-full !rounded-full bg-brand-green hover:bg-brand-green/90 text-white h-[51px] gap-[10px] justify-center">
-              {actionButton.icon}
-              <span>{actionButton.text}</span>
-            </Button>
-          </Link>
         </div>
       </div>
     </header>
