@@ -116,6 +116,11 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
   const { isOpen, onToggle, onRefresh, onNavigate } =
     props as AdminSidebarProps;
 
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
+
   const navigationItems = [
     {
       id: "dashboard",
@@ -143,6 +148,13 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
       label: "Enrol Officer",
       icon: <UserRoundPen size={20} />,
       href: "/enrol-officer",
+      disabled: false,
+    },
+    {
+      id: "profile",
+      label: "Profile",
+      icon: <User size={20} />,
+      href: "/profile",
       disabled: false,
     },
   ];
@@ -246,26 +258,17 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
             </ul>
           </nav>
 
-          {/* Footer */}
+          {/* Footer - Logout Button */}
           <div className="p-4 border-t border-white/10">
-            <Link
-              href="/profile"
-              onClick={() => onNavigate?.()}
-              className={`
-                flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-                ${
-                  pathname === "/profile"
-                    ? "bg-brand-secondary text-brand-secondary-contrast shadow-lg"
-                    : "text-brand-primary-contrast/80 hover:bg-brand-secondary hover:text-brand-secondary-contrast"
-                }
-                cursor-pointer
-              `}
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 text-brand-primary-contrast/80 hover:bg-red-500 hover:text-white w-full cursor-pointer"
             >
               <span className="text-lg">
-                <User size={20} />
+                <LogOut size={20} />
               </span>
-              <span className="font-medium">Profile</span>
-            </Link>
+              <span className="font-medium">Logout</span>
+            </button>
           </div>
         </div>
       </div>
