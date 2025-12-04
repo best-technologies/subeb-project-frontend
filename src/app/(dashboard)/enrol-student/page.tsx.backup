@@ -1,0 +1,783 @@
+"use client";
+import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  PlusIcon,
+  TrashIcon,
+  UserPlus,
+  CalendarDays,
+  BookOpen,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { LoadingModal } from "@/components/ui/LoadingModal";
+import { Dialog } from "@/components/ui/dialog";
+import { SimpleFooter } from "@/components/shared/Footer";
+import { enrollStudents } from "@/services/api/enrollment";
+import {
+  useEnrollmentMetadata,
+  useEnrollmentLgaSchools,
+  useEnrollmentSchoolClasses,
+} from "@/services/hooks/useEnrollment";
+import type { EnrolledStudent } from "@/services/types/enrollment";
+
+// Zod schema for student enrollment validation
+const studentSchema = z.object({
+  firstName: z
+    .string()
+    .min(2, "First name must be at least 2 characters")
+    .max(50, "First name must not exceed 50 characters")
+    .regex(
+      /^[a-zA-Z\s'-]+$/,
+      "First name can only contain letters, spaces, hyphens, and apostrophes"
+    ),
+  lastName: z
+    .string()
+    .min(2, "Last name must be at least 2 characters")
+    .max(50, "Last name must not exceed 50 characters")
+    .regex(
+      /^[a-zA-Z\s'-]+$/,
+      "Last name can only contain letters, spaces, hyphens, and apostrophes"
+    ),
+  dateOfBirth: z
+    .string()
+    .min(1, "Date of birth is required")
+    .refine((date) => {
+      const birthDate = new Date(date);
+      const today = new Date();
+      const minDate = new Date(
+        today.getFullYear() - 25,
+        today.getMonth(),
+        today.getDate()
+      );
+      const maxDate = new Date(
+        today.getFullYear() - 3,
+        today.getMonth(),
+        today.getDate()
+      );
+      return birthDate >= minDate && birthDate <= maxDate;
+    }, "Student must be between 3 and 25 years old"),
+  gender: z.enum(["MALE", "FEMALE"], {
+    message: "Please select a valid gender",
+  }),
+  schoolId: z.string().min(1, "School is required"),
+  classId: z.string().min(1, "Class is required"),
+});
+
+const enrollmentFormSchema = z.object({
+  students: z
+    .array(studentSchema)
+    .min(1, "At least one student is required")
+    .max(50, "Cannot enroll more than 50 students at once"),
+});
+
+type EnrollmentFormData = z.infer<typeof enrollmentFormSchema>;
+
+// Helper to format term name
+const formatTermName = (termName: string): string => {
+  if (termName.includes("FIRST")) return "First Term";
+  if (termName.includes("SECOND")) return "Second Term";
+  if (termName.includes("THIRD")) return "Third Term";
+  return termName.replace(/_/g, " ");
+};
+
+// Success Dialog Component
+interface SuccessDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  enrolledStudents: EnrolledStudent[];
+}
+
+const SuccessDialog: React.FC<SuccessDialogProps> = ({
+  isOpen,
+  onClose,
+  enrolledStudents,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+        <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="p-6">
+            {/* Success Header */}
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+              Enrollment Successful!
+            </h2>
+            <p className="text-center text-gray-600 mb-6">
+              {enrolledStudents.length} student
+              {enrolledStudents.length > 1 ? "s" : ""} enrolled successfully
+            </p>
+
+            {/* Student Details */}
+            <div className="space-y-4">
+              {enrolledStudents.map((student, index) => (
+                <div
+                  key={student.id}
+                  className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        {student.firstName} {student.lastName}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Student ID: {student.studentId}
+                      </p>
+                    </div>
+                    <span className="bg-brand-primary text-white px-3 py-1 rounded-full text-xs font-medium">
+                      #{index + 1}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-gray-600">Email:</span>
+                      <p className="font-medium text-gray-900 break-all">
+                        {student.email}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Username:</span>
+                      <p className="font-medium text-gray-900">
+                        {student.user.username}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Temporary Password:</span>
+                      <p className="font-mono font-bold text-brand-primary bg-white px-2 py-1 rounded border border-brand-primary/20">
+                        {student.tempPassword}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Gender:</span>
+                      <p className="font-medium text-gray-900">
+                        {student.gender}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Important Notice */}
+            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                <span className="font-semibold">Important:</span> Please save or
+                print these temporary passwords. Students will need them to log
+                in for the first time.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={() => {
+                  const studentData = enrolledStudents
+                    .map(
+                      (s, i) =>
+                        `${i + 1}. ${s.firstName} ${s.lastName}\n` +
+                        `   Student ID: ${s.studentId}\n` +
+                        `   Email: ${s.email}\n` +
+                        `   Username: ${s.user.username}\n` +
+                        `   Password: ${s.tempPassword}\n`
+                    )
+                    .join("\n");
+
+                  const blob = new Blob([studentData], { type: "text/plain" });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `enrolled-students-${
+                    new Date().toISOString().split("T")[0]
+                  }.txt`;
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Download Details
+              </Button>
+              <Button onClick={onClose} className="flex-1">
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Dialog>
+  );
+};
+
+// Main Enrollment Page Component
+export default function EnrolStudentPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>(
+    []
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [showError, setShowError] = useState(false);
+
+  // Common selections (applies to all students)
+  const [lgaId, setLgaId] = useState("");
+  const [schoolId, setSchoolId] = useState("");
+
+  // Fetch enrollment metadata, schools, and classes
+  const {
+    data: enrollmentMetadata,
+    loading: metadataLoading,
+    error: metadataError,
+  } = useEnrollmentMetadata();
+
+  const {
+    data: lgaSchoolsData,
+    loading: schoolsLoading,
+    error: schoolsError,
+  } = useEnrollmentLgaSchools(lgaId || null);
+
+  const {
+    data: schoolClassesData,
+    loading: classesLoading,
+    error: classesError,
+  } = useEnrollmentSchoolClasses(schoolId || null);
+
+  // Extract data
+  const lgas = useMemo(
+    () => enrollmentMetadata?.localGovernments || [],
+    [enrollmentMetadata]
+  );
+  const schools = useMemo(
+    () => lgaSchoolsData?.schools || [],
+    [lgaSchoolsData]
+  );
+  const classes = useMemo(
+    () => schoolClassesData?.classes || [],
+    [schoolClassesData]
+  );
+
+  // React Hook Form setup
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<EnrollmentFormData>({
+    resolver: zodResolver(enrollmentFormSchema),
+    defaultValues: {
+      students: [
+        {
+          firstName: "",
+          lastName: "",
+          dateOfBirth: "",
+          gender: "MALE" as "MALE" | "FEMALE",
+          schoolId: "",
+          classId: "",
+        },
+      ],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "students",
+  });
+
+  // Watch schoolId to auto-populate when selected
+  React.useEffect(() => {
+    if (schoolId) {
+      fields.forEach((_, index) => {
+        setValue(`students.${index}.schoolId`, schoolId);
+      });
+    }
+  }, [schoolId, fields, setValue]);
+
+  // Reset school when LGA changes
+  React.useEffect(() => {
+    if (lgaId) {
+      setSchoolId("");
+    }
+  }, [lgaId]);
+
+  // Handle API errors
+  React.useEffect(() => {
+    if (metadataError || schoolsError || classesError) {
+      setError(metadataError || schoolsError || classesError);
+      setShowError(true);
+    }
+  }, [metadataError, schoolsError, classesError]);
+
+  const onSubmit = async (data: EnrollmentFormData) => {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      const response = await enrollStudents({ students: data.students });
+
+      if (response.success && response.data) {
+        setEnrolledStudents(response.data);
+        setShowSuccess(true);
+      } else {
+        setError(response.message || "Failed to enroll students");
+        setShowError(true);
+      }
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || "Failed to enroll students. Please try again.");
+      setShowError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const addStudent = () => {
+    append({
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
+      gender: "MALE" as "MALE" | "FEMALE",
+      schoolId: schoolId,
+      classId: "",
+    });
+  };
+
+  const removeStudent = (index: number) => {
+    if (fields.length > 1) {
+      remove(index);
+    }
+  };
+
+  const handleSuccessClose = () => {
+    setShowSuccess(false);
+    router.push("/students");
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Page Header */}
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-6 mb-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-brand-primary/10 rounded-lg flex items-center justify-center">
+              <UserPlus className="w-6 h-6 text-brand-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Enrol Students
+              </h1>
+              <p className="text-gray-600 text-sm">
+                Add new students to the system
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Academic Session & Term Info */}
+        {enrollmentMetadata && (
+          <div className="bg-gradient-to-r from-brand-primary to-brand-accent rounded-lg shadow-sm p-6 mb-6">
+            <h2 className="text-lg font-semibold text-white mb-3">
+              Academic Period
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <CalendarDays className="w-5 h-5 text-white" />
+                  <span className="text-white/80 text-sm font-medium">
+                    Current Session
+                  </span>
+                </div>
+                <p className="text-white text-xl font-bold">
+                  {enrollmentMetadata.currentSession.name}
+                </p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <BookOpen className="w-5 h-5 text-white" />
+                  <span className="text-white/80 text-sm font-medium">
+                    Current Term
+                  </span>
+                </div>
+                <p className="text-white text-xl font-bold">
+                  {formatTermName(enrollmentMetadata.currentTerm.name)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* LGA and School Selection */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            School Information
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Select the LGA and school for all students being enrolled
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* LGA Selection */}
+            <div>
+              <Label htmlFor="lga">Local Government Area (LGA) *</Label>
+              <Select value={lgaId} onValueChange={setLgaId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select LGA" />
+                </SelectTrigger>
+                <SelectContent>
+                  {lgas.map((lga: any) => (
+                    <SelectItem key={lga.id} value={lga.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span className="capitalize">{lga.name}</span>
+                        <span className="ml-2 bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full text-xs font-medium">
+                          {lga.totalSchools}{" "}
+                          {lga.totalSchools === 1 ? "school" : "schools"}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* School Selection */}
+            <div>
+              <Label htmlFor="school">School *</Label>
+              <Select
+                value={schoolId}
+                onValueChange={setSchoolId}
+                disabled={!lgaId || schoolsLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      !lgaId
+                        ? "Select LGA first"
+                        : schoolsLoading
+                        ? "Loading schools..."
+                        : "Select School"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {schools.map((school: any) => (
+                    <SelectItem key={school.id} value={school.id}>
+                      {school.name} {school.code && `(${school.code})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {schools.length === 0 && lgaId && !schoolsLoading && (
+                <p className="text-sm text-amber-600 mt-1">
+                  No schools found in this LGA
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Student Forms */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Student {index + 1}
+                </h3>
+                {fields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeStudent(index)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <TrashIcon className="w-5 h-5 mr-1" />
+                    Remove
+                  </Button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* First Name */}
+                <div>
+                  <Label htmlFor={`students.${index}.firstName`}>
+                    First Name *
+                  </Label>
+                  <Input
+                    {...register(`students.${index}.firstName`)}
+                    placeholder="Enter first name"
+                    className={
+                      errors.students?.[index]?.firstName
+                        ? "border-red-500"
+                        : ""
+                    }
+                  />
+                  {errors.students?.[index]?.firstName && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {errors.students[index]?.firstName?.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Last Name */}
+                <div>
+                  <Label htmlFor={`students.${index}.lastName`}>
+                    Last Name *
+                  </Label>
+                  <Input
+                    {...register(`students.${index}.lastName`)}
+                    placeholder="Enter last name"
+                    className={
+                      errors.students?.[index]?.lastName ? "border-red-500" : ""
+                    }
+                  />
+                  {errors.students?.[index]?.lastName && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {errors.students[index]?.lastName?.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Date of Birth */}
+                <div>
+                  <Label htmlFor={`students.${index}.dateOfBirth`}>
+                    Date of Birth *
+                  </Label>
+                  <Input
+                    type="date"
+                    {...register(`students.${index}.dateOfBirth`)}
+                    max={new Date().toISOString().split("T")[0]}
+                    className={
+                      errors.students?.[index]?.dateOfBirth
+                        ? "border-red-500"
+                        : ""
+                    }
+                  />
+                  {errors.students?.[index]?.dateOfBirth && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {errors.students[index]?.dateOfBirth?.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Gender */}
+                <div>
+                  <Label htmlFor={`students.${index}.gender`}>Gender *</Label>
+                  <Select
+                    value={watch(`students.${index}.gender`)}
+                    onValueChange={(value) =>
+                      setValue(
+                        `students.${index}.gender`,
+                        value as "MALE" | "FEMALE"
+                      )
+                    }
+                  >
+                    <SelectTrigger
+                      className={
+                        errors.students?.[index]?.gender ? "border-red-500" : ""
+                      }
+                    >
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MALE">Male</SelectItem>
+                      <SelectItem value="FEMALE">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.students?.[index]?.gender && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {errors.students[index]?.gender?.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Class */}
+                <div className="md:col-span-2">
+                  <Label htmlFor={`students.${index}.classId`}>Class *</Label>
+                  <Select
+                    value={watch(`students.${index}.classId`)}
+                    onValueChange={(value) =>
+                      setValue(`students.${index}.classId`, value)
+                    }
+                    disabled={!schoolId || classesLoading}
+                  >
+                    <SelectTrigger
+                      className={
+                        errors.students?.[index]?.classId
+                          ? "border-red-500"
+                          : ""
+                      }
+                    >
+                      <SelectValue
+                        placeholder={
+                          !schoolId
+                            ? "Select school first"
+                            : classesLoading
+                            ? "Loading classes..."
+                            : "Select class"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {classes.map((cls: any) => (
+                        <SelectItem key={cls.id} value={cls.id}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{cls.name}</span>
+                            {cls.capacity && (
+                              <span className="ml-2 text-xs text-gray-500">
+                                {cls.currentStudents}/{cls.capacity}
+                              </span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.students?.[index]?.classId && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {errors.students[index]?.classId?.message}
+                    </p>
+                  )}
+                  {classes.length === 0 && schoolId && !classesLoading && (
+                    <p className="text-sm text-amber-600 mt-1">
+                      No classes found in this school
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Form-level errors */}
+          {errors.students && typeof errors.students.message === "string" && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-600">{errors.students.message}</p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addStudent}
+              disabled={fields.length >= 50}
+              className="flex items-center justify-center"
+            >
+              <PlusIcon className="w-5 h-5 mr-2" />
+              Add Another Student
+            </Button>
+
+            <Button
+              type="submit"
+              disabled={isSubmitting || !schoolId}
+              className="flex-1 sm:flex-none sm:min-w-[200px]"
+            >
+              {isSubmitting
+                ? "Enrolling..."
+                : `Enroll ${fields.length} Student${
+                    fields.length > 1 ? "s" : ""
+                  }`}
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      {/* Loading Modal */}
+      <LoadingModal
+        isOpen={isSubmitting || metadataLoading}
+        message={isSubmitting ? "Enrolling students..." : "Loading data..."}
+      />
+
+      {/* Success Dialog */}
+      <SuccessDialog
+        isOpen={showSuccess}
+        onClose={handleSuccessClose}
+        enrolledStudents={enrolledStudents}
+      />
+
+      {/* Error Toast */}
+      {showError && error && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-md">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg
+                  className="w-5 h-5 text-red-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-red-800">{error}</p>
+              </div>
+              <button
+                onClick={() => setShowError(false)}
+                className="ml-3 flex-shrink-0 text-red-600 hover:text-red-800"
+              >
+                <span className="sr-only">Close</span>
+                <svg
+                  className="w-5 h-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <SimpleFooter />
+    </div>
+  );
+}

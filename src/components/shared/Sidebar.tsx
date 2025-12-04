@@ -151,6 +151,13 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
       disabled: false,
     },
     {
+      id: "enrol-student",
+      label: "Enrol Student",
+      icon: <UserPlus size={20} />,
+      href: "/enrol-student",
+      disabled: false,
+    },
+    {
       id: "enrol-officer",
       label: "Enrol Officer",
       icon: <UserRoundPen size={20} />,

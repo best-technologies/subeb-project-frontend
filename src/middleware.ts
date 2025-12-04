@@ -25,6 +25,7 @@ const roleRoutes = {
     "/profile",
     "/schools",
     "/students",
+    "/enrol-student",
     "/enrol-officer",
   ],
   SUBEB_OFFICER: ["/enter-grades"],
