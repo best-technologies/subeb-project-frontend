@@ -21,18 +21,24 @@ export default function OfficerLayout({
 
   // Validate role on mount
   useEffect(() => {
-    if (isAuthenticated && user) {
+    // Wait for authentication to be determined
+    if (!isAuthenticated) {
+      setIsValidating(false);
+      return;
+    }
+
+    if (user) {
       const normalizedRole = user.role.toLowerCase();
 
       // Only SUBEB_OFFICER can access officer routes
       if (normalizedRole !== "subeb_officer") {
-        // Redirect SUPER_ADMIN to their default page
+        // Redirect non-officers to their default page
         router.replace("/dashboard");
         return;
       }
-    }
 
-    setIsValidating(false);
+      setIsValidating(false);
+    }
   }, [isAuthenticated, user, router]);
 
   // Determine active item based on pathname

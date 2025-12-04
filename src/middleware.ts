@@ -64,8 +64,8 @@ function hasRoleAccess(role: string, pathname: string): boolean {
 
   // SUBEB_OFFICER has access to /enter-grades and officer dynamic routes
   if (normalizedRole === "subeb_officer") {
-    // Check dynamic routes: /:id/profile and /:id/grade-record
-    const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
+    // Check dynamic routes: /:id/profile, /:id/grade-record, and /:id/add-student
+    const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record|add-student)$/;
     if (dynamicRoutePattern.test(pathname)) {
       return true;
     }
