@@ -30,9 +30,9 @@ import {
   useSchoolClasses,
   useClassStudents,
 } from "@/services/hooks/useGrading";
+import { uploadResults, type Subject } from "@/services";
 
 const genders = ["Male", "Female"];
-const subjectKeys = Object.keys(subjectNames) as (keyof typeof subjectNames)[];
 
 // Helper function to convert term format from backend (e.g., "FIRST_TERM" -> "First")
 const formatTermName = (termName: string): string => {
@@ -48,11 +48,9 @@ const initialStudentState = {
   examNumber: "",
   class: "",
   classId: "",
+  classLevel: "" as "PRIMARY" | "SECONDARY" | "",
   gender: "",
-  subjects: Object.fromEntries(subjectKeys.map((key) => [key, ""])) as Record<
-    string,
-    string
-  >,
+  subjects: {} as Record<string, string>,
 };
 
 function getInitials(name: string) {
@@ -233,6 +231,10 @@ export default function EnterGradesPage() {
   >(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showClassChangeWarning, setShowClassChangeWarning] = useState(false);
+  const [pendingClassId, setPendingClassId] = useState<string | null>(null);
+  const [showSubmitPrompt, setShowSubmitPrompt] = useState(false);
 
   // Validate role on mount - only SUBEB_OFFICER can access
   useEffect(() => {
@@ -249,6 +251,43 @@ export default function EnterGradesPage() {
 
     setIsValidating(false);
   }, [isAuthenticated, user, router]);
+
+  // Restore students from localStorage on mount
+  useEffect(() => {
+    const savedStudents = localStorage.getItem("pendingGradeSubmissions");
+    if (savedStudents) {
+      try {
+        const parsed = JSON.parse(savedStudents);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setStudents(parsed);
+          setSuccess(
+            `Restored ${parsed.length} unsaved student${
+              parsed.length !== 1 ? "s" : ""
+            } from previous session`
+          );
+          setShowToast(true);
+        }
+      } catch (err) {
+        console.error("Failed to restore saved students:", err);
+      }
+    }
+  }, []);
+
+  // Save students to localStorage whenever they change
+  useEffect(() => {
+    if (students.length > 0) {
+      localStorage.setItem("pendingGradeSubmissions", JSON.stringify(students));
+    } else {
+      localStorage.removeItem("pendingGradeSubmissions");
+    }
+  }, [students]);
+
+  // Show submit prompt when students reach 10 or more
+  useEffect(() => {
+    if (students.length === 10 && !showSubmitPrompt) {
+      setShowSubmitPrompt(true);
+    }
+  }, [students.length, showSubmitPrompt]);
 
   // Fetch grade entry metadata from new API
   const {
@@ -313,6 +352,26 @@ export default function EnterGradesPage() {
     () => classStudentsData?.students || [],
     [classStudentsData]
   );
+
+  // Extract all subjects from metadata (flatten primary and secondary)
+  const allSubjects = useMemo(() => {
+    const subjectsData = gradeMetadata?.subjects;
+    console.log("Grade Metadata:", gradeMetadata);
+    console.log("Subjects from metadata:", subjectsData);
+
+    if (!subjectsData) return [];
+
+    const primarySubjects = subjectsData.primary?.subjects || [];
+    const secondarySubjects = subjectsData.secondary?.subjects || [];
+
+    return [...primarySubjects, ...secondarySubjects];
+  }, [gradeMetadata]);
+
+  // Filter subjects based on selected class level
+  const availableSubjects = useMemo(() => {
+    if (!student.classLevel || !allSubjects) return [];
+    return allSubjects.filter((s) => s.level === student.classLevel);
+  }, [allSubjects, student.classLevel]);
 
   // Reset school selection when LGA changes
   React.useEffect(() => {
@@ -406,13 +465,51 @@ export default function EnterGradesPage() {
 
   const handleSelectChange = (name: string, value: string) => {
     if (name === "class") {
+      // Warn if changing class with students added
+      if (students.length > 0 && value !== student.classId) {
+        setPendingClassId(value);
+        setShowClassChangeWarning(true);
+        return;
+      }
+
       // Find the selected class and set both name and ID
       const selectedClass = classes.find((c) => c.id === value);
       if (selectedClass) {
+        // Get subjects for this class level - ensure allSubjects is an array
+        const subjects = Array.isArray(allSubjects) ? allSubjects : [];
+
+        // Determine class level from class name (e.g., "Primary 2" -> "PRIMARY")
+        const className = selectedClass.name.toLowerCase();
+        let classLevel: "PRIMARY" | "SECONDARY" = "PRIMARY";
+        if (
+          className.includes("jss") ||
+          className.includes("sss") ||
+          className.includes("secondary")
+        ) {
+          classLevel = "SECONDARY";
+        } else if (className.includes("primary")) {
+          classLevel = "PRIMARY";
+        }
+
+        console.log("Selected Class:", selectedClass);
+        console.log("Determined Class Level:", classLevel);
+        console.log("All Subjects:", subjects);
+
+        const classSubjects = subjects.filter((s) => s.level === classLevel);
+
+        console.log("Filtered Class Subjects:", classSubjects);
+
+        // Initialize subjects with empty strings
+        const initialSubjects = Object.fromEntries(
+          classSubjects.map((s) => [s.id, ""])
+        );
+
         setStudent((prev) => ({
           ...prev,
           class: selectedClass.name,
           classId: selectedClass.id,
+          classLevel: classLevel,
+          subjects: initialSubjects,
           // Reset student fields when class changes
           studentId: "",
           studentName: "",
@@ -453,6 +550,48 @@ export default function EnterGradesPage() {
     }
   };
 
+  const handleConfirmClassChange = () => {
+    if (!pendingClassId) return;
+
+    // Clear students and proceed with class change
+    setStudents([]);
+    const selectedClass = classes.find((c) => c.id === pendingClassId);
+    if (selectedClass) {
+      const subjects = Array.isArray(allSubjects) ? allSubjects : [];
+      const className = selectedClass.name.toLowerCase();
+      let classLevel: "PRIMARY" | "SECONDARY" = "PRIMARY";
+      if (
+        className.includes("jss") ||
+        className.includes("sss") ||
+        className.includes("secondary")
+      ) {
+        classLevel = "SECONDARY";
+      } else if (className.includes("primary")) {
+        classLevel = "PRIMARY";
+      }
+
+      const classSubjects = subjects.filter((s) => s.level === classLevel);
+      const initialSubjects = Object.fromEntries(
+        classSubjects.map((s) => [s.id, ""])
+      );
+
+      setStudent((prev) => ({
+        ...prev,
+        class: selectedClass.name,
+        classId: selectedClass.id,
+        classLevel: classLevel,
+        subjects: initialSubjects,
+        studentId: "",
+        studentName: "",
+        examNumber: "",
+        gender: "",
+      }));
+    }
+
+    setShowClassChangeWarning(false);
+    setPendingClassId(null);
+  };
+
   const handleSubjectScoreChange = (subject: string, value: string) => {
     if (/^\d{0,3}$/.test(value) && +value <= 100) {
       setStudent((prev) => ({
@@ -475,12 +614,14 @@ export default function EnterGradesPage() {
       setShowToast(true);
       return;
     }
-    for (const key of subjectKeys) {
+    // Validate all subjects have scores
+    for (const subject of availableSubjects) {
+      const score = student.subjects[subject.id];
       if (
-        student.subjects[key] === "" ||
-        isNaN(Number(student.subjects[key])) ||
-        Number(student.subjects[key]) < 0 ||
-        Number(student.subjects[key]) > 100
+        score === "" ||
+        isNaN(Number(score)) ||
+        Number(score) < 0 ||
+        Number(score) > 100
       ) {
         setError("Please enter valid scores (0-100) for all subjects.");
         setSuccess(null);
@@ -499,11 +640,14 @@ export default function EnterGradesPage() {
     }
 
     setStudents((prev) => [...prev, student]);
-    setStudent({
+    // Preserve class, classId, classLevel, and subjects when resetting
+    setStudent((prev) => ({
       ...initialStudentState,
-      class: student.class,
-      classId: student.classId,
-    });
+      class: prev.class,
+      classId: prev.classId,
+      classLevel: prev.classLevel,
+      subjects: prev.subjects,
+    }));
     setError(null);
     setSuccess("Student added successfully!");
     setShowToast(true);
@@ -590,6 +734,12 @@ export default function EnterGradesPage() {
         isOpen={studentsLoading && !!student.classId}
         message="Loading students in selected class..."
       />
+      <LoadingModal
+        isOpen={isSubmitting}
+        message={`Submitting grades for ${students.length} student${
+          students.length !== 1 ? "s" : ""
+        }...`}
+      />
 
       {/* Success Modal with Auto-Dismiss */}
       <LoadingModal isOpen={showSuccessModal} message={successMessage} />
@@ -634,6 +784,99 @@ export default function EnterGradesPage() {
               className="flex-1 text-white order-1 sm:order-2 bg-destructive hover:bg-destructive/90"
             >
               Clear All & Go Back
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* Class Change Warning Dialog */}
+      <Dialog
+        open={showClassChangeWarning}
+        onOpenChange={() => {
+          setShowClassChangeWarning(false);
+          setPendingClassId(null);
+        }}
+        showCloseButton={false}
+      >
+        <div className="p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <ExclamationCircleIcon className="w-6 h-6 text-amber-500 flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="text-lg font-semibold text-brand-black mb-2">
+                Change Class Warning
+              </h3>
+              <p className="text-sm text-brand-black-accent mb-3">
+                You have {students.length} student
+                {students.length !== 1 ? "s" : ""} with grades already added.
+                Changing the class will clear all added students.
+              </p>
+              <p className="text-sm text-brand-black-accent font-medium">
+                Please submit your current students before changing the class to
+                avoid data loss.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <Button
+              onClick={() => {
+                setShowClassChangeWarning(false);
+                setPendingClassId(null);
+              }}
+              variant="outline"
+              className="flex-1 order-2 sm:order-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmClassChange}
+              className="flex-1 text-white order-1 sm:order-2 bg-destructive hover:bg-destructive/90"
+            >
+              Clear All & Change Class
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* Submit Prompt Dialog */}
+      <Dialog
+        open={showSubmitPrompt}
+        onOpenChange={setShowSubmitPrompt}
+        showCloseButton={false}
+      >
+        <div className="p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <CheckCircleIcon className="w-6 h-6 text-brand-green flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="text-lg font-semibold text-brand-black mb-2">
+                Consider Submitting Your Progress
+              </h3>
+              <p className="text-sm text-brand-black-accent mb-3">
+                You&apos;ve added {students.length} students! To avoid losing
+                your work due to unexpected power outages or device issues, we
+                recommend submitting your grades now.
+              </p>
+              <p className="text-sm text-brand-black-accent">
+                Your progress is being saved locally, but submitting ensures
+                your data is safely stored on the server.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <Button
+              onClick={() => setShowSubmitPrompt(false)}
+              variant="outline"
+              className="flex-1 order-2 sm:order-1"
+            >
+              Continue Adding
+            </Button>
+            <Button
+              onClick={() => {
+                setShowSubmitPrompt(false);
+                handleTabChange("review");
+              }}
+              className="flex-1 order-1 sm:order-2 bg-brand-green"
+            >
+              Go to Submit
             </Button>
           </div>
         </div>
@@ -948,26 +1191,40 @@ export default function EnterGradesPage() {
                 <h3 className="text-lg font-medium text-brand-black mb-4">
                   Subject Scores
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {subjectKeys.map((key) => (
-                    <div key={key} className="space-y-2">
-                      <Label className="text-sm text-brand-black-accent">
-                        {subjectNames[key]}
-                      </Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={student.subjects[key]}
-                        onChange={(e) =>
-                          handleSubjectScoreChange(key, e.target.value)
-                        }
-                        className="text-center"
-                        placeholder="0-100"
-                      />
-                    </div>
-                  ))}
-                </div>
+                {!student.classId ? (
+                  <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                    <p className="text-gray-500 text-sm">
+                      Please select a class to view available subjects
+                    </p>
+                  </div>
+                ) : availableSubjects.length === 0 ? (
+                  <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-8 text-center">
+                    <p className="text-yellow-700 text-sm">
+                      No subjects found for this class level
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {availableSubjects.map((subject) => (
+                      <div key={subject.id} className="space-y-2">
+                        <Label className="text-sm text-brand-black-accent">
+                          {subject.name}
+                        </Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={student.subjects[subject.id] || ""}
+                          onChange={(e) =>
+                            handleSubjectScoreChange(subject.id, e.target.value)
+                          }
+                          className="text-center"
+                          placeholder="0-100"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between pt-4">
@@ -1109,12 +1366,14 @@ export default function EnterGradesPage() {
                         <div className="text-right">
                           <p className="text-sm text-gray-600">
                             Avg:{" "}
-                            {Math.round(
-                              Object.values(stu.subjects).reduce(
-                                (sum, score) => sum + Number(score),
-                                0
-                              ) / subjectKeys.length
-                            )}
+                            {Object.keys(stu.subjects).length > 0
+                              ? Math.round(
+                                  Object.values(stu.subjects).reduce(
+                                    (sum, score) => sum + Number(score),
+                                    0
+                                  ) / Object.keys(stu.subjects).length
+                                )
+                              : 0}
                             %
                           </p>
                         </div>
@@ -1132,17 +1391,77 @@ export default function EnterGradesPage() {
                   Back to Edit
                 </Button>
                 <Button
-                  onClick={() => {
-                    setSuccess("Grades submitted successfully!");
-                    setError(null);
-                    setStudents([]);
-                    setActiveTab("session");
-                    setShowToast(true);
+                  onClick={async () => {
+                    if (isSubmitting) return;
+
+                    setIsSubmitting(true);
+                    try {
+                      // Transform students data to API format
+                      const studentsPayload = students.map((stu) => ({
+                        studentId: stu.studentId,
+                        subjects: Object.entries(stu.subjects).map(
+                          ([subjectId, score]) => ({
+                            subjectId,
+                            score: Number(score),
+                          })
+                        ),
+                      }));
+
+                      // Make API call
+                      const response = await uploadResults({
+                        sessionId,
+                        termId,
+                        lgaId,
+                        schoolId,
+                        classId: student.classId,
+                        students: studentsPayload,
+                      });
+
+                      if (response.success) {
+                        setSuccess(
+                          response.message ||
+                            `Successfully submitted grades for ${
+                              students.length
+                            } student${students.length !== 1 ? "s" : ""}!`
+                        );
+                        setError(null);
+                        setStudents([]);
+                        setStudent(initialStudentState);
+                        // Clear localStorage on successful submission
+                        localStorage.removeItem("pendingGradeSubmissions");
+                        setActiveTab("session");
+                        setShowToast(true);
+                      } else {
+                        throw new Error(
+                          response.message || "Failed to submit grades"
+                        );
+                      }
+                    } catch (err: unknown) {
+                      const error = err as { message?: string };
+                      setError(
+                        error.message ||
+                          "Failed to submit grades. Please try again."
+                      );
+                      setSuccess(null);
+                      setShowToast(true);
+                    } finally {
+                      setIsSubmitting(false);
+                    }
                   }}
-                  className="flex items-center gap-2 font-medium bg-brand-green"
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 font-medium bg-brand-green disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CheckCircleIcon className="w-5 h-5" />
-                  Submit All Grades
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircleIcon className="w-5 h-5" />
+                      Submit All Grades
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

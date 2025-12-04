@@ -26,6 +26,7 @@ export interface ClassInfo {
   name: string;
   grade: string;
   section: string;
+  level: "PRIMARY" | "SECONDARY";
   isActive: boolean;
   totalStudents: number;
 }
@@ -67,6 +68,14 @@ export interface CurrentTerm {
   stateId: string;
 }
 
+export interface Subject {
+  id: string;
+  name: string;
+  code: string;
+  level: "PRIMARY" | "SECONDARY";
+  description: string;
+}
+
 export interface GradeEntryMetadataResponse {
   success: boolean;
   message: string;
@@ -76,6 +85,17 @@ export interface GradeEntryMetadataResponse {
     currentTerm: CurrentTerm;
     totalLocalGovernments: number;
     localGovernments: LocalGovernment[];
+    totalSubjects: number;
+    subjects: {
+      primary: {
+        count: number;
+        subjects: Subject[];
+      };
+      secondary: {
+        count: number;
+        subjects: Subject[];
+      };
+    };
   };
   statusCode: number;
 }
@@ -123,6 +143,36 @@ export interface ClassStudentsResponse {
     classId: string;
     total: number;
     students: StudentInfo[];
+  };
+  statusCode: number;
+}
+
+export interface SubjectScore {
+  subjectId: string;
+  score: number;
+}
+
+export interface StudentResult {
+  studentId: string;
+  subjects: SubjectScore[];
+}
+
+export interface UploadResultsRequest {
+  sessionId: string;
+  termId: string;
+  lgaId: string;
+  schoolId: string;
+  classId: string;
+  students: StudentResult[];
+}
+
+export interface UploadResultsResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    totalStudents: number;
+    uploadedCount: number;
+    failedCount: number;
   };
   statusCode: number;
 }
@@ -273,6 +323,47 @@ export async function fetchClassStudents(
           : err.response?.status === 500
           ? "Server error. Please try again later."
           : "Unable to load students. Please check your internet connection and try again.",
+      statusCode: err.response?.status || 500,
+    };
+  }
+}
+
+/**
+ * Upload student results/grades
+ * @param payload - The upload results payload containing session, term, school, class and student results
+ */
+export async function uploadResults(
+  payload: UploadResultsRequest
+): Promise<UploadResultsResponse> {
+  try {
+    const response = await api.post<UploadResultsResponse>(
+      "/grading/upload-results",
+      payload
+    );
+    return response.data;
+  } catch (error: unknown) {
+    const err = error as {
+      response?: { data?: unknown; status?: number };
+      message?: string;
+    };
+    console.error("Upload results error:", err);
+
+    if (err.response?.data) {
+      throw err.response.data;
+    }
+
+    throw {
+      success: false,
+      message:
+        err.response?.status === 401
+          ? "Session expired. Please log in again."
+          : err.response?.status === 400
+          ? "Invalid data provided. Please check all fields and try again."
+          : err.response?.status === 404
+          ? "Student or class information not found."
+          : err.response?.status === 500
+          ? "Server error. Please try again later."
+          : "Unable to upload results. Please check your internet connection and try again.",
       statusCode: err.response?.status || 500,
     };
   }

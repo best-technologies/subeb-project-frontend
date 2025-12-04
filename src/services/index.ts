@@ -12,6 +12,7 @@ export {
   fetchLgaSchools,
   fetchSchoolClasses,
   fetchClassStudents,
+  uploadResults,
 } from "./api/grading";
 
 // Export hooks
@@ -69,10 +70,15 @@ export type {
   StudentInfo,
   CurrentSession as GradingCurrentSession,
   CurrentTerm as GradingCurrentTerm,
+  Subject,
   GradeEntryMetadataResponse,
   LgaSchoolsResponse,
   SchoolClassesResponse,
   ClassStudentsResponse,
+  UploadResultsRequest,
+  UploadResultsResponse,
+  StudentResult,
+  SubjectScore,
 } from "./api/grading";
 
 export type {
