@@ -38,6 +38,8 @@ export default function OfficerLayout({
   // Determine active item based on pathname
   const activeItem = pathname.includes("/profile")
     ? ("profile" as const)
+    : pathname.includes("/add-student")
+    ? ("add-student" as const)
     : ("grade-record" as const);
 
   // Show loading state while validating role

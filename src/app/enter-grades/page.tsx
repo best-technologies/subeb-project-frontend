@@ -63,6 +63,150 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
+// Student Selector Component with Search and Grouping
+interface StudentSelectorProps {
+  students: Array<{
+    id: string;
+    fullName: string;
+    hasResultForActiveTerm: boolean;
+  }>;
+  selectedStudentId: string;
+  onStudentSelect: (value: string) => void;
+  disabled: boolean;
+  classId: string;
+  onAddStudent: () => void;
+}
+
+function StudentSelector({
+  students,
+  selectedStudentId,
+  onStudentSelect,
+  disabled,
+  classId,
+  onAddStudent,
+}: StudentSelectorProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Filter and group students
+  const { awaitingUpload, alreadyUploaded } = useMemo(() => {
+    const filtered = students.filter((s) =>
+      s.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    return {
+      awaitingUpload: filtered.filter((s) => !s.hasResultForActiveTerm),
+      alreadyUploaded: filtered.filter((s) => s.hasResultForActiveTerm),
+    };
+  }, [students, searchQuery]);
+
+  const selectedStudent = students.find((s) => s.id === selectedStudentId);
+
+  return (
+    <Select
+      value={selectedStudentId}
+      onValueChange={(value) => {
+        onStudentSelect(value);
+        setIsOpen(false);
+      }}
+      disabled={disabled}
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <SelectTrigger className="focus:ring-brand-green hover:border-brand-green/40">
+        <SelectValue
+          placeholder={
+            !classId
+              ? "Select class first"
+              : students.length === 0
+              ? "No students available"
+              : "Select student"
+          }
+        >
+          {selectedStudent && (
+            <span className="capitalize">{selectedStudent.fullName}</span>
+          )}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent className="border-brand-green/20">
+        {/* Search Input with Add Student Button */}
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-2">
+          <div className="relative flex items-center gap-2">
+            <div className="relative flex-1">
+              <Input
+                type="text"
+                placeholder="Search student..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pr-24 h-9 text-sm"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddStudent();
+                }}
+                className="absolute right-1 top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-medium rounded-full bg-brand-green text-white hover:bg-brand-green/90 transition-colors whitespace-nowrap"
+              >
+                Add Student
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Awaiting Upload Group */}
+        <div className="py-1">
+          <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">
+            Awaiting Upload ({awaitingUpload.length})
+          </div>
+          {awaitingUpload.length > 0 ? (
+            awaitingUpload.map((s) => (
+              <SelectItem
+                key={s.id}
+                value={s.id}
+                className="pl-6 focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green cursor-pointer"
+              >
+                <span className="capitalize">{s.fullName}</span>
+              </SelectItem>
+            ))
+          ) : (
+            <div className="px-8 py-2 text-xs text-gray-400 italic">
+              No students awaiting upload
+            </div>
+          )}
+        </div>
+
+        {/* Already Uploaded Group */}
+        {alreadyUploaded.length > 0 && (
+          <div className="py-1">
+            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">
+              Already Uploaded ({alreadyUploaded.length})
+            </div>
+            {alreadyUploaded.map((s) => (
+              <SelectItem
+                key={s.id}
+                value={s.id}
+                disabled
+                className="pl-6 opacity-50 cursor-not-allowed data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              >
+                <span className="capitalize text-gray-400">{s.fullName}</span>
+              </SelectItem>
+            ))}
+          </div>
+        )}
+
+        {/* No Results Message */}
+        {awaitingUpload.length === 0 && alreadyUploaded.length === 0 && (
+          <div className="py-6 text-center text-sm text-gray-500">
+            No students found
+          </div>
+        )}
+      </SelectContent>
+    </Select>
+  );
+}
+
 export default function EnterGradesPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
@@ -132,7 +276,7 @@ export default function EnterGradesPage() {
     data: classStudentsData,
     loading: studentsLoading,
     error: studentsError,
-  } = useClassStudents(schoolId, student.classId);
+  } = useClassStudents(student.classId);
 
   // Auto-populate session and term from grade metadata
   React.useEffect(() => {
@@ -756,38 +900,22 @@ export default function EnterGradesPage() {
                   <Label className="text-brand-black-accent">
                     Student Name
                   </Label>
-                  <Select
-                    value={student.studentId}
-                    onValueChange={(value) =>
+                  <StudentSelector
+                    students={availableStudents}
+                    selectedStudentId={student.studentId}
+                    onStudentSelect={(value) =>
                       handleSelectChange("student", value)
                     }
                     disabled={
                       !student.classId || availableStudents.length === 0
                     }
-                  >
-                    <SelectTrigger className="focus:ring-brand-green hover:border-brand-green/40">
-                      <SelectValue
-                        placeholder={
-                          !student.classId
-                            ? "Select class first"
-                            : availableStudents.length === 0
-                            ? "No students available"
-                            : "Select student"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent className="border-brand-green/20 text-brand-green">
-                      {availableStudents.map((s) => (
-                        <SelectItem
-                          key={s.id}
-                          value={s.id}
-                          className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
-                        >
-                          <span className="capitalize">{s.fullName}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    classId={student.classId}
+                    onAddStudent={() => {
+                      if (user?.id) {
+                        router.push(`/${user.id}/add-student`);
+                      }
+                    }}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-brand-black-accent">

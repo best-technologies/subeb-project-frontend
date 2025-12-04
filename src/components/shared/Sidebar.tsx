@@ -10,6 +10,7 @@ import {
   UserRound,
   ClipboardList,
   LogOut,
+  UserPlus,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,7 +30,7 @@ interface AdminSidebarProps extends BaseSidebarProps {
 
 interface OfficerSidebarProps extends BaseSidebarProps {
   variant: "officer";
-  activeItem: "profile" | "grade-record";
+  activeItem: "profile" | "grade-record" | "add-student";
   userId: string;
 }
 
@@ -63,6 +64,12 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         label: "Grade record",
         icon: <ClipboardList size={20} />,
         href: `/${userId}/grade-record`,
+      },
+      {
+        id: "add-student",
+        label: "Add Student",
+        icon: <UserPlus size={20} />,
+        href: `/${userId}/add-student`,
       },
     ];
 

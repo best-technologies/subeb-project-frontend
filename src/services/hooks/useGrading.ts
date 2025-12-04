@@ -171,10 +171,7 @@ interface UseClassStudentsState {
   error: string | null;
 }
 
-export const useClassStudents = (
-  schoolId: string | null,
-  classId: string | null
-) => {
+export const useClassStudents = (classId: string | null) => {
   const [state, setState] = useState<UseClassStudentsState>({
     data: null,
     loading: false,
@@ -182,7 +179,7 @@ export const useClassStudents = (
   });
 
   useEffect(() => {
-    if (!schoolId || !classId) {
+    if (!classId) {
       setState({ data: null, loading: false, error: null });
       return;
     }
@@ -190,7 +187,7 @@ export const useClassStudents = (
     const loadStudents = async () => {
       setState((prev) => ({ ...prev, loading: true, error: null }));
       try {
-        const response = await fetchClassStudents(schoolId, classId);
+        const response = await fetchClassStudents(classId);
         if (response.success && response.data) {
           setState({ data: response.data, loading: false, error: null });
         } else {
@@ -211,7 +208,7 @@ export const useClassStudents = (
     };
 
     loadStudents();
-  }, [schoolId, classId]);
+  }, [classId]);
 
   return state;
 };

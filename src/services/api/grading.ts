@@ -242,16 +242,14 @@ export async function fetchSchoolClasses(
 
 /**
  * Fetch students in a specific class
- * @param schoolId - The ID of the school
  * @param classId - The ID of the class
  */
 export async function fetchClassStudents(
-  schoolId: string,
   classId: string
 ): Promise<ClassStudentsResponse> {
   try {
     const response = await api.get<ClassStudentsResponse>(
-      `/grading/metadata/schools/${schoolId}/classes/${classId}/students`
+      `/grading/metadata/classes/${classId}/students`
     );
     return response.data;
   } catch (error: unknown) {
