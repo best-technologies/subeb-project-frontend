@@ -70,7 +70,7 @@ export type {
   StudentInfo,
   CurrentSession as GradingCurrentSession,
   CurrentTerm as GradingCurrentTerm,
-  Subject,
+  Subject as GradingSubject,
   GradeEntryMetadataResponse,
   LgaSchoolsResponse,
   SchoolClassesResponse,

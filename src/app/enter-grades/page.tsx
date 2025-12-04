@@ -8,7 +8,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { SquarePen } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { subjectNames } from "@/types/student";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
@@ -30,9 +29,7 @@ import {
   useSchoolClasses,
   useClassStudents,
 } from "@/services/hooks/useGrading";
-import { uploadResults, type Subject } from "@/services";
-
-const genders = ["Male", "Female"];
+import { uploadResults } from "@/services";
 
 // Helper function to convert term format from backend (e.g., "FIRST_TERM" -> "First")
 const formatTermName = (termName: string): string => {
@@ -457,11 +454,6 @@ export default function EnterGradesPage() {
       setShowSuccessModal(true);
     }
   }, [classStudentsData, studentsLoading, student.classId]);
-
-  const handleStudentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setStudent((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleSelectChange = (name: string, value: string) => {
     if (name === "class") {

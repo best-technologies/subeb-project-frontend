@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useMemo } from "react";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -65,11 +64,8 @@ const initialStudentState: StudentFormData = {
 };
 
 export default function EnrolStudentPage() {
-  const router = useRouter();
   const [session, setSession] = useState("2024/2025");
-  const [sessionId, setSessionId] = useState("");
   const [term, setTerm] = useState("First");
-  const [termId, setTermId] = useState("");
   const [school, setSchool] = useState("");
   const [schoolId, setSchoolId] = useState("");
   const [lgaValue, setLgaValue] = useState("");
@@ -117,11 +113,9 @@ export default function EnrolStudentPage() {
   React.useEffect(() => {
     if (enrollmentMetadata?.currentSession) {
       setSession(enrollmentMetadata.currentSession.name);
-      setSessionId(enrollmentMetadata.currentSession.id);
     }
     if (enrollmentMetadata?.currentTerm) {
       setTerm(formatTermName(enrollmentMetadata.currentTerm.name));
-      setTermId(enrollmentMetadata.currentTerm.id);
     }
   }, [enrollmentMetadata]);
 
@@ -681,20 +675,26 @@ export default function EnrolStudentPage() {
                       <SelectValue placeholder="Select LGA" />
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
-                      {lgas.map((lga: any) => (
-                        <SelectItem
-                          key={lga.id}
-                          value={lga.id}
-                          className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
-                        >
-                          <div className="flex items-center justify-between w-full gap-2">
-                            <span className="capitalize">{lga.name}</span>
-                            <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-brand-primary text-white font-medium">
-                              {lga.totalSchools}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {lgas.map(
+                        (lga: {
+                          id: string;
+                          name: string;
+                          totalSchools: number;
+                        }) => (
+                          <SelectItem
+                            key={lga.id}
+                            value={lga.id}
+                            className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
+                          >
+                            <div className="flex items-center justify-between w-full gap-2">
+                              <span className="capitalize">{lga.name}</span>
+                              <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-brand-primary text-white font-medium">
+                                {lga.totalSchools}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -723,20 +723,26 @@ export default function EnrolStudentPage() {
                       />
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
-                      {schools.map((s: any) => (
-                        <SelectItem
-                          key={s.id}
-                          value={s.id}
-                          className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
-                        >
-                          <div className="flex items-center justify-between w-full gap-2">
-                            <span className="capitalize">{s.name}</span>
-                            <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-brand-primary text-white font-medium">
-                              {s.totalClasses}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {schools.map(
+                        (s: {
+                          id: string;
+                          name: string;
+                          totalClasses: number;
+                        }) => (
+                          <SelectItem
+                            key={s.id}
+                            value={s.id}
+                            className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
+                          >
+                            <div className="flex items-center justify-between w-full gap-2">
+                              <span className="capitalize">{s.name}</span>
+                              <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-brand-primary text-white font-medium">
+                                {s.totalClasses}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -789,7 +795,7 @@ export default function EnrolStudentPage() {
                       <SelectValue placeholder="Select class" />
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
-                      {classes.map((c: any) => (
+                      {classes.map((c) => (
                         <SelectItem
                           key={c.id}
                           value={c.id}
