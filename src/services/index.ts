@@ -7,6 +7,13 @@ export {
   downloadStudentResultPDF,
 } from "./api";
 
+export {
+  fetchGradeEntryMetadata,
+  fetchLgaSchools,
+  fetchSchoolClasses,
+  fetchClassStudents,
+} from "./api/grading";
+
 // Export hooks
 export { useAdminDashboard } from "./hooks/useAdminDashboard";
 export { useStudentsDashboard } from "./hooks/useStudentsDashboard";
@@ -14,6 +21,12 @@ export { useGlobalAdminDashboard } from "./hooks/useGlobalAdminDashboard";
 export { useGlobalStudentsDashboard } from "./hooks/useGlobalStudentsDashboard";
 export { useGlobalSearchFilter } from "./hooks/useGlobalSearchFilter";
 export { useCurrentSession } from "./hooks/useCurrentSession";
+export {
+  useGradeEntryMetadata,
+  useLgaSchools,
+  useSchoolClasses,
+  useClassStudents,
+} from "./hooks/useGrading";
 
 // Export types
 export type {
@@ -48,6 +61,19 @@ export type {
   Term as SessionTerm,
   CurrentSessionResponse,
 } from "./api/session";
+
+export type {
+  LocalGovernment,
+  School as GradingSchool,
+  ClassInfo,
+  StudentInfo,
+  CurrentSession as GradingCurrentSession,
+  CurrentTerm as GradingCurrentTerm,
+  GradeEntryMetadataResponse,
+  LgaSchoolsResponse,
+  SchoolClassesResponse,
+  ClassStudentsResponse,
+} from "./api/grading";
 
 export type {
   StudentDetailsResponse,

@@ -8,7 +8,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { SquarePen } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useGlobalAdminDashboard, useCurrentSession } from "@/services";
 import { subjectNames } from "@/types/student";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -25,6 +24,12 @@ import { LoadingModal } from "@/components/ui/LoadingModal";
 import { Dialog } from "@/components/ui/dialog";
 import { SimpleFooter } from "@/components/shared/Footer";
 import { useAuthStore } from "@/store/authStore";
+import {
+  useGradeEntryMetadata,
+  useLgaSchools,
+  useSchoolClasses,
+  useClassStudents,
+} from "@/services/hooks/useGrading";
 
 const genders = ["Male", "Female"];
 const subjectKeys = Object.keys(subjectNames) as (keyof typeof subjectNames)[];
@@ -38,9 +43,11 @@ const formatTermName = (termName: string): string => {
 };
 
 const initialStudentState = {
+  studentId: "",
   studentName: "",
   examNumber: "",
   class: "",
+  classId: "",
   gender: "",
   subjects: Object.fromEntries(subjectKeys.map((key) => [key, ""])) as Record<
     string,
@@ -61,9 +68,13 @@ export default function EnterGradesPage() {
   const { user, isAuthenticated } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const [session, setSession] = useState("2024/2025");
+  const [sessionId, setSessionId] = useState("");
   const [term, setTerm] = useState("First");
+  const [termId, setTermId] = useState("");
   const [school, setSchool] = useState("");
+  const [schoolId, setSchoolId] = useState("");
   const [lgaValue, setLgaValue] = useState("");
+  const [lgaId, setLgaId] = useState("");
   const [student, setStudent] = useState(initialStudentState);
   const [students, setStudents] = useState<(typeof initialStudentState)[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +87,8 @@ export default function EnterGradesPage() {
   const [pendingTab, setPendingTab] = useState<
     "session" | "student" | "review" | null
   >(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Validate role on mount - only SUBEB_OFFICER can access
   useEffect(() => {
@@ -93,72 +106,154 @@ export default function EnterGradesPage() {
     setIsValidating(false);
   }, [isAuthenticated, user, router]);
 
-  // Fetch real data from API
-  const { data: dashboardData, loading: dashboardLoading } =
-    useGlobalAdminDashboard();
+  // Fetch grade entry metadata from new API
   const {
-    session: currentSession,
-    loading: sessionLoading,
-    error: sessionError,
-  } = useCurrentSession();
+    data: gradeMetadata,
+    loading: metadataLoading,
+    error: metadataError,
+  } = useGradeEntryMetadata();
 
-  // Auto-populate session and term from current session
+  // Fetch schools when LGA is selected
+  const {
+    data: lgaSchoolsData,
+    loading: schoolsLoading,
+    error: schoolsError,
+  } = useLgaSchools(lgaId);
+
+  // Fetch classes when school is selected and moving to student tab
+  const {
+    data: schoolClassesData,
+    loading: classesLoading,
+    error: classesError,
+  } = useSchoolClasses(schoolId);
+
+  // Fetch students when class is selected
+  const {
+    data: classStudentsData,
+    loading: studentsLoading,
+    error: studentsError,
+  } = useClassStudents(schoolId, student.classId);
+
+  // Auto-populate session and term from grade metadata
   React.useEffect(() => {
-    if (currentSession) {
-      setSession(currentSession.name);
-      const currentTerm = currentSession.terms.find((t) => t.isCurrent);
-      if (currentTerm) {
-        setTerm(formatTermName(currentTerm.name));
-      }
+    if (gradeMetadata?.currentSession) {
+      setSession(gradeMetadata.currentSession.name);
+      setSessionId(gradeMetadata.currentSession.id);
     }
-  }, [currentSession]);
+    if (gradeMetadata?.currentTerm) {
+      setTerm(formatTermName(gradeMetadata.currentTerm.name));
+      setTermId(gradeMetadata.currentTerm.id);
+    }
+  }, [gradeMetadata]);
 
-  // Use real data from API
-  const schools = useMemo(
-    () => dashboardData?.data?.schools || dashboardData?.schools || [],
-    [dashboardData]
-  );
-
+  // Extract LGAs from grade metadata
   const lgas = useMemo(
-    () =>
-      dashboardData?.data?.lgas?.map((l) => l.name) ||
-      dashboardData?.lgas?.map((l) => l.name) ||
-      [],
-    [dashboardData]
+    () => gradeMetadata?.localGovernments || [],
+    [gradeMetadata]
   );
 
+  // Extract schools from LGA schools data
+  const schools = useMemo(
+    () => lgaSchoolsData?.schools || [],
+    [lgaSchoolsData]
+  );
+
+  // Extract classes from school classes data
   const classes = useMemo(
-    () =>
-      dashboardData?.data?.classes?.map((c) => c.name) ||
-      dashboardData?.classes?.map((c) => c.name) ||
-      [],
-    [dashboardData]
+    () => schoolClassesData?.classes || [],
+    [schoolClassesData]
   );
 
-  // Filter schools by selected LGA
-  const filteredSchools = useMemo(() => {
-    if (!lgaValue || !schools) return [];
-    return schools.filter((school) => school.lga === lgaValue);
-  }, [schools, lgaValue]);
-
-  // Loading state for schools when LGA is selected
-  const [isLoadingSchools, setIsLoadingSchools] = useState(false);
-
-  // Simulate schools loading when LGA changes (if needed for API call)
-  React.useEffect(() => {
-    if (lgaValue && dashboardLoading) {
-      setIsLoadingSchools(true);
-    } else {
-      setIsLoadingSchools(false);
-    }
-  }, [lgaValue, dashboardLoading]);
+  // Extract students from class students data
+  const availableStudents = useMemo(
+    () => classStudentsData?.students || [],
+    [classStudentsData]
+  );
 
   // Reset school selection when LGA changes
   React.useEffect(() => {
-    if (lgaValue) {
+    if (lgaId) {
       setSchool("");
+      setSchoolId("");
     }
-  }, [lgaValue]);
+  }, [lgaId]);
+
+  // Reset class selection when school changes
+  React.useEffect(() => {
+    if (schoolId) {
+      setStudent((prev) => ({ ...prev, class: "", classId: "" }));
+    }
+  }, [schoolId]);
+
+  // Handle API errors with toast notifications
+  React.useEffect(() => {
+    if (metadataError) {
+      setError(metadataError);
+      setShowToast(true);
+    }
+  }, [metadataError]);
+
+  React.useEffect(() => {
+    if (schoolsError) {
+      setError(schoolsError);
+      setShowToast(true);
+    }
+  }, [schoolsError]);
+
+  React.useEffect(() => {
+    if (classesError) {
+      setError(classesError);
+      setShowToast(true);
+    }
+  }, [classesError]);
+
+  React.useEffect(() => {
+    if (studentsError) {
+      setError(studentsError);
+      setShowToast(true);
+    }
+  }, [studentsError]);
+
+  // Auto-dismiss success modal after 5 seconds
+  React.useEffect(() => {
+    if (showSuccessModal) {
+      const timer = setTimeout(() => {
+        setShowSuccessModal(false);
+        setSuccessMessage("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessModal]);
+
+  // Show success modal when schools are loaded
+  React.useEffect(() => {
+    if (lgaSchoolsData && !schoolsLoading && lgaId) {
+      setSuccessMessage(
+        `Successfully loaded ${lgaSchoolsData.schools.length} schools`
+      );
+      setShowSuccessModal(true);
+    }
+  }, [lgaSchoolsData, schoolsLoading, lgaId]);
+
+  // Show success modal when classes are loaded
+  React.useEffect(() => {
+    if (schoolClassesData && !classesLoading && schoolId) {
+      setSuccessMessage(
+        `Successfully loaded ${schoolClassesData.classes.length} classes`
+      );
+      setShowSuccessModal(true);
+    }
+  }, [schoolClassesData, classesLoading, schoolId]);
+
+  // Show success modal when students are loaded
+  React.useEffect(() => {
+    if (classStudentsData && !studentsLoading && student.classId) {
+      setSuccessMessage(
+        `Successfully loaded ${classStudentsData.students.length} students`
+      );
+      setShowSuccessModal(true);
+    }
+  }, [classStudentsData, studentsLoading, student.classId]);
 
   const handleStudentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -166,7 +261,52 @@ export default function EnterGradesPage() {
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setStudent((prev) => ({ ...prev, [name]: value }));
+    if (name === "class") {
+      // Find the selected class and set both name and ID
+      const selectedClass = classes.find((c) => c.id === value);
+      if (selectedClass) {
+        setStudent((prev) => ({
+          ...prev,
+          class: selectedClass.name,
+          classId: selectedClass.id,
+          // Reset student fields when class changes
+          studentId: "",
+          studentName: "",
+          examNumber: "",
+          gender: "",
+        }));
+      }
+    } else if (name === "student") {
+      // Find the selected student and auto-fill fields
+      const selectedStudent = availableStudents.find((s) => s.id === value);
+      if (selectedStudent) {
+        setStudent((prev) => ({
+          ...prev,
+          studentId: selectedStudent.id,
+          studentName: selectedStudent.fullName,
+          examNumber: selectedStudent.studentId,
+          gender: selectedStudent.gender === "MALE" ? "Male" : "Female",
+        }));
+      }
+    } else {
+      setStudent((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleLgaChange = (value: string) => {
+    const selectedLga = lgas.find((lga) => lga.id === value);
+    if (selectedLga) {
+      setLgaValue(selectedLga.name);
+      setLgaId(selectedLga.id);
+    }
+  };
+
+  const handleSchoolChange = (value: string) => {
+    const selectedSchool = schools.find((s) => s.id === value);
+    if (selectedSchool) {
+      setSchool(selectedSchool.name);
+      setSchoolId(selectedSchool.id);
+    }
   };
 
   const handleSubjectScoreChange = (subject: string, value: string) => {
@@ -183,9 +323,10 @@ export default function EnterGradesPage() {
       !student.studentName ||
       !student.examNumber ||
       !student.class ||
-      !student.gender
+      !student.gender ||
+      !student.studentId
     ) {
-      setError("Please fill all student fields.");
+      setError("Please select a student and ensure all fields are filled.");
       setSuccess(null);
       setShowToast(true);
       return;
@@ -203,8 +344,22 @@ export default function EnterGradesPage() {
         return;
       }
     }
+
+    // Check if student already added
+    const isDuplicate = students.some((s) => s.studentId === student.studentId);
+    if (isDuplicate) {
+      setError("This student has already been added.");
+      setSuccess(null);
+      setShowToast(true);
+      return;
+    }
+
     setStudents((prev) => [...prev, student]);
-    setStudent(initialStudentState);
+    setStudent({
+      ...initialStudentState,
+      class: student.class,
+      classId: student.classId,
+    });
     setError(null);
     setSuccess("Student added successfully!");
     setShowToast(true);
@@ -276,17 +431,24 @@ export default function EnterGradesPage() {
     <div className="min-h-screen bg-white flex flex-col">
       {/* Loading Dialogs */}
       <LoadingModal
-        isOpen={sessionLoading}
+        isOpen={metadataLoading}
         message="Loading academic session and term information..."
       />
       <LoadingModal
-        isOpen={dashboardLoading && !sessionLoading && lgas.length === 0}
-        message="Loading local government areas..."
-      />
-      <LoadingModal
-        isOpen={isLoadingSchools && !!lgaValue}
+        isOpen={schoolsLoading && !!lgaId}
         message="Loading schools in selected LGA..."
       />
+      <LoadingModal
+        isOpen={classesLoading && !!schoolId}
+        message="Loading classes in selected school..."
+      />
+      <LoadingModal
+        isOpen={studentsLoading && !!student.classId}
+        message="Loading students in selected class..."
+      />
+
+      {/* Success Modal with Auto-Dismiss */}
+      <LoadingModal isOpen={showSuccessModal} message={successMessage} />
 
       {/* Navigation Warning Dialog */}
       <Dialog
@@ -367,7 +529,7 @@ export default function EnterGradesPage() {
           <div className="flex">
             <button
               onClick={() => handleTabChange("session")}
-              className={`flex-1 px-2 sm:px-4 md:px-6 py-3 md:py-4 font-medium text-xs sm:text-sm md:text-base text-center transition-colors rounded-bl-lg rounded-tl-lg ${
+              className={`flex-1 min-w-0 px-2 sm:px-4 md:px-6 py-3 md:py-4 font-medium text-xs sm:text-sm md:text-base text-center transition-colors rounded-bl-lg rounded-tl-lg whitespace-nowrap ${
                 activeTab === "session"
                   ? "text-brand-green border-b-4 border-brand-green bg-brand-green/4"
                   : "text-gray-500 hover:text-gray-700"
@@ -378,7 +540,7 @@ export default function EnterGradesPage() {
             <button
               onClick={() => canProceedToStudent && handleTabChange("student")}
               disabled={!canProceedToStudent}
-              className={`flex-1 px-2 sm:px-4 md:px-6 py-3 md:py-4 font-medium text-xs sm:text-sm md:text-base text-center transition-colors ${
+              className={`flex-1 min-w-0 px-2 sm:px-4 md:px-6 py-3 md:py-4 font-medium text-xs sm:text-sm md:text-base text-center transition-colors whitespace-nowrap ${
                 activeTab === "student"
                   ? "text-brand-green border-b-4 border-brand-green bg-brand-green/4"
                   : canProceedToStudent
@@ -391,7 +553,7 @@ export default function EnterGradesPage() {
             <button
               onClick={() => canProceedToReview && handleTabChange("review")}
               disabled={!canProceedToReview}
-              className={`flex-1 px-2 sm:px-4 md:px-6 py-3 md:py-4 font-medium text-xs sm:text-sm md:text-base text-center transition-colors rounded-br-lg rounded-tr-lg ${
+              className={`flex-1 min-w-0 px-2 sm:px-4 md:px-6 py-3 md:py-4 font-medium text-xs sm:text-sm md:text-base text-center transition-colors rounded-br-lg rounded-tr-lg whitespace-nowrap ${
                 activeTab === "review"
                   ? "text-brand-green border-b-4 border-brand-green bg-brand-green/4"
                   : canProceedToReview
@@ -430,11 +592,11 @@ export default function EnterGradesPage() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
-                  {sessionLoading && (
+                  {metadataLoading && (
                     <p className="text-sm text-gray-500">Loading session...</p>
                   )}
-                  {sessionError && (
-                    <p className="text-sm text-red-500">{sessionError}</p>
+                  {metadataError && (
+                    <p className="text-sm text-red-500">{metadataError}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -447,10 +609,10 @@ export default function EnterGradesPage() {
                     </SelectTrigger>
                     <SelectContent className="border-brand-green/20 text-brand-green">
                       <SelectItem
-                        value="First"
+                        value={term}
                         className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
                       >
-                        First Term
+                        {term} Term
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -459,18 +621,23 @@ export default function EnterGradesPage() {
                   <Label className="text-brand-black-accent font-medium">
                     Local Government Area
                   </Label>
-                  <Select value={lgaValue} onValueChange={setLgaValue}>
+                  <Select value={lgaId} onValueChange={handleLgaChange}>
                     <SelectTrigger className="focus:ring-brand-green hover:border-brand-green/40">
                       <SelectValue placeholder="Select LGA" />
                     </SelectTrigger>
                     <SelectContent className="border-brand-green/20 text-brand-green">
                       {lgas.map((lga) => (
                         <SelectItem
-                          key={lga}
-                          value={lga}
+                          key={lga.id}
+                          value={lga.id}
                           className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
                         >
-                          {lga}
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <span className="capitalize">{lga.name}</span>
+                            <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-brand-green text-white font-medium">
+                              {lga.totalSchools}
+                            </span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -481,33 +648,38 @@ export default function EnterGradesPage() {
                     School
                   </Label>
                   <Select
-                    value={school}
-                    onValueChange={setSchool}
-                    disabled={!lgaValue || filteredSchools.length === 0}
+                    value={schoolId}
+                    onValueChange={handleSchoolChange}
+                    disabled={!lgaId || schools.length === 0}
                   >
                     <SelectTrigger
                       className={`focus:ring-brand-green hover:border-brand-green/40 ${
-                        !lgaValue ? "opacity-50" : ""
+                        !lgaId ? "opacity-50" : ""
                       }`}
                     >
                       <SelectValue
                         placeholder={
-                          !lgaValue
+                          !lgaId
                             ? "Select LGA first"
-                            : filteredSchools.length === 0
+                            : schools.length === 0
                             ? "No schools available"
                             : "Select school"
                         }
                       />
                     </SelectTrigger>
                     <SelectContent className="border-brand-green/20 text-brand-green">
-                      {filteredSchools.map((s) => (
+                      {schools.map((s) => (
                         <SelectItem
                           key={s.id}
-                          value={s.name}
+                          value={s.id}
                           className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
                         >
-                          {s.name}
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <span className="capitalize">{s.name}</span>
+                            <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-brand-green text-white font-medium">
+                              {s.totalClasses}
+                            </span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -520,9 +692,17 @@ export default function EnterGradesPage() {
                     canProceedToStudent && handleTabChange("student")
                   }
                   disabled={!canProceedToStudent}
-                  className="bg-brand-green"
+                  className="bg-brand-green relative overflow-hidden"
                 >
-                  Continue to Add Students
+                  {canProceedToStudent && (
+                    <>
+                      <span className="absolute inset-0 animate-ripple-wave"></span>
+                      <span className="absolute inset-0 animate-ripple-wave-delayed"></span>
+                    </>
+                  )}
+                  <span className="relative z-10">
+                    Continue to Add Students
+                  </span>
                 </Button>
               </div>
             </div>
@@ -546,7 +726,7 @@ export default function EnterGradesPage() {
                 <div className="space-y-2">
                   <Label className="text-brand-black-accent">Class</Label>
                   <Select
-                    value={student.class}
+                    value={student.classId}
                     onValueChange={(value) =>
                       handleSelectChange("class", value)
                     }
@@ -557,11 +737,16 @@ export default function EnterGradesPage() {
                     <SelectContent className="border-brand-green/20 text-brand-green">
                       {classes.map((c) => (
                         <SelectItem
-                          key={c}
-                          value={c}
+                          key={c.id}
+                          value={c.id}
                           className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
                         >
-                          {c}
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <span className="capitalize">{c.name}</span>
+                            <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-brand-green text-white font-medium">
+                              {c.totalStudents}
+                            </span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -571,45 +756,62 @@ export default function EnterGradesPage() {
                   <Label className="text-brand-black-accent">
                     Student Name
                   </Label>
-                  <Input
-                    name="studentName"
-                    value={student.studentName}
-                    onChange={handleStudentChange}
-                    placeholder="Enter full name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent">Exam Number</Label>
-                  <Input
-                    name="examNumber"
-                    value={student.examNumber}
-                    onChange={handleStudentChange}
-                    placeholder="Enter exam number"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent">Gender</Label>
                   <Select
-                    value={student.gender}
+                    value={student.studentId}
                     onValueChange={(value) =>
-                      handleSelectChange("gender", value)
+                      handleSelectChange("student", value)
+                    }
+                    disabled={
+                      !student.classId || availableStudents.length === 0
                     }
                   >
                     <SelectTrigger className="focus:ring-brand-green hover:border-brand-green/40">
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue
+                        placeholder={
+                          !student.classId
+                            ? "Select class first"
+                            : availableStudents.length === 0
+                            ? "No students available"
+                            : "Select student"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent className="border-brand-green/20 text-brand-green">
-                      {genders.map((g) => (
+                      {availableStudents.map((s) => (
                         <SelectItem
-                          key={g}
-                          value={g}
+                          key={s.id}
+                          value={s.id}
                           className="focus:bg-brand-green/10 focus:text-brand-green hover:bg-brand-green/5 data-[state=checked]:text-brand-green [&>span>svg]:text-brand-green"
                         >
-                          {g}
+                          <span className="capitalize">{s.fullName}</span>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-brand-black-accent">
+                    Student Number
+                  </Label>
+                  <Input
+                    name="examNumber"
+                    value={student.examNumber}
+                    readOnly
+                    disabled
+                    placeholder="Auto-filled"
+                    className="bg-gray-50 cursor-not-allowed"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-brand-black-accent">Gender</Label>
+                  <Input
+                    name="gender"
+                    value={student.gender}
+                    readOnly
+                    disabled
+                    placeholder="Auto-filled"
+                    className="bg-gray-50 cursor-not-allowed"
+                  />
                 </div>
               </div>
 
