@@ -67,22 +67,22 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-8">
             <BenefitCard
-              image="/svgs/rectangle.svg"
+              image="/3ds/3d-upload.jpg"
               title="Smart Result Uploads"
               description="Upload scores in bulk, validate instantly, and reduce entry errors with our intuitive upload system."
             />
             <BenefitCard
-              image="/svgs/rectangle.svg"
+              image="/3ds/3d-oversight.jpg"
               title="Real-Time Oversight"
               description="Get a complete view of performance across classes, terms, and subjects — all from your admin dashboard."
             />
             <BenefitCard
-              image="/svgs/rectangle.svg"
+              image="/3ds/3d-security.jpg"
               title="Secure & Reliable"
               description="Your data is encrypted and automatically backed up, ensuring accuracy and protection at every step."
             />
             <BenefitCard
-              image="/svgs/rectangle.svg"
+              image="/3ds/3d-dashboard.jpg"
               title="Analytics That Matter"
               description="Make informed decisions with automated reports, charts, and comparative analytics."
             />
@@ -188,7 +188,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 md:gap-12 lg:gap-24 items-start">
             <div className="overflow-hidden aspect-square relative mb-12 md:mb-0">
               <Image
-                src="/imgs/question-mark.jpg"
+                src="/imgs/question-mark.jpeg"
                 alt="FAQ illustration"
                 width={500}
                 height={580}

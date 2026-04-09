@@ -16,7 +16,7 @@ export default function BenefitCard({
     <div className="border border-[#E5E7EA] rounded-lg overflow-hidden">
       {/* Image Section - 580x280 */}
       <div className="w-full h-[200px] md:h-[280px] relative">
-        <Image src={image} alt={title} fill className="object-cover" />
+        <Image src={image} alt={title} fill className="object-contain" />
       </div>
 
       {/* Content Section */}
