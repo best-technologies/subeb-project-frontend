@@ -12,10 +12,19 @@ export default function VideoModal({ isOpen, onClose }: VideoModalProps) {
 
   useEffect(() => {
     if (isOpen && videoRef.current) {
+      videoRef.current.muted = true;
       videoRef.current.load();
-      videoRef.current.play().catch(() => {
-        // Autoplay blocked — user can press play manually
-      });
+      videoRef.current
+        .play()
+        .then(() => {
+          // Unmute after autoplay starts successfully
+          if (videoRef.current) {
+            videoRef.current.muted = false;
+          }
+        })
+        .catch(() => {
+          // Autoplay blocked — user can press play manually
+        });
     }
     if (!isOpen && videoRef.current) {
       videoRef.current.pause();
@@ -67,7 +76,6 @@ export default function VideoModal({ isOpen, onClose }: VideoModalProps) {
           ref={videoRef}
           src={isOpen ? "/videos/subeb-demo.mp4" : undefined}
           controls
-          muted
           autoPlay
           playsInline
           preload="auto"
