@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Youtube, Linkedin, Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import VideoModal from "@/components/shared/VideoModal";
 
 // Simple footer for officer/authenticated pages
 export function SimpleFooter() {
@@ -18,6 +19,8 @@ export function SimpleFooter() {
 
 // Full footer for landing page (default export)
 export default function Footer() {
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
   return (
     <footer className="bg-white">
       <div className="px-5 pb-5">
@@ -41,6 +44,7 @@ export default function Footer() {
                   <Button
                     variant="outline"
                     className="!rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px]"
+                    onClick={() => setIsVideoModalOpen(true)}
                   >
                     <Youtube className="w-5 h-5" />
                     <span>Watch a Demo</span>
@@ -162,6 +166,10 @@ export default function Footer() {
           </section>
         </div>
       </div>
+      <VideoModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+      />
     </footer>
   );
 }

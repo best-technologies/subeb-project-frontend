@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
+import VideoModal from "@/components/shared/VideoModal";
 
 export default function Header() {
   const { user, isAuthenticated } = useAuthStore();
@@ -21,6 +22,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Wait for auth store to hydrate to prevent flickering
@@ -153,6 +155,7 @@ export default function Header() {
                 <Button
                   variant="outline"
                   className="!rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px]"
+                  onClick={() => setIsVideoModalOpen(true)}
                 >
                   <Youtube className="w-4 h-4" />
                   <span>Watch a Demo</span>
@@ -245,7 +248,10 @@ export default function Header() {
               <Button
                 variant="outline"
                 className="w-full !rounded-full border-brand-green-accent text-brand-green hover:bg-gray-50 h-[51px] gap-[10px] justify-center"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsVideoModalOpen(true);
+                }}
               >
                 <Youtube className="w-4 h-4" />
                 <span>Watch a Demo</span>
@@ -288,6 +294,10 @@ export default function Header() {
           )}
         </div>
       </div>
+      <VideoModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+      />
     </header>
   );
 }

@@ -92,7 +92,7 @@ function isValidToken(token: string | undefined): boolean {
 
     // Decode payload (base64)
     const payload = JSON.parse(
-      Buffer.from(parts[1], "base64").toString("utf-8")
+      Buffer.from(parts[1], "base64").toString("utf-8"),
     );
 
     // Check expiration
@@ -123,7 +123,7 @@ export function middleware(request: NextRequest) {
 
   // Check if current route is public or auth route
   const isPublicRoute = publicRoutes.some((route) =>
-    route === "/" ? pathname === "/" : pathname.startsWith(route)
+    route === "/" ? pathname === "/" : pathname.startsWith(route),
   );
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
@@ -192,6 +192,6 @@ export const config = {
      * - public folder files
      * - api routes (they have their own auth)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$|api).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|mp4|webm|ogg)$|api).*)",
   ],
 };
