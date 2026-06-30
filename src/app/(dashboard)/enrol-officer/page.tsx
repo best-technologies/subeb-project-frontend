@@ -1,241 +1,158 @@
 "use client";
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import React, { useState } from "react";
+import { useOfficers } from "@/services/hooks/useOfficers";
 import { Button } from "@/components/ui/Button";
-import { useEnrollOfficer } from "@/services/hooks/useEnrollOfficer";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/Input";
-import { LoadingModal } from "@/components/ui/LoadingModal";
+import { Plus, Search } from "lucide-react";
+import AddOfficerForm from "@/components/officers/AddOfficerForm";
 import { Dialog } from "@/components/ui/dialog";
-import {
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-} from "@heroicons/react/24/solid";
+import { capitalizeWords } from "@/utils/formatters";
 
-// Zod schema for form validation
-const formSchema = z.object({
-  firstName: z.string().min(1, "First Name is required"),
-  lastName: z.string().min(1, "Last Name is required"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().min(1, "Phone Number is required"),
-  address: z.string().min(1, "Address is required"),
-});
+export default function OfficersPage() {
+  const [page, setPage] = useState(1);
+  const { data, isLoading, error } = useOfficers(page, 10);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-type FormValues = z.infer<typeof formSchema>;
-
-export default function EnrolOfficerPage() {
-  const enrollOfficerMutation = useEnrollOfficer();
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      address: "",
-    },
-  });
-
-  function onSubmit(values: FormValues) {
-    console.log("Form submitted with values:", values);
-
-    // Add designation field for the API
-    const submissionData = {
-      ...values,
-      designation: "Education Officer",
-    };
-
-    // Call the API through our new hook
-    enrollOfficerMutation.mutate(submissionData, {
-      onSuccess: () => {
-        console.log("Enrollment successful, resetting form");
-        form.reset();
-        setShowSuccessDialog(true);
-      },
-      onError: (error: unknown) => {
-        console.error("Enrollment failed:", error);
-        const message =
-          (
-            error as {
-              response?: { data?: { message?: string } };
-              message?: string;
-            }
-          )?.response?.data?.message ||
-          (error as { message?: string })?.message ||
-          "Failed to enroll officer. Please try again.";
-        setErrorMessage(message);
-        setShowErrorDialog(true);
-      },
-    });
-  }
+  const officers = (data?.meta as { id: string; user: { firstName: string; lastName: string; email: string }; phone: string; lga?: { name: string } }[]) || [];
+  const pagination = (data?.data as { pagination?: { total?: number; totalPages?: number } })?.pagination;
+  const total = pagination?.total || 0;
+  const totalPages = pagination?.totalPages || 1;
 
   return (
-    <>
-      {/* Loading Modal */}
-      <LoadingModal
-        isOpen={enrollOfficerMutation.isPending}
-        message="Enrolling officer..."
-      />
-
-      {/* Success Dialog */}
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <div className="p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <CheckCircleIcon className="w-10 h-10 text-green-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Officer Enrolled Successfully!
-            </h3>
-            <p className="text-gray-600 mb-6">
-              The SUBEB officer has been enrolled successfully.
-            </p>
-            <Button
-              onClick={() => setShowSuccessDialog(false)}
-              className="w-full"
-            >
-              Close
-            </Button>
-          </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Officers</h1>
+          <p className="text-gray-600">Manage SUBEB exam officers</p>
         </div>
-      </Dialog>
-
-      {/* Error Dialog */}
-      <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <div className="p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-              <ExclamationCircleIcon className="w-10 h-10 text-red-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Enrollment Failed
-            </h3>
-            <p className="text-gray-600 mb-6">{errorMessage}</p>
-            <Button
-              onClick={() => setShowErrorDialog(false)}
-              variant="outline"
-              className="w-full"
-            >
-              Try Again
-            </Button>
-          </div>
-        </div>
-      </Dialog>
-
-      <div className="max-w-md mx-auto bg-background text-foreground rounded-xl shadow-xl p-6 mt-10">
-        <h2 className="text-xl font-bold mb-4 text-center">Enrol Officer</h2>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 w-full"
-          >
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter first name"
-                      autoFocus
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter last name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Enter email address"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="tel"
-                      placeholder="Enter phone number"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="pt-2">
-              <Button
-                type="submit"
-                variant="default"
-                size="default"
-                className="w-full"
-                disabled={enrollOfficerMutation.isPending}
-              >
-                {enrollOfficerMutation.isPending
-                  ? "Enrolling..."
-                  : "Enroll Officer"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="flex items-center gap-2 bg-brand-primary text-white"
+        >
+          <Plus size={20} />
+          <span>Add Officer</span>
+        </Button>
       </div>
-    </>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+          <div className="relative w-64">
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={18}
+            />
+            <input
+              type="text"
+              placeholder="Search officers..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-primary"
+            />
+          </div>
+          <div className="text-sm text-gray-500">
+            Total: <span className="font-semibold text-gray-900">{total}</span>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-brand-accent-background">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Phone
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  LGA
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-gray-500">
+                    Loading officers...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-red-500">
+                    Failed to load officers
+                  </td>
+                </tr>
+              ) : officers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-gray-500">
+                    No officers found
+                  </td>
+                </tr>
+              ) : (
+                officers.map((officer: { id: string; user: { firstName: string; lastName: string; email: string }; phone: string; lga?: { name: string } }) => (
+                  <tr key={officer.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">
+                        {officer.user.firstName} {officer.user.lastName}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      {officer.user.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      {officer.phone}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      {officer.lga ? capitalizeWords(officer.lga.name) : "Unassigned"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-gray-100 flex items-center justify-between">
+            <Button
+              variant="outline"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <div className="p-6">
+          <h2 className="sr-only">Enrol New Officer</h2>
+          <div className="mt-4">
+            <AddOfficerForm onSuccess={() => setIsAddModalOpen(false)} />
+          </div>
+        </div>
+      </Dialog>
+    </div>
   );
 }

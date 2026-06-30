@@ -13,6 +13,7 @@ interface StudentsTableProps {
   getScoreBgColor: (score: number) => string;
   getPositionBadge: (position: number) => string;
   onEditStudent: (student: PerformanceStudent) => void;
+  hasActiveFilters?: boolean;
 }
 
 const StudentsTable: React.FC<StudentsTableProps> = ({
@@ -24,6 +25,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
   getScoreBgColor,
   getPositionBadge,
   onEditStudent,
+  hasActiveFilters,
 }) => {
   return (
     <div className="bg-white border border-brand-accent/20 rounded-xl overflow-hidden shadow-lg">
@@ -139,6 +141,25 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                   onEditStudent={onEditStudent}
                 />
               ))
+            ) : hasActiveFilters ? (
+              <tr>
+                <td colSpan={8} className="px-3 py-12 text-center">
+                  <div className="text-brand-light-accent-1">
+                    <div className="flex justify-center mb-4">
+                      <Squirrel className="w-20 h-20 text-brand-primary-2 opacity-50" />
+                    </div>
+                    <p className="text-xl font-semibold text-brand-primary mb-2">
+                      No Students Found
+                    </p>
+                    <p className="text-base text-brand-accent-text mb-1">
+                      There are no students matching your selected filters.
+                    </p>
+                    <p className="text-sm text-brand-accent-text/70">
+                      Try adjusting the Session, Term, or clearing the search.
+                    </p>
+                  </div>
+                </td>
+              </tr>
             ) : (
               <tr>
                 <td colSpan={8} className="px-3 py-12 text-center">

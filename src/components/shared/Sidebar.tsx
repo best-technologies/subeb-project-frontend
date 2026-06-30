@@ -30,11 +30,19 @@ interface AdminSidebarProps extends BaseSidebarProps {
 
 interface OfficerSidebarProps extends BaseSidebarProps {
   variant: "officer";
-  activeItem: "profile" | "grade-record" | "add-student";
-  userId: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  onRefresh?: () => void;
 }
 
-type SidebarProps = AdminSidebarProps | OfficerSidebarProps;
+interface SchoolItSidebarProps extends BaseSidebarProps {
+  variant: "school-it";
+  isOpen: boolean;
+  onToggle: () => void;
+  onRefresh?: () => void;
+}
+
+type SidebarProps = AdminSidebarProps | OfficerSidebarProps | SchoolItSidebarProps;
 
 const Sidebar: React.FC<SidebarProps> = (props) => {
   const pathname = usePathname();
@@ -43,135 +51,116 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
 
   const variant = props.variant || "admin";
 
-  // Officer Sidebar
-  if (variant === "officer") {
-    const { activeItem, userId, onNavigate } = props as OfficerSidebarProps;
-
-    const handleLogout = () => {
-      logout();
-      router.push("/login");
-    };
-
-    const navigationItems = [
-      {
-        id: "profile",
-        label: "My profile",
-        icon: <UserRound size={20} />,
-        href: `/${userId}/profile`,
-      },
-      {
-        id: "grade-record",
-        label: "Grade record",
-        icon: <ClipboardList size={20} />,
-        href: `/${userId}/grade-record`,
-      },
-      {
-        id: "add-student",
-        label: "Add Student",
-        icon: <UserPlus size={20} />,
-        href: `/${userId}/add-student`,
-      },
-    ];
-
-    return (
-      <div className="hidden lg:flex w-64 bg-white border-r border-gray-200 flex-shrink-0">
-        <div className="flex flex-col h-full">
-          {/* Navigation - Top */}
-          <nav className="p-0">
-            <ul className="space-y-0">
-              {navigationItems.map((item) => (
-                <li key={item.id}>
-                  <Link
-                    href={item.href}
-                    onClick={() => onNavigate?.()}
-                    className={`
-                      flex items-center space-x-3 px-6 py-4 transition-all duration-200 w-full
-                      ${
-                        activeItem === item.id
-                          ? "bg-[#F5FAF8] text-brand-green border-l-6 border-brand-green"
-                          : "text-gray-700 hover:bg-gray-50"
-                      }
-                    `}
-                  >
-                    <span>{item.icon}</span>
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Spacer to push logout to bottom */}
-          <div className="flex-1"></div>
-
-          {/* Logout Button - Bottom */}
-          <div className="p-6 border-t border-gray-200">
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 w-full transition-all duration-200"
-            >
-              <LogOut size={20} />
-              <span className="font-medium">Logout</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Admin Sidebar
-  const { isOpen, onToggle, onRefresh, onNavigate } =
-    props as AdminSidebarProps;
-
   const handleLogout = () => {
     logout();
     router.push("/login");
   };
 
-  const navigationItems = [
-    {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: <LayoutDashboard size={20} />,
-      href: "/dashboard",
-      disabled: false,
-    },
-    {
-      id: "students",
-      label: "Students",
-      icon: <Users size={20} />,
-      href: "/students",
-      disabled: false,
-    },
-    {
-      id: "schools",
-      label: "Schools",
-      icon: <School size={20} />,
-      href: "/schools",
-      disabled: false,
-    },
-    {
-      id: "enrol-student",
-      label: "Enrol Student",
-      icon: <UserPlus size={20} />,
-      href: "/enrol-student",
-      disabled: false,
-    },
-    {
-      id: "enrol-officer",
-      label: "Enrol Officer",
-      icon: <UserRoundPen size={20} />,
-      href: "/enrol-officer",
-      disabled: false,
-    },
-    {
-      id: "profile",
-      label: "Profile",
-      icon: <User size={20} />,
-      href: "/profile",
-      disabled: false,
-    },
-  ];
+  let navigationItems: Array<{ id: string; label: string; icon: React.ReactNode; href: string; disabled?: boolean }> = [];
+  const { isOpen, onToggle, onRefresh, onNavigate } = props as SidebarProps;
+
+  if (variant === "officer") {
+    navigationItems = [
+      {
+        id: "dashboard",
+        label: "Dashboard",
+        icon: <LayoutDashboard size={20} />,
+        href: "/officer/dashboard",
+      },
+      {
+        id: "results",
+        label: "Results",
+        icon: <ClipboardList size={20} />,
+        href: "/officer/results",
+      },
+      {
+        id: "audit-logs",
+        label: "Audit Logs",
+        icon: <ClipboardList size={20} />,
+        href: "/officer/audit-logs",
+      },
+      {
+        id: "profile",
+        label: "My Profile",
+        icon: <UserRound size={20} />,
+        href: "/officer/profile",
+      },
+    ];
+  } else if (variant === "school-it") {
+    navigationItems = [
+      {
+        id: "dashboard",
+        label: "Dashboard",
+        icon: <LayoutDashboard size={20} />,
+        href: "/school-it/dashboard",
+      },
+      {
+        id: "students",
+        label: "Students",
+        icon: <Users size={20} />,
+        href: "/school-it/students",
+      },
+      {
+        id: "results",
+        label: "Results",
+        icon: <ClipboardList size={20} />,
+        href: "/school-it/results",
+      },
+    ];
+  } else {
+    // Admin Sidebar
+    navigationItems = [
+      {
+        id: "dashboard",
+        label: "Dashboard",
+        icon: <LayoutDashboard size={20} />,
+        href: "/dashboard",
+        disabled: false,
+      },
+      {
+        id: "students",
+        label: "Students",
+        icon: <Users size={20} />,
+        href: "/students",
+        disabled: false,
+      },
+      {
+        id: "schools",
+        label: "Schools",
+        icon: <School size={20} />,
+        href: "/schools",
+        disabled: false,
+      },
+      {
+        id: "enrol-student",
+        label: "Enrol Student",
+        icon: <UserPlus size={20} />,
+        href: "/enrol-student",
+        disabled: false,
+      },
+      {
+        id: "officers",
+        label: "Officers",
+        icon: <UserRoundPen size={20} />,
+        href: "/enrol-officer",
+        disabled: false,
+      },
+      {
+        id: "academic-settings",
+        label: "Academic Settings",
+        icon: <ClipboardList size={20} />,
+        href: "/academic-settings",
+        disabled: false,
+      },
+      {
+        id: "profile",
+        label: "Profile",
+        icon: <User size={20} />,
+        href: "/profile",
+        disabled: false,
+      },
+    ];
+  }
 
   return (
     <>

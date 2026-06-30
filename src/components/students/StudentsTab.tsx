@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { TriangleAlert } from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { StudentsFilters as StudentsFiltersType } from "@/services/types/studentsDashboardResponse";
@@ -9,6 +9,7 @@ import StudentsHeader from "./StudentsHeader";
 import StudentsFilters from "./StudentsFilters";
 import StudentsTable from "./StudentsTable";
 import EditStudentDialog from "./EditStudentDialog";
+import AddStudentDialog from "./AddStudentDialog";
 import FilterContextMessage from "./FilterContextMessage";
 import { Button } from "@/components/ui/Button";
 import { LoadingModal } from "@/components/ui/LoadingModal";
@@ -20,8 +21,8 @@ import {
   getPositionBadge,
 } from "./utils/studentUtils";
 
-// Import the new search hook
 import { useStudentSearch } from "@/services/hooks/useStudentSearch";
+import { useSessions, useTerms } from "@/services/hooks/useAcademic";
 
 interface StudentsTabProps {
   // Initial data from dashboard
@@ -34,6 +35,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   lgas,
 }) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState<PerformanceStudent | null>(
     null
   );
@@ -66,6 +68,8 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     selectLGA,
     selectSchool,
     selectClass,
+    selectSession,
+    selectTerm,
     updateSearch,
     clearFilters,
     initializeStudents,
@@ -73,7 +77,14 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     // Check if filters are enabled
     isSchoolEnabled,
     isClassEnabled,
+    isTermEnabled,
   } = useStudentSearch();
+
+  const { data: sessionsData } = useSessions();
+  const { data: termsData } = useTerms(searchParams.session);
+
+  const availableSessions = useMemo(() => sessionsData?.data || [], [sessionsData]);
+  const availableTerms = useMemo(() => termsData?.data || [], [termsData]);
 
   // Initialize with original data on mount
   useEffect(() => {
@@ -90,10 +101,10 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
 
   // Only use search results when filters are applied, otherwise show empty
   const students = useMemo(() => {
-    return searchParams.classId ? searchStudents : [];
-  }, [searchParams.classId, searchStudents]);
+    return searchParams.classId || searchParams.search ? searchStudents : [];
+  }, [searchParams.classId, searchParams.search, searchStudents]);
 
-  const total = searchParams.classId ? searchTotal : 0;
+  const total = searchParams.classId || searchParams.search ? searchTotal : 0;
   const loading = searchLoading;
   const error = searchError;
 
@@ -124,12 +135,19 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     return;
   };
 
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleSearch = (search: string) => {
     setSearchTerm(search);
-    if (searchParams.classId) {
-      // Use server-side search when class is selected
-      updateSearch(search);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
     }
+    
+    searchTimeoutRef.current = setTimeout(() => {
+      // Use server-side search when there is a search term or class selected
+      updateSearch(search);
+    }, 500);
   };
 
   const handleClearFilters = () => {
@@ -183,6 +201,8 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     lga: searchParams.lgaId || "all-lgas",
     school: searchParams.schoolId || "all-schools",
     class: searchParams.classId || "all-classes",
+    session: searchParams.session || "all-sessions",
+    term: searchParams.term || "all-terms",
   };
 
   // Get selected class name for the filter context message
@@ -193,6 +213,18 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     );
     return selectedClass?.name;
   }, [searchParams.classId, availableClasses]);
+
+  const selectedSessionName = useMemo(() => {
+    if (!searchParams.session) return undefined;
+    const session = availableSessions?.find(s => s.id === searchParams.session);
+    return session?.name || searchParams.session;
+  }, [searchParams.session, availableSessions]);
+
+  const selectedTermName = useMemo(() => {
+    if (!searchParams.term) return undefined;
+    const term = availableTerms?.find(t => t.id === searchParams.term);
+    return term?.name || searchParams.term;
+  }, [searchParams.term, availableTerms]);
 
   // Determine if filter context message should be shown
   const shouldShowFilterContext = useMemo(() => {
@@ -251,6 +283,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         totalStudents={total}
         averageScore={averageScore}
         getScoreColor={getScoreColor}
+        onAddStudent={() => setShowAddDialog(true)}
       />
 
       {/* Filters Component */}
@@ -259,26 +292,35 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         lgas={lgas}
         availableSchools={availableSchools}
         availableClasses={availableClasses}
+        availableSessions={availableSessions}
+        availableTerms={availableTerms}
         searchTerm={
           searchParams.classId ? searchParams.search || "" : searchTerm
         }
         onSearchChange={handleSearch}
         isSchoolEnabled={isSchoolEnabled}
         isClassEnabled={isClassEnabled}
+        isTermEnabled={isTermEnabled}
         onLgaChange={handleLgaChange}
         onSchoolChange={handleSchoolChange}
         onClassChange={handleClassChange}
+        onSessionChange={selectSession}
+        onTermChange={selectTerm}
         onClearFilters={handleClearFilters}
       />
 
       {/* Filter Context Message */}
-      <FilterContextMessage
-        lgaName={selectedLgaName}
-        schoolName={selectedSchoolName}
-        className={selectedClassName}
-        searchTerm={searchParams.classId ? searchParams.search : searchTerm}
-        isVisible={shouldShowFilterContext}
-      />
+      {shouldShowFilterContext && (
+        <FilterContextMessage
+          lgaName={selectedLgaName}
+          schoolName={selectedSchoolName}
+          className={selectedClassName}
+          sessionName={selectedSessionName}
+          termName={selectedTermName}
+          searchTerm={searchParams.classId ? searchParams.search : searchTerm}
+          isVisible={true}
+        />
+      )}
 
       {/* Table Component */}
       <StudentsTable
@@ -290,6 +332,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         getScoreBgColor={getScoreBgColor}
         getPositionBadge={getPositionBadge}
         onEditStudent={handleEditStudent}
+        hasActiveFilters={!!hasActiveFilters}
       />
 
       {/* Edit Student Dialog */}
@@ -298,6 +341,12 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         student={studentToEdit}
         onOpenChange={handleCloseEditDialog}
         onSave={handleSaveStudent}
+      />
+
+      {/* Add Student Dialog */}
+      <AddStudentDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
       />
 
       {/* Loading Modal for progressive filtering and search */}

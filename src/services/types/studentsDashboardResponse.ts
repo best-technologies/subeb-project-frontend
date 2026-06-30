@@ -77,6 +77,7 @@ export interface StudentsFilters {
   gender?: string;
   subject?: string;
   session?: string;
+  term?: string;
 }
 
 // Error response type

@@ -21,6 +21,8 @@ interface StudentsFiltersProps {
   lgas: Array<{ id: string; name: string }>;
   availableSchools: Array<{ id: string; name: string }>;
   availableClasses: Array<{ id: string; name: string }>;
+  availableSessions: Array<{ id: string; name: string }>;
+  availableTerms: Array<{ id: string; name: string }>;
 
   // Search functionality
   searchTerm: string;
@@ -29,11 +31,14 @@ interface StudentsFiltersProps {
   // Progressive filter states
   isSchoolEnabled: boolean;
   isClassEnabled: boolean;
+  isTermEnabled: boolean;
 
   // Actions
   onLgaChange: (lgaId: string, lgaName?: string) => void;
   onSchoolChange: (schoolId: string, schoolName?: string) => void;
   onClassChange: (classId: string) => void;
+  onSessionChange: (sessionId: string) => void;
+  onTermChange: (termId: string) => void;
   onClearFilters: () => void;
 }
 
@@ -42,13 +47,18 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
   lgas,
   availableSchools,
   availableClasses,
+  availableSessions,
+  availableTerms,
   searchTerm,
   onSearchChange,
   isSchoolEnabled,
   isClassEnabled,
+  isTermEnabled,
   onLgaChange,
   onSchoolChange,
   onClassChange,
+  onSessionChange,
+  onTermChange,
   onClearFilters,
 }) => {
   // Handler to pass both ID and name when LGA is selected
@@ -76,8 +86,70 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
 
   return (
     <div className="bg-brand-secondary rounded-xl p-6 shadow-lg hover:opacity-90 transition-all duration-300">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* LGA Filter - Always enabled */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        {/* Session Filter */}
+        <div>
+          <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+            Session
+          </Label>
+          <Select
+            value={filters.session || "all-sessions"}
+            onValueChange={(val) => onSessionChange(val === "all-sessions" ? "" : val)}
+          >
+            <SelectTrigger className="w-full bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast h-12">
+              <SelectValue placeholder="All Sessions" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Sessions</SelectLabel>
+                <SelectItem value="all-sessions">All Sessions</SelectItem>
+                {availableSessions.map((session) => (
+                  <SelectItem key={session.id} value={session.id}>
+                    {session.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Term Filter */}
+        <div>
+          <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+            Term
+          </Label>
+          <Select
+            value={filters.term || "all-terms"}
+            onValueChange={(val) => onTermChange(val === "all-terms" ? "" : val)}
+            disabled={!isTermEnabled}
+          >
+            <SelectTrigger
+              className={`w-full h-12 transition-all duration-200 ${
+                isTermEnabled
+                  ? "bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast"
+                  : "bg-brand-secondary-contrast/5 border-brand-secondary-contrast/10 text-brand-secondary-contrast/40 cursor-not-allowed"
+              }`}
+            >
+              <SelectValue
+                placeholder={isTermEnabled ? "All Terms" : "Select Session first"}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Terms</SelectLabel>
+                <SelectItem value="all-terms">All Terms</SelectItem>
+                {isTermEnabled &&
+                  availableTerms.map((term) => (
+                    <SelectItem key={term.id} value={term.id}>
+                      {term.name}
+                    </SelectItem>
+                  ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* LGA Filter */}
         <div>
           <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
             LGA
@@ -178,6 +250,9 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-4">
 
         {/* Search Field */}
         <div>
@@ -199,13 +274,10 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
         </div>
 
         {/* Clear Filters */}
-        <div>
-          <div className="mb-4 opacity-0 hidden lg:block">
-            <Label>Placeholder</Label>
-          </div>
+        <div className="flex items-end">
           <Button
             onClick={onClearFilters}
-            className="w-full h-[46px] bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            className="w-full h-[48px] bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
           >
             Clear Filters
           </Button>

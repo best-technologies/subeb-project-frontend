@@ -27,8 +27,19 @@ const roleRoutes = {
     "/students",
     "/enrol-student",
     "/enrol-officer",
+    "/academic-settings",
   ],
-  SUBEB_OFFICER: ["/enter-grades"],
+  SUBEB_OFFICER: [
+    "/officer/dashboard",
+    "/officer/results",
+    "/officer/profile",
+    "/officer/audit-logs",
+  ],
+  SCHOOL_IT: [
+    "/school-it/dashboard",
+    "/school-it/students",
+    "/school-it/results",
+  ],
 } as const;
 
 /**
@@ -37,7 +48,10 @@ const roleRoutes = {
 function getRoleDefaultPath(role: string): string {
   const normalizedRole = role.toLowerCase();
   if (normalizedRole === "subeb_officer") {
-    return "/enter-grades";
+    return "/officer/dashboard";
+  }
+  if (normalizedRole === "school_it") {
+    return "/school-it/dashboard";
   }
   return "/dashboard";
 }
@@ -48,31 +62,29 @@ function getRoleDefaultPath(role: string): string {
 function hasRoleAccess(role: string, pathname: string): boolean {
   const normalizedRole = role.toLowerCase();
 
-  // SUPER_ADMIN has access to dashboard routes only (not officer routes or /enter-grades)
+  // SUPER_ADMIN has access to dashboard routes only
   if (normalizedRole === "super_admin") {
-    // Check if trying to access officer dynamic routes
-    const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
-    if (dynamicRoutePattern.test(pathname)) {
+    // Prevent access to officer and school-it routes
+    if (pathname.startsWith("/officer") || pathname.startsWith("/school-it")) {
       return false;
     }
-    // Check if trying to access /enter-grades
-    if (pathname.startsWith("/enter-grades")) {
-      return false;
-    }
-    // Allow access to SUPER_ADMIN routes
     return roleRoutes.SUPER_ADMIN.some((route) => pathname.startsWith(route));
   }
 
-  // SUBEB_OFFICER has access to /enter-grades and officer dynamic routes
+  // SUBEB_OFFICER has access to /officer/* routes
   if (normalizedRole === "subeb_officer") {
-    // Check dynamic routes: /:id/profile, /:id/grade-record, and /:id/add-student
-    const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record|add-student)$/;
-    if (dynamicRoutePattern.test(pathname)) {
-      return true;
+    if (pathname.startsWith("/dashboard") || pathname.startsWith("/school-it")) {
+      return false;
     }
-
-    // Check static routes
     return roleRoutes.SUBEB_OFFICER.some((route) => pathname.startsWith(route));
+  }
+
+  // SCHOOL_IT has access to /school-it/* routes
+  if (normalizedRole === "school_it") {
+    if (pathname.startsWith("/dashboard") || pathname.startsWith("/officer")) {
+      return false;
+    }
+    return roleRoutes.SCHOOL_IT.some((route) => pathname.startsWith(route));
   }
 
   return false;

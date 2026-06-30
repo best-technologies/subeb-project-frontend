@@ -216,6 +216,8 @@ export const useStudentSearch = () => {
           lgaId: searchParams.lgaId,
           schoolId: searchParams.schoolId,
           classId,
+          session: searchParams.session,
+          term: searchParams.term,
           page: searchParams.page || 1,
           limit: searchParams.limit || 10,
           search: searchParams.search,
@@ -270,10 +272,53 @@ export const useStudentSearch = () => {
     setError(null);
   }, [originalStudents]);
 
-  // Update search within class
+  const selectSession = useCallback(async (sessionId: string) => {
+    setSearchParams((prev) => ({ ...prev, session: sessionId, term: undefined }));
+    if (!searchParams.classId) return; // Only fetch if we have a class selected
+
+    try {
+      setLoadingStates((prev) => ({ ...prev, class: true }));
+      const response = await searchStudents({
+        ...searchParams,
+        session: sessionId,
+        term: undefined,
+      });
+
+      if (response.success && response.data) {
+        setStudents(response.data.performanceTable || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, class: false }));
+    }
+  }, [searchParams]);
+
+  const selectTerm = useCallback(async (termId: string) => {
+    setSearchParams((prev) => ({ ...prev, term: termId }));
+    if (!searchParams.classId) return; // Only fetch if we have a class selected
+
+    try {
+      setLoadingStates((prev) => ({ ...prev, class: true }));
+      const response = await searchStudents({
+        ...searchParams,
+        term: termId,
+      });
+
+      if (response.success && response.data) {
+        setStudents(response.data.performanceTable || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, class: false }));
+    }
+  }, [searchParams]);
+
   const updateSearch = useCallback(
     async (searchTerm: string) => {
-      if (!searchParams.classId) return;
+      // Return early if no class and no search term
+      if (!searchParams.classId && !searchTerm.trim()) return;
 
       setSearchParams((prev) => ({ ...prev, search: searchTerm, page: 1 }));
 
@@ -307,7 +352,7 @@ export const useStudentSearch = () => {
   // Change page
   const changePage = useCallback(
     async (page: number) => {
-      if (!searchParams.classId || page === searchParams.page) return;
+      if ((!searchParams.classId && !searchParams.search) || page === searchParams.page) return;
 
       setSearchParams((prev) => ({ ...prev, page }));
 
@@ -363,6 +408,8 @@ export const useStudentSearch = () => {
     selectLGA,
     selectSchool,
     selectClass,
+    selectSession,
+    selectTerm,
     updateSearch,
     changePage,
     clearFilters,
@@ -371,5 +418,6 @@ export const useStudentSearch = () => {
     // Check if filters are enabled
     isSchoolEnabled: !!searchParams.lgaId,
     isClassEnabled: !!searchParams.schoolId,
+    isTermEnabled: !!searchParams.session,
   };
 };

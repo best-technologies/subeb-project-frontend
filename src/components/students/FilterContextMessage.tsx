@@ -1,10 +1,13 @@
 import React from "react";
 import { Info } from "lucide-react";
+import { formatEducationalText } from "@/utils/formatters";
 
 interface FilterContextMessageProps {
   lgaName?: string;
   schoolName?: string;
   className?: string;
+  sessionName?: string;
+  termName?: string;
   searchTerm?: string;
   isVisible: boolean;
 }
@@ -13,12 +16,23 @@ const FilterContextMessage: React.FC<FilterContextMessageProps> = ({
   lgaName,
   schoolName,
   className,
+  sessionName,
+  termName,
   searchTerm,
   isVisible,
 }) => {
   if (!isVisible) return null;
 
   const buildMessage = () => {
+    // Determine the academic period prefix
+    let periodText = "";
+    if (sessionName || termName) {
+      const parts = [];
+      if (sessionName) parts.push(`Session ${sessionName}`);
+      if (termName) parts.push(`${formatEducationalText(termName)}`);
+      periodText = `for ${parts.join(", ")} `;
+    }
+
     // Handle the case where search is used with or without filters
     if (searchTerm && searchTerm.trim()) {
       if (lgaName || schoolName || className) {
@@ -28,18 +42,18 @@ const FilterContextMessage: React.FC<FilterContextMessageProps> = ({
         if (schoolName) filterParts.push(schoolName);
         if (className) filterParts.push(className);
 
-        return `You're now viewing students from ${filterParts.join(
+        return `You're now viewing students ${periodText}from ${filterParts.join(
           " > "
         )} matching "${searchTerm}"`;
       } else {
         // Search only
-        return `Showing students matching "${searchTerm}"`;
+        return `Showing students ${periodText}matching "${searchTerm}"`;
       }
     }
 
     // Handle the case where all three filters are applied (class is selected)
     if (lgaName && schoolName && className) {
-      return `You're now viewing students from ${lgaName} LGA > ${schoolName} > ${className}`;
+      return `You're now viewing students ${periodText}from ${lgaName} LGA > ${schoolName} > ${className}`;
     }
 
     return "";

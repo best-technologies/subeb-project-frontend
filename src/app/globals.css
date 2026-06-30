@@ -5,16 +5,16 @@
 
 @theme {
   /* Brand Colors */
-  --color-brand-primary: #91252a;
+  --color-brand-primary: #08854c; /* Changed to Brand Green */
   --color-brand-primary-contrast: #fff;
-  --color-brand-primary-2: #4e0000;
+  --color-brand-primary-2: #055f35; /* Darker Green */
   --color-brand-primary-2-contrast: #fff;
-  --color-brand-secondary: #f5b349;
-  --color-brand-secondary-contrast: #171717;
-  --color-brand-accent: #c4ac7a;
-  --color-brand-accent-contrast: #171717;
-  --color-brand-accent-background: #f0f0f0;
-  --color-brand-accent-background-contrast: #171717;
+  --color-brand-secondary: #e6f3ed; /* Light green accent */
+  --color-brand-secondary-contrast: #08854c;
+  --color-brand-accent: #b5dccc; /* Lighter shade of green */
+  --color-brand-accent-contrast: #055f35;
+  --color-brand-accent-background: #f0f7f4;
+  --color-brand-accent-background-contrast: #08854c;
   /* New Brand Colors */
   --color-brand-black: #121212;
   --color-brand-black-accent: #5a5a5a;

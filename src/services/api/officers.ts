@@ -16,8 +16,12 @@ export async function enrollOfficer(data: OfficerData): Promise<ApiResponse> {
   return response.data;
 }
 
-// Future: Add other officer-related API calls
-// export async function getOfficers(filters?: OfficerFilters): Promise<ApiResponse<Officer[]>> { }
-// export async function getOfficer(id: string): Promise<ApiResponse<Officer>> { }
-// export async function updateOfficer(id: string, data: Partial<OfficerData>): Promise<ApiResponse> { }
-// export async function deleteOfficer(id: string): Promise<ApiResponse> { }
+export async function getOfficers(page: number = 1, limit: number = 10): Promise<ApiResponse> {
+  const response = await api.get(`/admin/subeb-officers?page=${page}&limit=${limit}`);
+  return response.data;
+}
+
+export async function updateOfficer(id: string, data: Partial<OfficerData>): Promise<ApiResponse> {
+  const response = await api.patch(`/admin/subeb-officers/${id}`, data);
+  return response.data;
+}
