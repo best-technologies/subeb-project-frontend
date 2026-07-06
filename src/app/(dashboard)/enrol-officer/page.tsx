@@ -3,20 +3,40 @@
 import React, { useState } from "react";
 import { useOfficers } from "@/services/hooks/useOfficers";
 import { Button } from "@/components/ui/Button";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, MoreVertical, Edit2 } from "lucide-react";
 import AddOfficerForm from "@/components/officers/AddOfficerForm";
+import EditOfficerModal from "@/components/officers/EditOfficerModal";
 import { Dialog } from "@/components/ui/dialog";
 import { capitalizeWords } from "@/utils/formatters";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function OfficersPage() {
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useOfficers(page, 10);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedOfficer, setSelectedOfficer] = useState<any>(null);
 
-  const officers = (data?.meta as { id: string; user: { firstName: string; lastName: string; email: string }; phone: string; lga?: { name: string } }[]) || [];
+  const officers = (data?.meta as { id: string; user: { firstName: string; lastName: string; email: string }; phone: string; lgaId?: string; lga?: { name: string } }[]) || [];
   const pagination = (data?.data as { pagination?: { total?: number; totalPages?: number } })?.pagination;
   const total = pagination?.total || 0;
   const totalPages = pagination?.totalPages || 1;
+
+  const handleEditClick = (officer: any) => {
+    setSelectedOfficer({
+      id: officer.id,
+      firstName: officer.user.firstName,
+      lastName: officer.user.lastName,
+      email: officer.user.email,
+      lgaId: officer.lgaId || "",
+    });
+    setIsEditModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -71,29 +91,32 @@ export default function OfficersPage() {
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
                     Loading officers...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-red-500">
+                  <td colSpan={6} className="px-6 py-10 text-center text-red-500">
                     Failed to load officers
                   </td>
                 </tr>
               ) : officers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
                     No officers found
                   </td>
                 </tr>
               ) : (
-                officers.map((officer: { id: string; user: { firstName: string; lastName: string; email: string }; phone: string; lga?: { name: string } }) => (
+                officers.map((officer: any) => (
                   <tr key={officer.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-gray-900">
@@ -113,6 +136,22 @@ export default function OfficersPage() {
                       <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                         Active
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditClick(officer)}>
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            <span>Edit Officer</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))
@@ -153,6 +192,13 @@ export default function OfficersPage() {
           </div>
         </div>
       </Dialog>
+
+      <EditOfficerModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        officer={selectedOfficer}
+        onSuccess={() => setIsEditModalOpen(false)}
+      />
     </div>
   );
 }

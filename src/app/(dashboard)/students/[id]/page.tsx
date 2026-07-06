@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -14,6 +14,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useSessions, useTerms } from "@/services/hooks/useAcademic";
 import { useData } from "@/context/DataContext";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import {
@@ -46,6 +54,48 @@ export default function StudentDetailsPage() {
   const [downloadingPDF, setDownloadingPDF] = useState(false);
   const [showDownloadSuccess, setShowDownloadSuccess] = useState(false);
 
+  const [selectedSessionId, setSelectedSessionId] = useState<string>("");
+  const [selectedTermId, setSelectedTermId] = useState<string>("");
+
+  const { data: sessionsData } = useSessions();
+  const availableSessions = useMemo(() => sessionsData?.data || [], [sessionsData]);
+  
+  const { data: termsData } = useTerms(selectedSessionId);
+  const availableTerms = useMemo(() => termsData?.data || [], [termsData]);
+
+  const sessionName = useMemo(() => {
+    return selectedSessionId 
+      ? availableSessions.find(s => s.id === selectedSessionId)?.name 
+      : undefined;
+  }, [selectedSessionId, availableSessions]);
+
+  const termName = useMemo(() => {
+    return selectedTermId 
+      ? availableTerms.find(t => t.id === selectedTermId)?.name 
+      : undefined;
+  }, [selectedTermId, availableTerms]);
+
+  // Set initial selected values based on backend default response
+  useEffect(() => {
+    if (studentDetails?.performanceSummary && !selectedSessionId) {
+      const pSession = studentDetails.performanceSummary.session;
+      const foundSession = availableSessions.find(s => s.name === pSession);
+      if (foundSession) {
+        setSelectedSessionId(foundSession.id);
+      }
+    }
+  }, [studentDetails, availableSessions, selectedSessionId]);
+
+  useEffect(() => {
+    if (studentDetails?.performanceSummary && selectedSessionId && !selectedTermId) {
+      const pTerm = studentDetails.performanceSummary.term;
+      const foundTerm = availableTerms.find(t => t.name === pTerm);
+      if (foundTerm) {
+        setSelectedTermId(foundTerm.id);
+      }
+    }
+  }, [studentDetails, availableTerms, selectedSessionId, selectedTermId]);
+
   useEffect(() => {
     // Get students data from admin dashboard for basic info (fallback only)
     const studentsData = getStudentsDataFromAdmin();
@@ -70,7 +120,7 @@ export default function StudentDetailsPage() {
       setDetailsLoading(true);
       try {
         // Use the student UUID from the URL for the API call
-        const response = await getStudentDetails(studentId);
+        const response = await getStudentDetails(studentId, sessionName, termName);
         setStudentDetails(response.data);
 
         // If we don't have the student in cache, we can still proceed with API data
@@ -80,14 +130,14 @@ export default function StudentDetailsPage() {
         }
       } catch (error) {
         console.error("Error fetching student details:", error);
-        // Handle error - maybe show a fallback or error message
+        setStudentDetails(null);
       } finally {
         setDetailsLoading(false);
       }
     };
 
     fetchStudentDetails();
-  }, [studentId, student]);
+  }, [studentId, student, sessionName, termName]);
 
   const handleBackToStudents = () => {
     router.push("/students");
@@ -496,9 +546,42 @@ export default function StudentDetailsPage() {
                 <ChartColumn className="w-5 h-5 mr-3" />
                 Academic Performance Report
               </h3>
-              <div className="text-sm text-brand-accent-text/70">
-                {performanceSummary.session} •{" "}
-                {performanceSummary.term.replace("_", " ")}
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <Select
+                  value={selectedSessionId}
+                  onValueChange={(val) => {
+                    setSelectedSessionId(val);
+                    setSelectedTermId(""); // Reset term when session changes
+                  }}
+                >
+                  <SelectTrigger className="w-[160px] h-9 text-sm bg-brand-accent/5 border-brand-accent/20 text-brand-primary font-medium">
+                    <SelectValue placeholder="Select Session" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSessions.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={selectedTermId}
+                  onValueChange={setSelectedTermId}
+                  disabled={!selectedSessionId}
+                >
+                  <SelectTrigger className="w-[160px] h-9 text-sm bg-brand-accent/5 border-brand-accent/20 text-brand-primary font-medium">
+                    <SelectValue placeholder="Select Term" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableTerms.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name.replace("_", " ")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

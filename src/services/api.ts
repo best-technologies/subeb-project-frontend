@@ -282,10 +282,19 @@ class ApiClient {
   }
 
   // Student Details API Method
-  async getStudentDetails(studentId: string): Promise<StudentDetailsResponse> {
+  async getStudentDetails(
+    studentId: string,
+    session?: string,
+    term?: string
+  ): Promise<StudentDetailsResponse> {
     try {
+      const params = new URLSearchParams();
+      if (session) params.append("session", session);
+      if (term) params.append("term", term);
+      const queryString = params.toString();
+
       const response = await this.get<StudentDetailsResponse>(
-        `/admin/students/${studentId}/details`
+        `/admin/students/${studentId}/details${queryString ? `?${queryString}` : ""}`
       );
       return response;
     } catch (error) {
@@ -341,8 +350,8 @@ export const getAdminDashboard = (
 export const getStudentsDashboard = (filters?: StudentsFilters) =>
   apiClient.getStudentsDashboard(filters);
 export const getCurrentSession = () => apiClient.getCurrentSession();
-export const getStudentDetails = (studentId: string) =>
-  apiClient.getStudentDetails(studentId);
+export const getStudentDetails = (studentId: string, session?: string, term?: string) =>
+  apiClient.getStudentDetails(studentId, session, term);
 export const downloadStudentResultPDF = (studentId: string) =>
   apiClient.downloadStudentResultPDF(studentId);
 export const setAuthToken = (token: string) => apiClient.setAuthToken(token);
