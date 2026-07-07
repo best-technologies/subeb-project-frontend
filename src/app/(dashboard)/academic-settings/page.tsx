@@ -1,16 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSessions, useUpdateSessionStatus, useTerms, useUpdateTermStatus } from "@/services/hooks/useAcademic";
+import { useSessions, useUpdateSessionStatus, useActivateSession, useTerms, useUpdateTermStatus, useActivateTerm } from "@/services/hooks/useAcademic";
 import { Button } from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import { CreateSessionModal } from "@/components/academic/CreateSessionModal";
 import { CreateTermModal } from "@/components/academic/CreateTermModal";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
 export default function AcademicSettingsPage() {
   const { data: sessionsData, isLoading: loadingSessions } = useSessions();
   const updateSessionMutation = useUpdateSessionStatus();
+  const activateSessionMutation = useActivateSession();
   const updateTermMutation = useUpdateTermStatus();
+  const activateTermMutation = useActivateTerm();
 
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
@@ -30,6 +34,14 @@ export default function AcademicSettingsPage() {
   const handleToggleTermStatus = (id: string, currentStatus: 'OPEN' | 'CLOSED') => {
     const newStatus = currentStatus === 'OPEN' ? 'CLOSED' : 'OPEN';
     updateTermMutation.mutate({ id, status: newStatus });
+  };
+
+  const handleActivateSession = (id: string) => {
+    activateSessionMutation.mutate(id);
+  };
+
+  const handleActivateTerm = (id: string) => {
+    activateTermMutation.mutate(id);
   };
 
   return (
@@ -59,110 +71,161 @@ export default function AcademicSettingsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Sessions Panel */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100 bg-gray-50">
-            <h2 className="text-lg font-semibold text-gray-800">Sessions</h2>
-          </div>
-          <div className="p-0">
-            <table className="w-full">
-              <thead className="bg-brand-accent-background">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Session Name</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-gray-50 border-b border-gray-100 p-4">
+            <CardTitle className="text-lg font-semibold text-gray-800">Sessions</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-brand-accent-background">
+                <TableRow>
+                  <TableHead className="w-[30%]">Session Name</TableHead>
+                  <TableHead className="w-[25%]">Current</TableHead>
+                  <TableHead className="w-[20%]">Status</TableHead>
+                  <TableHead className="text-right w-[25%]">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {loadingSessions ? (
-                  <tr><td colSpan={3} className="px-6 py-4 text-center text-gray-500">Loading...</td></tr>
+                  <TableRow><TableCell colSpan={4} className="text-center text-gray-500 py-4">Loading...</TableCell></TableRow>
                 ) : sessions.length === 0 ? (
-                  <tr><td colSpan={3} className="px-6 py-4 text-center text-gray-500">No sessions found</td></tr>
+                  <TableRow><TableCell colSpan={4} className="text-center text-gray-500 py-4">No sessions found</TableCell></TableRow>
                 ) : (
-                  sessions.map((session: { id: string, name: string, status?: 'OPEN' | 'CLOSED' }) => (
-                    <tr 
+                  sessions.map((session: { id: string, name: string, status?: 'OPEN' | 'CLOSED', isCurrent?: boolean }) => (
+                    <TableRow 
                       key={session.id} 
-                      className={`hover:bg-gray-50 cursor-pointer transition-colors ${selectedSessionId === session.id ? 'bg-brand-secondary/20' : ''}`}
+                      className={`cursor-pointer transition-colors ${selectedSessionId === session.id ? 'bg-brand-secondary/10 hover:bg-brand-secondary/20' : 'hover:bg-gray-50'}`}
                       onClick={() => setSelectedSessionId(session.id)}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{session.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <TableCell className="font-medium text-gray-900">
+                        {session.name}
+                        {session.isCurrent && (
+                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            Active
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {session.isCurrent ? (
+                           <span className="text-sm font-medium text-gray-500">Current</span>
+                        ) : (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-brand-primary hover:bg-brand-primary/10 hover:text-brand-primary h-8"
+                            disabled={activateSessionMutation.isPending}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleActivateSession(session.id);
+                            }}
+                          >
+                            Set Active
+                          </Button>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${session.status === 'OPEN' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                           {session.status || 'CLOSED'}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      </TableCell>
+                      <TableCell className="text-right">
                         <Button 
                           variant="outline" 
                           size="sm"
+                          className={`h-8 ${session.status === 'OPEN' ? "!bg-red-500 !text-white !border-red-500 hover:!bg-transparent hover:!text-red-500 hover:!border-red-500" : "text-brand-primary border-brand-primary"}`}
                           disabled={updateSessionMutation.isPending}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleToggleSessionStatus(session.id, session.status || 'CLOSED');
                           }}
                         >
-                          {session.status === 'OPEN' ? 'Close Session' : 'Open Session'}
+                          {session.status === 'OPEN' ? 'Close' : 'Open'}
                         </Button>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
         {/* Terms Panel */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-800">Terms</h2>
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-gray-50 border-b border-gray-100 p-4 flex flex-row justify-between items-center space-y-0">
+            <CardTitle className="text-lg font-semibold text-gray-800">Terms</CardTitle>
             {!selectedSessionId && <span className="text-sm text-gray-500">Select a session first</span>}
-          </div>
-          <div className="p-0">
+          </CardHeader>
+          <CardContent className="p-0 overflow-x-auto">
             {selectedSessionId ? (
-              <table className="w-full">
-                <thead className="bg-brand-accent-background">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Term Name</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
+              <Table>
+                <TableHeader className="bg-brand-accent-background">
+                  <TableRow>
+                    <TableHead className="w-[30%]">Term Name</TableHead>
+                    <TableHead className="w-[25%]">Current</TableHead>
+                    <TableHead className="w-[20%]">Status</TableHead>
+                    <TableHead className="text-right w-[25%]">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {loadingTerms ? (
-                    <tr><td colSpan={3} className="px-6 py-4 text-center text-gray-500">Loading terms...</td></tr>
+                    <TableRow><TableCell colSpan={4} className="text-center text-gray-500 py-4">Loading terms...</TableCell></TableRow>
                   ) : terms.length === 0 ? (
-                    <tr><td colSpan={3} className="px-6 py-4 text-center text-gray-500">No terms found for this session</td></tr>
+                    <TableRow><TableCell colSpan={4} className="text-center text-gray-500 py-4">No terms found for this session</TableCell></TableRow>
                   ) : (
-                    terms.map((term: { id: string, name: string, status?: 'OPEN' | 'CLOSED' }) => (
-                      <tr key={term.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{term.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                    terms.map((term: { id: string, name: string, status?: 'OPEN' | 'CLOSED', isCurrent?: boolean }) => (
+                      <TableRow key={term.id} className="hover:bg-gray-50 transition-colors">
+                        <TableCell className="font-medium text-gray-900">
+                          {term.name}
+                          {term.isCurrent && (
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                              Active
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {term.isCurrent ? (
+                             <span className="text-sm font-medium text-gray-500">Current</span>
+                          ) : (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-brand-primary hover:bg-brand-primary/10 hover:text-brand-primary h-8"
+                              disabled={activateTermMutation.isPending}
+                              onClick={() => handleActivateTerm(term.id)}
+                            >
+                              Set Active
+                            </Button>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${term.status === 'OPEN' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                             {term.status || 'CLOSED'}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                        </TableCell>
+                        <TableCell className="text-right">
                           <Button 
                             variant="outline" 
                             size="sm"
+                            className={`h-8 ${term.status === 'OPEN' ? "!bg-red-500 !text-white !border-red-500 hover:!bg-transparent hover:!text-red-500 hover:!border-red-500" : "text-brand-primary border-brand-primary"}`}
                             disabled={updateTermMutation.isPending}
                             onClick={() => handleToggleTermStatus(term.id, term.status || 'CLOSED')}
                           >
-                            {term.status === 'OPEN' ? 'Close Term' : 'Open Term'}
+                            {term.status === 'OPEN' ? 'Close' : 'Open'}
                           </Button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))
                   )}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             ) : (
               <div className="p-10 text-center text-gray-500">
                 Please click on a session from the left panel to view and manage its terms.
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       <CreateSessionModal 

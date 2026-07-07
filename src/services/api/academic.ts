@@ -5,6 +5,7 @@ export interface SessionData {
   id: string;
   name: string;
   status: 'OPEN' | 'CLOSED';
+  isCurrent: boolean;
   createdAt: string;
 }
 
@@ -13,6 +14,7 @@ export interface TermData {
   name: string;
   sessionId: string;
   status: 'OPEN' | 'CLOSED';
+  isCurrent: boolean;
   createdAt: string;
 }
 
@@ -32,6 +34,11 @@ export async function updateSessionStatus(id: string, status: 'OPEN' | 'CLOSED')
   return response.data;
 }
 
+export async function activateSession(id: string): Promise<ApiResponse> {
+  const response = await api.put(`/academic/sessions/${id}/activate`);
+  return response.data;
+}
+
 // Term APIs
 export async function getTerms(sessionId?: string): Promise<ApiResponse<TermData[]>> {
   const query = sessionId ? `?sessionId=${sessionId}` : '';
@@ -46,5 +53,10 @@ export async function createTerm(data: Record<string, unknown>): Promise<ApiResp
 
 export async function updateTermStatus(id: string, status: 'OPEN' | 'CLOSED'): Promise<ApiResponse> {
   const response = await api.put(`/academic/terms/${id}/status`, { status });
+  return response.data;
+}
+
+export async function activateTerm(id: string): Promise<ApiResponse> {
+  const response = await api.put(`/academic/terms/${id}/activate`);
   return response.data;
 }

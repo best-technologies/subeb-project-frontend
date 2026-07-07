@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getSessions, updateSessionStatus, getTerms, updateTermStatus, createSession, createTerm } from "@/services/api/academic";
+import { getSessions, updateSessionStatus, getTerms, updateTermStatus, createSession, createTerm, activateSession, activateTerm } from "@/services/api/academic";
 
 export const academicKeys = {
   all: ["academic"] as const,
@@ -18,6 +18,16 @@ export function useUpdateSessionStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'OPEN' | 'CLOSED' }) => updateSessionStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: academicKeys.sessions() });
+    },
+  });
+}
+
+export function useActivateSession() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => activateSession(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: academicKeys.sessions() });
     },
@@ -46,6 +56,16 @@ export function useUpdateTermStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'OPEN' | 'CLOSED' }) => updateTermStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: academicKeys.all });
+    },
+  });
+}
+
+export function useActivateTerm() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => activateTerm(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: academicKeys.all });
     },
