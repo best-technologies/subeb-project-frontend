@@ -11,6 +11,7 @@ import {
   ClipboardList,
   LogOut,
   UserPlus,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -157,6 +158,13 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         label: "Profile",
         icon: <User size={20} />,
         href: "/profile",
+        disabled: false,
+      },
+      {
+        id: "audit-logs",
+        label: "Audit Logs",
+        icon: <FileText size={20} />,
+        href: "/audit-logs",
         disabled: false,
       },
     ];
