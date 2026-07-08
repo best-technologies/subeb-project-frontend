@@ -20,7 +20,7 @@ import {
 import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/shared/PageHeader";
 import { LoadingModal } from "@/components/ui/LoadingModal";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/custom-dialog";
 import { SimpleFooter } from "@/components/shared/Footer";
 import { useAuthStore } from "@/store/authStore";
 import {

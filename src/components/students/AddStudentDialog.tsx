@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/custom-dialog";
 import { Button } from "@/components/ui/Button";
 import { useForm } from "react-hook-form";
 import * as z from "zod";

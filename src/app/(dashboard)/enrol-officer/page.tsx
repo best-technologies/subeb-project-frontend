@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Plus, Search, MoreVertical, Edit2 } from "lucide-react";
 import AddOfficerForm from "@/components/officers/AddOfficerForm";
 import EditOfficerModal from "@/components/officers/EditOfficerModal";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/custom-dialog";
 import { capitalizeWords } from "@/utils/formatters";
 import {
   DropdownMenu,

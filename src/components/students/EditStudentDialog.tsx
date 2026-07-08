@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/custom-dialog";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import {

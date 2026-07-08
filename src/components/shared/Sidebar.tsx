@@ -17,6 +17,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
+import { SchoolNameText } from "@/utils/truncateText";
 
 interface BaseSidebarProps {
   onNavigate?: () => void;
@@ -48,7 +49,7 @@ type SidebarProps = AdminSidebarProps | OfficerSidebarProps | SchoolItSidebarPro
 const Sidebar: React.FC<SidebarProps> = (props) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
 
   const variant = props.variant || "admin";
 
@@ -219,9 +220,16 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
                     </Button>
                   )}
                 </div>
-                <span className="text-brand-primary-contrast/70 text-sm">
-                  Student Management System
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-brand-primary-contrast/70 text-sm">
+                    Student Management System
+                  </span>
+                  {user?.role === "SCHOOL_IT" && user?.schoolName && (
+                    <span className="text-brand-primary-contrast/90 text-xs font-semibold mt-0.5" title={user.schoolName}>
+                      <SchoolNameText text={user.schoolName} />
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Mobile close button */}

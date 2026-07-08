@@ -9,6 +9,7 @@ export interface User {
   sub?: string;
   createdAt?: string;
   updatedAt?: string;
+  schoolName?: string | null;
 }
 
 export interface RegisterRequest {

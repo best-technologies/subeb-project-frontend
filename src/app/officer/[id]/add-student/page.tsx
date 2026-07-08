@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { LoadingModal } from "@/components/ui/LoadingModal";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/custom-dialog";
 import { enrollStudents } from "@/services/api/enrollment";
 import {
   useEnrollmentMetadata,

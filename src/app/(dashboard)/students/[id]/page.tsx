@@ -13,7 +13,7 @@ import {
   Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/custom-dialog";
 import {
   Select,
   SelectContent,

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/Input";
 import { LoadingModal } from "@/components/ui/LoadingModal";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/custom-dialog";
 import { useEnrollmentMetadata } from "@/services/hooks/useEnrollment";
 import {
   Select,

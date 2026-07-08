@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { LoadingModal } from "@/components/ui/LoadingModal";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/custom-dialog";
 import { useRegister, getAuthErrorMessage } from "@/services/hooks/useAuth";
 import { PASSWORD_REQUIREMENTS } from "@/services/types/auth";
 import {

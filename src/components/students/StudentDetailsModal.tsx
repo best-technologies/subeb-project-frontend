@@ -10,7 +10,7 @@ import {
   Download,
   Share2,
 } from "lucide-react";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/custom-dialog";
 import { Button } from "@/components/ui/Button";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { formatEducationalText } from "@/utils/formatters";
