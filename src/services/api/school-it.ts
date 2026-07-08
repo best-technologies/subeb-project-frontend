@@ -13,6 +13,8 @@ export const schoolItApi = {
   updateStudent: (id: string, data: any) => api.put(`/school-it/students/${id}`, data),
 
   // Results
+  getSubjects: () => api.get('/school-it/results/subjects'),
+
   getResults: (params?: { classId?: string; page?: number; limit?: number }) =>
     api.get('/school-it/results', { params }),
   

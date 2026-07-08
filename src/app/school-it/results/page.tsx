@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, Upload, Edit2, AlertCircle } from "lucide-re
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
+import { ManualResultEntry } from '@/components/school-it/ManualResultEntry';
 
 export default function SchoolItResultsPage() {
   const [page, setPage] = useState(1);
@@ -171,15 +172,15 @@ export default function SchoolItResultsPage() {
             </button>
           </div>
 
-          <form onSubmit={handleUploadSubmit} className="space-y-4">
-            <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 flex items-start gap-3 mb-4">
-              <AlertCircle className="text-yellow-600 mt-0.5" size={18} />
-              <div className="text-sm text-yellow-800">
-                If any single result in your batch fails validation, the entire batch will be rejected to prevent partial uploads. You will need to correct the file and try again.
+          {isCsvMode ? (
+            <form onSubmit={handleUploadSubmit} className="space-y-4">
+              <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 flex items-start gap-3 mb-4">
+                <AlertCircle className="text-yellow-600 mt-0.5" size={18} />
+                <div className="text-sm text-yellow-800">
+                  If any single result in your batch fails validation, the entire batch will be rejected to prevent partial uploads. You will need to correct the file and try again.
+                </div>
               </div>
-            </div>
 
-            {isCsvMode ? (
               <div className="space-y-2">
                 <Label htmlFor="csvFile">Upload CSV/Excel File</Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center bg-gray-50">
@@ -188,30 +189,21 @@ export default function SchoolItResultsPage() {
                   <Input id="csvFile" type="file" accept=".csv, .xlsx" className="w-[250px]" />
                 </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Student ID</Label>
-                  <Input placeholder="e.g. STU123456" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Subject ID</Label>
-                  <Input placeholder="e.g. SUB123" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Score (0-100)</Label>
-                  <Input type="number" min="0" max="100" placeholder="e.g. 85" />
-                </div>
-              </div>
-            )}
 
-            <DialogFooter className="mt-6">
-              <Button type="button" variant="outline" onClick={() => setIsUploadModalOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={uploadMutation.isPending}>
-                {uploadMutation.isPending ? 'Uploading...' : 'Submit Results'}
-              </Button>
-            </DialogFooter>
-          </form>
+              <DialogFooter className="mt-6">
+                <Button type="button" variant="outline" onClick={() => setIsUploadModalOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={uploadMutation.isPending}>
+                  {uploadMutation.isPending ? 'Uploading...' : 'Submit Results'}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <ManualResultEntry 
+              dashboardData={dashboardQuery.data} 
+              onSuccess={() => setIsUploadModalOpen(false)}
+              onCancel={() => setIsUploadModalOpen(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

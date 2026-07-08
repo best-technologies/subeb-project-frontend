@@ -6,6 +6,7 @@ export const schoolItKeys = {
   all: ['school-it'] as const,
   dashboard: () => [...schoolItKeys.all, 'dashboard'] as const,
   students: (params?: any) => [...schoolItKeys.all, 'students', params] as const,
+  subjects: () => [...schoolItKeys.all, 'subjects'] as const,
   results: (params?: any) => [...schoolItKeys.all, 'results', params] as const,
 };
 
@@ -13,6 +14,13 @@ export function useSchoolItDashboard() {
   return useQuery({
     queryKey: schoolItKeys.dashboard(),
     queryFn: () => schoolItApi.getDashboardAnalytics().then((res) => res.data),
+  });
+}
+
+export function useSchoolItSubjects() {
+  return useQuery({
+    queryKey: schoolItKeys.subjects(),
+    queryFn: () => schoolItApi.getSubjects().then((res) => res.data),
   });
 }
 
