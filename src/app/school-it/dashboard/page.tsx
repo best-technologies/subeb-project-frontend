@@ -68,6 +68,12 @@ export default function SchoolItDashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Welcome to {school.name}</h1>
           <p className="text-gray-600 mt-1">School Code: <span className="font-mono text-brand-primary">{school.code}</span></p>
+          {(data?.activeSession || data?.activeTerm) && (
+            <p className="text-sm text-gray-500 mt-2 flex items-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+              Active Period: <span className="font-medium text-gray-700">{data.activeSession?.name} - {data.activeTerm?.name?.replace('_', ' ')}</span>
+            </p>
+          )}
         </div>
         <Link href="/school-it/students">
           <Button className="flex items-center gap-2 px-6 py-2.5">
