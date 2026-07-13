@@ -152,7 +152,7 @@ export default function SchoolItResultsPage() {
 
       {/* Upload Results Modal */}
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Upload Results</DialogTitle>
           </DialogHeader>
