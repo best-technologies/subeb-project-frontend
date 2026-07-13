@@ -8,6 +8,7 @@ export const schoolItKeys = {
   students: (params?: any) => [...schoolItKeys.all, 'students', params] as const,
   subjects: () => [...schoolItKeys.all, 'subjects'] as const,
   results: (params?: any) => [...schoolItKeys.all, 'results', params] as const,
+  studentResults: (id: string) => [...schoolItKeys.all, 'student-results', id] as const,
 };
 
 export function useSchoolItDashboard() {
@@ -81,5 +82,13 @@ export function useUploadSchoolItResults() {
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to upload results');
     },
+  });
+}
+
+export function useSchoolItStudentResults(studentId: string) {
+  return useQuery({
+    queryKey: schoolItKeys.studentResults(studentId),
+    queryFn: () => schoolItApi.getStudentResults(studentId).then((res) => res.data),
+    enabled: !!studentId,
   });
 }

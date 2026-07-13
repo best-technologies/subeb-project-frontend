@@ -18,5 +18,7 @@ export const schoolItApi = {
   getResults: (params?: { classId?: string; page?: number; limit?: number }) =>
     api.get('/school-it/results', { params }),
   
+  getStudentResults: (studentId: string) => api.get(`/school-it/results/${studentId}`),
+  
   uploadResultsAtomic: (data: any) => api.post('/school-it/results/upload', data),
 };

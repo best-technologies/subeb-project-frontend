@@ -5,11 +5,14 @@ import { useSchoolItResults, useUploadSchoolItResults, useSchoolItDashboard } fr
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/Button";
-import { ChevronLeft, ChevronRight, Upload, Edit2, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, Edit2, AlertCircle, MoreVertical, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { ManualResultEntry } from '@/components/school-it/ManualResultEntry';
+import Link from 'next/link';
+import { useSchoolItSubjects } from '@/services/hooks/useSchoolIt';
 
 export default function SchoolItResultsPage() {
   const [page, setPage] = useState(1);
@@ -17,6 +20,7 @@ export default function SchoolItResultsPage() {
 
   const dashboardQuery = useSchoolItDashboard();
   const { data, isLoading } = useSchoolItResults({ page, limit });
+  const { data: subjectsData } = useSchoolItSubjects();
   const uploadMutation = useUploadSchoolItResults();
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -61,7 +65,7 @@ export default function SchoolItResultsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Manage Results</h1>
-          <p className="text-gray-600">Total Assessments: {total}</p>
+          <p className="text-gray-600">Total Students: {total}</p>
         </div>
         <Button onClick={() => setIsUploadModalOpen(true)} className="flex items-center gap-2">
           <Upload size={18} />
@@ -74,11 +78,11 @@ export default function SchoolItResultsPage() {
           <Table>
             <TableHeader className="bg-gray-50 border-b border-gray-100">
               <TableRow>
-                <TableHead>Student</TableHead>
+                <TableHead>Student ID</TableHead>
+                <TableHead>Student Name</TableHead>
                 <TableHead>Class</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Subjects Graded</TableHead>
+                <TableHead>Overall Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -96,36 +100,68 @@ export default function SchoolItResultsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                results.map((assessment: any) => (
-                  <TableRow key={assessment.id} className="hover:bg-gray-50 transition-colors">
-                    <TableCell className="font-medium text-gray-900">
-                      {assessment.student.firstName} {assessment.student.lastName}
-                    </TableCell>
-                    <TableCell className="text-gray-600">{assessment.class.name}</TableCell>
-                    <TableCell className="text-gray-600">{assessment.subject.name}</TableCell>
-                    <TableCell className="font-bold">{assessment.score}%</TableCell>
-                    <TableCell>
-                      <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        assessment.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 
-                        assessment.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {assessment.status.replace('_', ' ')}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="ml-auto flex items-center gap-2"
-                        disabled={assessment.status === 'APPROVED'}
-                        title={assessment.status === 'APPROVED' ? "Approved results cannot be edited" : "Edit result"}
-                      >
-                        <Edit2 size={14} /> Edit
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
+                results.map((student: any) => {
+                  const assessments = student.assessments || [];
+                  const totalSubjects = subjectsData?.length || 0;
+                  
+                  let status = 'NOT GRADED';
+                  let statusColor = 'bg-gray-100 text-gray-800';
+
+                  if (assessments.length > 0) {
+                    if (assessments.some((a: any) => a.status === 'REJECTED')) {
+                      status = 'REJECTED';
+                      statusColor = 'bg-red-100 text-red-800';
+                    } else if (assessments.some((a: any) => a.status === 'AWAITING_APPROVAL')) {
+                      status = 'AWAITING APPROVAL';
+                      statusColor = 'bg-yellow-100 text-yellow-800';
+                    } else {
+                      status = 'APPROVED';
+                      statusColor = 'bg-green-100 text-green-800';
+                    }
+                  }
+
+                  return (
+                    <TableRow key={student.id} className="hover:bg-gray-50 transition-colors">
+                      <TableCell className="font-medium text-gray-900">{student.studentId}</TableCell>
+                      <TableCell className="text-gray-900">
+                        {student.firstName} {student.lastName}
+                      </TableCell>
+                      <TableCell className="text-gray-600">{student.class?.name}</TableCell>
+                      <TableCell className="text-gray-600">
+                        <span className="font-medium">{assessments.length}</span> / {totalSubjects}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}`}>
+                          {status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <Link href={`/school-it/results/${student.id}`}>
+                              <DropdownMenuItem className="cursor-pointer">
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Results
+                              </DropdownMenuItem>
+                            </Link>
+                            <Link href={`/school-it/results/${student.id}`}>
+                              <DropdownMenuItem className="cursor-pointer">
+                                <Edit2 className="mr-2 h-4 w-4" />
+                                Edit Results
+                              </DropdownMenuItem>
+                            </Link>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
