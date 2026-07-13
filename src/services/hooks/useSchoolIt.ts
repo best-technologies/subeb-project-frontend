@@ -77,7 +77,7 @@ export function useUploadSchoolItResults() {
     mutationFn: (data: any) => schoolItApi.uploadResultsAtomic(data),
     onSuccess: (res) => {
       toast.success(res.data?.message || 'Results uploaded successfully');
-      queryClient.invalidateQueries({ queryKey: schoolItKeys.results() });
+      queryClient.invalidateQueries({ queryKey: ['school-it', 'results'] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to upload results');
@@ -90,5 +90,20 @@ export function useSchoolItStudentResults(studentId: string) {
     queryKey: schoolItKeys.studentResults(studentId),
     queryFn: () => schoolItApi.getStudentResults(studentId).then((res) => res.data),
     enabled: !!studentId,
+  });
+}
+
+export function useSubmitSchoolItResults() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => schoolItApi.submitResultsForApproval(),
+    onSuccess: (res) => {
+      toast.success(res.data?.message || 'Results submitted for approval successfully');
+      queryClient.invalidateQueries({ queryKey: ['school-it', 'results'] });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to submit results');
+    },
   });
 }

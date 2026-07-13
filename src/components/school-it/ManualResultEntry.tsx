@@ -12,9 +12,10 @@ interface ManualResultEntryProps {
   onSuccess: () => void;
   onCancel: () => void;
   dashboardData: any;
+  existingResults?: any[];
 }
 
-export function ManualResultEntry({ onSuccess, onCancel, dashboardData }: ManualResultEntryProps) {
+export function ManualResultEntry({ onSuccess, onCancel, dashboardData, existingResults }: ManualResultEntryProps) {
   const [open, setOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [scores, setScores] = useState<Record<string, number>>({});
@@ -25,6 +26,14 @@ export function ManualResultEntry({ onSuccess, onCancel, dashboardData }: Manual
 
   const students = studentsData?.data || [];
   const subjects = subjectsData || [];
+
+  const availableStudents = useMemo(() => {
+    if (!existingResults || existingResults.length === 0) return students;
+    return students.filter((s: any) => {
+      const existingStudent = existingResults.find((r: any) => r.id === s.id);
+      return !existingStudent || !existingStudent.assessments || existingStudent.assessments.length === 0;
+    });
+  }, [students, existingResults]);
 
   const selectedStudent = useMemo(() => {
     return students.find((s: any) => s.id === selectedStudentId);
@@ -102,9 +111,9 @@ export function ManualResultEntry({ onSuccess, onCancel, dashboardData }: Manual
             <Command>
               <CommandInput placeholder="Search student name or ID..." />
               <CommandList>
-                <CommandEmpty>No student found.</CommandEmpty>
+                <CommandEmpty>No ungraded students found.</CommandEmpty>
                 <CommandGroup className="max-h-64 overflow-y-auto">
-                  {students.map((student: any) => (
+                  {availableStudents.map((student: any) => (
                     <CommandItem
                       key={student.id}
                       value={`${student.firstName} ${student.lastName} ${student.studentId}`}
