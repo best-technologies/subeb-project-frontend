@@ -131,7 +131,7 @@ export default function ExamOfficerResults() {
                     <TableCell className="font-medium text-gray-900">{school.name}</TableCell>
                     <TableCell className="text-gray-500">{school.code}</TableCell>
                     <TableCell>
-                      <span className="font-semibold">{school.stats.total}</span> students
+                      <span className="font-semibold">{school.stats.total}/{school.stats.totalEnrolled}</span> students
                     </TableCell>
                     <TableCell>
                       {school.overallStatus === "AWAITING_APPROVAL" && (
