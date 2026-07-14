@@ -186,7 +186,7 @@ export default function ExamOfficerResults() {
                         </DropdownMenu>
                       ) : (
                         <Button variant="ghost" className="h-8 w-8 p-0" disabled>
-                          <MoreVertical className="h-4 w-4 text-gray-300" />
+                          <MoreVertical className="h-4 w-4 text-gray-400 opacity-90" />
                         </Button>
                       )}
                     </TableCell>
