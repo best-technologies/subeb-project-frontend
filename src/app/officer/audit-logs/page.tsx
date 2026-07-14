@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useExamOfficerAuditLogs } from "@/services/hooks/useExamOfficer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { format } from "date-fns";
+
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 import Pagination from "@/components/shared/Pagination";
 
@@ -56,7 +56,14 @@ export default function ExamOfficerAuditLogs() {
                   return (
                     <TableRow key={log.id} className="hover:bg-gray-50">
                       <TableCell className="whitespace-nowrap text-sm text-gray-500">
-                        {format(new Date(log.createdAt), "MMM d, yyyy h:mm a")}
+                        {new Date(log.createdAt).toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true
+                        })}
                       </TableCell>
                       <TableCell>
                         {log.action === "RESULT_APPROVAL" ? (
