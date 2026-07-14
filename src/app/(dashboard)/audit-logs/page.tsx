@@ -25,10 +25,20 @@ function formatAction(action: string) {
 }
 
 function formatDetails(action: string, details: string) {
+  const formattedAction = formatAction(action);
+  
+  if (formattedAction === "Submitted Results") {
+    return `Submitted results for approval.`;
+  }
+  
+  if (formattedAction === "Approved Results" && (!details || details === "{}")) {
+    return `Approved results for a school.`;
+  }
+  
   if (!details || details === "{}") return "N/A";
+  
   try {
     const parsed = JSON.parse(details);
-    const formattedAction = formatAction(action);
     
     if (formattedAction === "Approved Results" || formattedAction === "Rejected Results") {
       const verb = formattedAction === "Approved Results" ? "Approved" : "Rejected";
