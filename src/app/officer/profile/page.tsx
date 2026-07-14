@@ -5,8 +5,9 @@ import { useExamOfficerProfile, useUpdateExamOfficerProfile } from "@/services/h
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { User, Mail, Phone, MapPin, Building, Upload, Camera } from "lucide-react";
+import { User, Mail, Phone, MapPin, Building, Upload, Camera, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { uploadApi } from "@/services/api/upload";
 
 type ProfileFormData = {
   firstName: string;
@@ -20,6 +21,7 @@ export default function ExamOfficerProfile() {
   const updateMutation = useUpdateExamOfficerProfile();
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   
   const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm<ProfileFormData>();
 
@@ -49,16 +51,17 @@ export default function ExamOfficerProfile() {
     try {
       let pictureUrl = profile?.user?.profilePicture;
       
-      // If there's a new picture, we would upload it to S3 here.
-      // Since S3 integration details are not fully provided in this context,
-      // we assume an upload function or we just send the form data.
-      // For this implementation, we will assume standard update logic.
       if (profilePicture) {
-        // const formData = new FormData();
-        // formData.append("file", profilePicture);
-        // const uploadRes = await api.post('/upload', formData);
-        // pictureUrl = uploadRes.data.url;
-        toast.error("Profile picture upload requires S3 integration setup.");
+        setIsUploading(true);
+        try {
+          const uploadRes = await uploadApi.uploadImage(profilePicture);
+          pictureUrl = uploadRes.url;
+        } catch (err: any) {
+          toast.error(err.response?.data?.message || "Failed to upload profile picture.");
+          setIsUploading(false);
+          return;
+        }
+        setIsUploading(false);
       }
 
       updateMutation.mutate({
@@ -93,21 +96,17 @@ export default function ExamOfficerProfile() {
             <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-gray-100">
               <div className="relative group">
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
-                  {previewUrl ? (
+                  {isUploading ? (
+                    <Loader2 className="w-10 h-10 text-brand-primary animate-spin" />
+                  ) : previewUrl ? (
                     <img src={previewUrl} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
                     <User className="w-16 h-16 text-gray-400" />
                   )}
                 </div>
-                <label htmlFor="profile-upload" className="absolute bottom-0 right-0 p-2 bg-brand-primary text-white rounded-full shadow-lg cursor-pointer hover:bg-brand-primary/90 transition-colors">
-                  <Camera className="w-5 h-5" />
-                  <input 
-                    type="file" 
-                    id="profile-upload" 
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={handleImageChange}
-                  />
+                <label className="absolute bottom-1 right-1 bg-brand-primary text-white p-2.5 rounded-full shadow-lg cursor-pointer hover:bg-brand-secondary transition-colors" title="Upload new picture">
+                  <Camera size={18} />
+                  <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} disabled={isUploading || updateMutation.isPending} />
                 </label>
               </div>
               <div className="text-center sm:text-left">
