@@ -5,9 +5,9 @@ import { toast } from 'react-hot-toast';
 export const schoolItKeys = {
   all: ['school-it'] as const,
   dashboard: () => [...schoolItKeys.all, 'dashboard'] as const,
-  students: (params?: any) => [...schoolItKeys.all, 'students', params] as const,
+  students: (params?: any) => params ? [...schoolItKeys.all, 'students', params] as const : [...schoolItKeys.all, 'students'] as const,
   subjects: () => [...schoolItKeys.all, 'subjects'] as const,
-  results: (params?: any) => [...schoolItKeys.all, 'results', params] as const,
+  results: (params?: any) => params ? [...schoolItKeys.all, 'results', params] as const : [...schoolItKeys.all, 'results'] as const,
   studentResults: (id: string) => [...schoolItKeys.all, 'student-results', id] as const,
 };
 
