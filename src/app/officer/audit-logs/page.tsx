@@ -5,7 +5,7 @@ import { useExamOfficerAuditLogs } from "@/services/hooks/useExamOfficer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { CheckCircle, XCircle, Clock } from "lucide-react";
-import Pagination from "@/components/shared/Pagination";
+import PaginationControls from "@/components/students/PaginationControls";
 
 export default function ExamOfficerAuditLogs() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,8 +98,8 @@ export default function ExamOfficerAuditLogs() {
         </div>
 
         {pagination && pagination.totalPages > 1 && (
-          <div className="p-4 border-t border-gray-100 bg-gray-50">
-            <Pagination
+          <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+            <PaginationControls
               currentPage={currentPage}
               totalPages={pagination.totalPages}
               onPageChange={setCurrentPage}
