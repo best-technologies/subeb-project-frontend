@@ -119,7 +119,7 @@ export default function AuditLogsPage() {
             <TableHeader className="bg-brand-accent-background">
               <TableRow>
                 <TableHead className="w-[15%]">Date & Time</TableHead>
-                <TableHead className="w-[15%]">User ID</TableHead>
+                <TableHead className="w-[15%]">User</TableHead>
                 <TableHead className="w-[15%]">Action</TableHead>
                 <TableHead className="w-[15%]">Entity</TableHead>
                 <TableHead className="w-[40%]">Details</TableHead>
@@ -147,8 +147,8 @@ export default function AuditLogsPage() {
                     <TableCell className="font-medium text-gray-900 whitespace-nowrap">
                       {new Date(log.createdAt).toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-gray-600 font-mono text-xs">
-                      {log.userId}
+                    <TableCell className="text-gray-900 font-medium">
+                      {log.userName || log.userId}
                     </TableCell>
                     <TableCell>
                       <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200">
