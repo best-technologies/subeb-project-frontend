@@ -69,12 +69,12 @@ export default function ExamOfficerAuditLogs() {
                         {log.action === "RESULT_APPROVAL" ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             <CheckCircle className="w-3.5 h-3.5" />
-                            Approved
+                            Approval
                           </span>
                         ) : log.action === "RESULT_REJECTION" ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                             <XCircle className="w-3.5 h-3.5" />
-                            Rejected
+                            Rejection
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -86,8 +86,8 @@ export default function ExamOfficerAuditLogs() {
                         {details.schoolName || "Unknown School"}
                       </TableCell>
                       <TableCell className="text-sm text-gray-500">
-                        {log.action === "RESULT_APPROVAL" && `Approved ${details.count || 0} assessments.`}
-                        {log.action === "RESULT_REJECTION" && `Rejected ${details.count || 0} assessments.`}
+                        {log.action === "RESULT_APPROVAL" && `Approved ${details.count || 0} students.`}
+                        {log.action === "RESULT_REJECTION" && `Rejected ${details.count || 0} students.`}
                       </TableCell>
                     </TableRow>
                   );
