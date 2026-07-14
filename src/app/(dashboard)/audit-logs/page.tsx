@@ -9,11 +9,12 @@ import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
 function formatAction(action: string) {
   if (!action) return "Unknown Action";
-  if (action === "RESULT_APPROVAL") return "Approved Results";
-  if (action === "RESULT_REJECTION") return "Rejected Results";
-  if (action === "UPLOADED_RESULTS") return "Uploaded Results";
-  if (action === "ENROLLED_STUDENT") return "Enrolled Student";
-  if (action === "UPDATED_STUDENT") return "Updated Student";
+  if (action === "RESULT_APPROVAL" || (action.includes("exam-officer/results") && action.includes("approve"))) return "Approved Results";
+  if (action === "RESULT_REJECTION" || (action.includes("exam-officer/results") && action.includes("reject"))) return "Rejected Results";
+  if (action === "UPLOADED_RESULTS" || (action.includes("school-it/results/upload"))) return "Uploaded Results";
+  if (action === "SUBMITTED_RESULTS" || (action.includes("school-it/results/submit"))) return "Submitted Results";
+  if (action === "ENROLLED_STUDENT" || (action.includes("school-it/students") && action.startsWith("POST"))) return "Enrolled Student";
+  if (action === "UPDATED_STUDENT" || (action.includes("school-it/students") && action.startsWith("PUT"))) return "Updated Student";
   
   if (action.includes("subeb-officers/enroll")) return "Enrolled SUBEB Officer";
   if (action.includes("students/enrollsingleorbulkstudents")) return "Enrolled Student(s)";
@@ -27,29 +28,38 @@ function formatDetails(action: string, details: string) {
   if (!details || details === "{}") return "N/A";
   try {
     const parsed = JSON.parse(details);
+    const formattedAction = formatAction(action);
     
-    if (action === "RESULT_APPROVAL" || action === "RESULT_REJECTION") {
-      const verb = action === "RESULT_APPROVAL" ? "Approved" : "Rejected";
+    if (formattedAction === "Approved Results" || formattedAction === "Rejected Results") {
+      const verb = formattedAction === "Approved Results" ? "Approved" : "Rejected";
       return `${verb} results for ${parsed.count || 0} student(s) at ${parsed.schoolName || 'a school'}.`;
     }
     
-    if (action === "UPLOADED_RESULTS") {
-      return `Uploaded results for a class.`;
+    if (formattedAction === "Uploaded Results") {
+      const count = parsed.students ? parsed.students.length : (parsed.totalStudents || 0);
+      return `Uploaded results for ${count} student(s) in class ${parsed.classId || 'Unknown'}.`;
     }
     
-    if (action === "ENROLLED_STUDENT" || action === "UPDATED_STUDENT") {
-      return `Student: ${parsed.name || "Unknown"}, ID: ${parsed.studentId || "N/A"}`;
+    if (formattedAction === "Submitted Results") {
+      return `Submitted results for approval.`;
+    }
+    
+    if (formattedAction === "Enrolled Student" || formattedAction === "Updated Student") {
+      const name = parsed.name || (parsed.firstName ? `${parsed.firstName} ${parsed.lastName || ''}` : "Unknown");
+      return `Student: ${name.trim()}, ID: ${parsed.studentId || "N/A"}`;
     }
 
-    if (parsed.students && Array.isArray(parsed.students)) {
-      const count = parsed.students.length;
-      const sample = parsed.students[0];
-      const name = sample ? (sample.firstName || sample?.student?.firstName || "Unknown") : undefined;
-      return `Enrolled ${count} student(s)${name ? ` (e.g., ${name})` : ""}`;
+    if (formattedAction === "Enrolled Student(s)") {
+      if (parsed.students && Array.isArray(parsed.students)) {
+        const count = parsed.students.length;
+        const sample = parsed.students[0];
+        const name = sample ? (sample.firstName || sample?.student?.firstName || "Unknown") : undefined;
+        return `Enrolled ${count} student(s)${name && name !== "Unknown" ? ` (e.g., ${name})` : ""}`;
+      }
     }
     
-    if (parsed.firstName) {
-      return `Name: ${parsed.firstName} ${parsed.lastName || ''}, Email: ${parsed.email || "N/A"}`;
+    if (formattedAction === "Enrolled SUBEB Officer" || parsed.firstName) {
+      return `Name: ${parsed.firstName || 'Unknown'} ${parsed.lastName || ''}, Email: ${parsed.email || "N/A"}`;
     }
     
     // Generic fallback for JSON
