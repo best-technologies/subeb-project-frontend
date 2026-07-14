@@ -9,6 +9,12 @@ import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
 function formatAction(action: string) {
   if (!action) return "Unknown Action";
+  if (action === "RESULT_APPROVAL") return "Approved Results";
+  if (action === "RESULT_REJECTION") return "Rejected Results";
+  if (action === "UPLOADED_RESULTS") return "Uploaded Results";
+  if (action === "ENROLLED_STUDENT") return "Enrolled Student";
+  if (action === "UPDATED_STUDENT") return "Updated Student";
+  
   if (action.includes("subeb-officers/enroll")) return "Enrolled SUBEB Officer";
   if (action.includes("students/enrollsingleorbulkstudents")) return "Enrolled Student(s)";
   if (action.startsWith("POST ")) return "Created Record";
@@ -17,18 +23,33 @@ function formatAction(action: string) {
   return action;
 }
 
-function formatDetails(details: string) {
-  if (!details) return "N/A";
+function formatDetails(action: string, details: string) {
+  if (!details || details === "{}") return "N/A";
   try {
     const parsed = JSON.parse(details);
     
-    if (parsed.students && Array.isArray(parsed.students)) {
-      const count = parsed.students.length;
-      return `Enrolled ${count} student(s)${count > 0 ? ` (e.g., ${parsed.students[0].firstName} ${parsed.students[0].lastName})` : ""}`;
+    if (action === "RESULT_APPROVAL" || action === "RESULT_REJECTION") {
+      const verb = action === "RESULT_APPROVAL" ? "Approved" : "Rejected";
+      return `${verb} results for ${parsed.count || 0} student(s) at ${parsed.schoolName || 'a school'}.`;
     }
     
-    if (parsed.firstName && parsed.lastName) {
-      return `Name: ${parsed.firstName} ${parsed.lastName}, Email: ${parsed.email || "N/A"}`;
+    if (action === "UPLOADED_RESULTS") {
+      return `Uploaded results for a class.`;
+    }
+    
+    if (action === "ENROLLED_STUDENT" || action === "UPDATED_STUDENT") {
+      return `Student: ${parsed.name || "Unknown"}, ID: ${parsed.studentId || "N/A"}`;
+    }
+
+    if (parsed.students && Array.isArray(parsed.students)) {
+      const count = parsed.students.length;
+      const sample = parsed.students[0];
+      const name = sample ? (sample.firstName || sample?.student?.firstName || "Unknown") : undefined;
+      return `Enrolled ${count} student(s)${name ? ` (e.g., ${name})` : ""}`;
+    }
+    
+    if (parsed.firstName) {
+      return `Name: ${parsed.firstName} ${parsed.lastName || ''}, Email: ${parsed.email || "N/A"}`;
     }
     
     // Generic fallback for JSON
@@ -124,7 +145,7 @@ export default function AuditLogsPage() {
                     </TableCell>
                     <TableCell className="max-w-md">
                       <div className="text-sm text-gray-600 truncate" title={log.details}>
-                        {formatDetails(log.details)}
+                        {formatDetails(log.action, log.details)}
                       </div>
                     </TableCell>
                   </TableRow>
