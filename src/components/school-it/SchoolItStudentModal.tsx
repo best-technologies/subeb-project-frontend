@@ -4,8 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-// uploadApi removed because it does not exist yet
 import { toast } from 'react-hot-toast';
+import { uploadApi } from '@/services/api/upload';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface StudentModalProps {
@@ -47,14 +47,8 @@ export function SchoolItStudentModal({ isOpen, onClose, onSubmit, isLoading, stu
 
       if (profilePic) {
         setUploading(true);
-        // S3 Upload mock
-        // const formData = new FormData();
-        // formData.append('file', profilePic);
-        // const uploadRes = await uploadApi.uploadImage(formData);
-        // profilePictureUrl = uploadRes.data.url;
-        
-        // Mock successful upload for now
-        profilePictureUrl = URL.createObjectURL(profilePic);
+        const uploadRes = await uploadApi.uploadImage(profilePic);
+        profilePictureUrl = uploadRes.url;
       }
 
       onSubmit({
@@ -129,15 +123,19 @@ export function SchoolItStudentModal({ isOpen, onClose, onSubmit, isLoading, stu
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="profilePicture">Profile Picture (Optional, S3 Upload)</Label>
-            <Input 
-              id="profilePicture" 
-              type="file" 
-              accept="image/*"
-              onChange={(e) => setProfilePic(e.target.files?.[0] || null)} 
-            />
-          </div>
+            <div className="space-y-2 col-span-2 mt-2">
+              <Label htmlFor="profilePic">Profile Picture (Optional, S3 Upload)</Label>
+              <Input
+                id="profilePic"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setProfilePic(e.target.files[0]);
+                  }
+                }}
+              />
+            </div>
 
           <DialogFooter className="mt-6">
             <Button type="button" variant="outline" onClick={onClose} disabled={isLoading || uploading}>
