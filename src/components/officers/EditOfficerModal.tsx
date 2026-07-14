@@ -37,7 +37,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 const formSchema = z.object({
   firstName: z.string().min(1, "First Name is required"),
   lastName: z.string().min(1, "Last Name is required"),
-  lgaId: z.string().min(1, "Please select an LGA"),
+  lgaId: z.string().optional(),
   profilePicture: z.string().optional(),
 });
 
@@ -226,7 +226,7 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
                 name="lgaId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Local Government Area (LGA) <span className="text-red-500">*</span></FormLabel>
+                    <FormLabel>Local Government Area (LGA)</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
