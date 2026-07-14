@@ -22,7 +22,7 @@ export default function OfficersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOfficer, setSelectedOfficer] = useState<any>(null);
 
-  const officers = (data?.meta as { id: string; user: { firstName: string; lastName: string; email: string }; phone: string; lgaId?: string; lga?: { name: string } }[]) || [];
+  const officers = (data?.meta as { id: string; user: { firstName: string; lastName: string; email: string; profilePicture?: string }; phone: string; lgaId?: string; lga?: { name: string } }[]) || [];
   const pagination = (data?.data as { pagination?: { total?: number; totalPages?: number } })?.pagination;
   const total = pagination?.total || 0;
   const totalPages = pagination?.totalPages || 1;
@@ -34,6 +34,7 @@ export default function OfficersPage() {
       lastName: officer.user.lastName,
       email: officer.user.email,
       lgaId: officer.lgaId || "",
+      profilePicture: officer.user.profilePicture || "",
     });
     setIsEditModalOpen(true);
   };
@@ -119,8 +120,19 @@ export default function OfficersPage() {
                 officers.map((officer: any) => (
                   <tr key={officer.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">
-                        {officer.user.firstName} {officer.user.lastName}
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          {officer.user.profilePicture ? (
+                            <img className="h-10 w-10 rounded-full object-cover" src={officer.user.profilePicture} alt="" />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold">
+                              {officer.user.firstName?.[0]}{officer.user.lastName?.[0]}
+                            </div>
+                          )}
+                        </div>
+                        <div className="font-medium text-gray-900">
+                          {officer.user.firstName} {officer.user.lastName}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">
