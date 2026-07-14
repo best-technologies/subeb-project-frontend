@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -30,11 +30,15 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
+import { uploadApi } from "@/services/api/upload";
+import { Camera, Loader2 } from "lucide-react";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 const formSchema = z.object({
   firstName: z.string().min(1, "First Name is required"),
   lastName: z.string().min(1, "Last Name is required"),
   lgaId: z.string().min(1, "Please select an LGA"),
+  profilePicture: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -48,6 +52,7 @@ export interface EditOfficerModalProps {
     lastName: string;
     email: string;
     lgaId?: string;
+    profilePicture?: string;
   } | null;
   onSuccess?: () => void;
 }
@@ -67,8 +72,34 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
       firstName: "",
       lastName: "",
       lgaId: "",
+      profilePicture: "",
     },
   });
+
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("Image must be less than 5MB");
+      setShowErrorDialog(true);
+      return;
+    }
+
+    try {
+      setIsUploadingImage(true);
+      const data = await uploadApi.uploadImage(file);
+      form.setValue("profilePicture", data.url);
+    } catch (err) {
+      setErrorMessage("Failed to upload image. Please try again.");
+      setShowErrorDialog(true);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   // Populate form when officer changes
   useEffect(() => {
@@ -77,6 +108,7 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
         firstName: officer.firstName || "",
         lastName: officer.lastName || "",
         lgaId: officer.lgaId || "",
+        profilePicture: officer.profilePicture || "",
       });
     }
   }, [officer, form]);
@@ -124,6 +156,33 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="flex justify-center mb-4">
+                <div className="relative">
+                  <div className="w-24 h-24 rounded-full border-2 border-brand-primary/20 bg-brand-primary/5 flex items-center justify-center overflow-hidden">
+                    {form.watch("profilePicture") ? (
+                      <img src={form.watch("profilePicture")} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <Camera className="w-8 h-8 text-brand-primary/40" />
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingImage}
+                    className="absolute bottom-0 right-0 bg-brand-primary text-white p-1.5 rounded-full shadow-lg hover:bg-brand-primary/90 disabled:opacity-50"
+                  >
+                    {isUploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusIcon className="w-4 h-4" />}
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/png, image/jpeg"
+                    className="hidden"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}

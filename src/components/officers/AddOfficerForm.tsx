@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -32,6 +32,9 @@ import {
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
 import { capitalizeWords } from "@/utils/formatters";
+import { uploadApi } from "@/services/api/upload";
+import { Camera, Loader2 } from "lucide-react";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 // Zod schema for form validation
 const formSchema = z.object({
@@ -41,6 +44,7 @@ const formSchema = z.object({
   phone: z.string().min(1, "Phone Number is required"),
   address: z.string().min(1, "Address is required"),
   lgaId: z.string().min(1, "Please select an LGA"),
+  profilePicture: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -58,6 +62,9 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
   const { data: metadata, loading: loadingMetadata } = useEnrollmentMetadata();
   const lgas = metadata?.localGovernments || [];
 
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,8 +74,31 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
       phone: "",
       address: "",
       lgaId: "",
+      profilePicture: "",
     },
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("Image must be less than 5MB");
+      setShowErrorDialog(true);
+      return;
+    }
+
+    try {
+      setIsUploadingImage(true);
+      const data = await uploadApi.uploadImage(file);
+      form.setValue("profilePicture", data.url);
+    } catch (err) {
+      setErrorMessage("Failed to upload image. Please try again.");
+      setShowErrorDialog(true);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   function onSubmit(values: FormValues) {
     console.log("Form submitted with values:", values);
@@ -164,6 +194,33 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 w-full"
           >
+            <div className="flex justify-center mb-4">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full border-2 border-brand-primary/20 bg-brand-primary/5 flex items-center justify-center overflow-hidden">
+                  {form.watch("profilePicture") ? (
+                    <img src={form.watch("profilePicture")} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <Camera className="w-8 h-8 text-brand-primary/40" />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingImage}
+                  className="absolute bottom-0 right-0 bg-brand-primary text-white p-1.5 rounded-full shadow-lg hover:bg-brand-primary/90 disabled:opacity-50"
+                >
+                  {isUploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusIcon className="w-4 h-4" />}
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/png, image/jpeg"
+                  className="hidden"
+                />
+              </div>
+            </div>
+            
             <FormField
               control={form.control}
               name="firstName"

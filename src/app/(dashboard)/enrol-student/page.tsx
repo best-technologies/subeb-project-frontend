@@ -1,12 +1,12 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   TrashIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { SquarePen } from "lucide-react";
+import { SquarePen, Camera, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
@@ -26,6 +26,7 @@ import {
   useEnrollmentSchoolClasses,
 } from "@/services/hooks/useEnrollment";
 import type { EnrolledStudent } from "@/services/types/enrollment";
+import { uploadApi } from "@/services/api/upload";
 
 // Helper to format term name
 const formatTermName = (termName: string): string => {
@@ -51,6 +52,7 @@ interface StudentFormData {
   schoolId: string;
   classId: string;
   className: string;
+  profilePicture?: string;
 }
 
 const initialStudentState: StudentFormData = {
@@ -61,6 +63,7 @@ const initialStudentState: StudentFormData = {
   schoolId: "",
   classId: "",
   className: "",
+  profilePicture: "",
 };
 
 export default function EnrolStudentPage() {
@@ -89,6 +92,33 @@ export default function EnrolStudentPage() {
     []
   );
   const [showEnrollmentSuccess, setShowEnrollmentSuccess] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size (e.g. max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be less than 5MB");
+      setShowToast(true);
+      return;
+    }
+
+    try {
+      setIsUploadingImage(true);
+      const data = await uploadApi.uploadImage(file);
+      setStudent(prev => ({ ...prev, profilePicture: data.url }));
+      setSuccess("Profile picture uploaded!");
+      setShowToast(true);
+    } catch (err) {
+      setError("Failed to upload image. Please try again.");
+      setShowToast(true);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   // Fetch enrollment metadata, schools, and classes
   const {
@@ -783,6 +813,32 @@ export default function EnrolStudentPage() {
 
               {/* Student Form */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 p-2 sm:p-4 rounded-lg">
+                <div className="md:col-span-2 flex justify-center mb-4">
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-full border-2 border-brand-primary/20 bg-brand-primary/5 flex items-center justify-center overflow-hidden">
+                      {student.profilePicture ? (
+                        <img src={student.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        <Camera className="w-8 h-8 text-brand-primary/40" />
+                      )}
+                    </div>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingImage}
+                      className="absolute bottom-0 right-0 bg-brand-primary text-white p-1.5 rounded-full shadow-lg hover:bg-brand-primary/90 disabled:opacity-50"
+                    >
+                      {isUploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusIcon className="w-4 h-4" />}
+                    </button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageUpload}
+                      accept="image/png, image/jpeg"
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2 md:col-span-2">
                   <Label className="text-brand-black-accent">Class *</Label>
                   <Select
