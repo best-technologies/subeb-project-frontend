@@ -153,7 +153,7 @@ export default function ExamOfficerResults() {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      {school.overallStatus === "AWAITING_APPROVAL" && (
+                      {school.overallStatus === "AWAITING_APPROVAL" ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -184,6 +184,10 @@ export default function ExamOfficerResults() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
+                      ) : (
+                        <Button variant="ghost" className="h-8 w-8 p-0" disabled>
+                          <MoreVertical className="h-4 w-4 text-gray-300" />
+                        </Button>
                       )}
                     </TableCell>
                   </TableRow>
