@@ -5,7 +5,7 @@ import { useSchoolItStudents, useEnrolSchoolItStudent, useUpdateSchoolItStudent,
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/Input";
 import { ChevronLeft, ChevronRight, Search, Plus, Edit2 } from "lucide-react";
 import { SchoolItStudentModal } from "@/components/school-it/SchoolItStudentModal";
 

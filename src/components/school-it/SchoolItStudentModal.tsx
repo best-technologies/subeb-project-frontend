@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
 import { uploadApi } from '@/services/api/upload';
