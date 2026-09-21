@@ -1,11 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import StatsCards from "./StatsCards";
 import StatsCardsSkeleton from "./StatsCardsSkeleton";
 import StudentsTableSkeleton from "@/components/students/StudentsTableSkeleton";
 import CollapsibleCharts from "./CollapsibleCharts";
 import { useGlobalSearchFilter } from "@/services";
-import { AdminDashboardData } from "@/services/types/adminDashboardResponse";
+import { getAdminDashboardPerformanceTable } from "@/services/api";
+import { AdminDashboardData, TopStudent, Pagination } from "@/services/types/adminDashboardResponse";
 import { capitalizeInitials } from "@/utils/formatters";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -16,7 +17,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { Trophy, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trophy, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 interface DashboardProps {
   dashboardData: AdminDashboardData | null;
@@ -47,13 +48,64 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [lgaFilter] = useState("");
   const [schoolFilter] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+
+  // Dedicated state for top students table so paginating never reloads the whole dashboard/cards
+  const [tableStudents, setTableStudents] = useState<TopStudent[]>([]);
+  const [tablePagination, setTablePagination] = useState<Pagination>({
+    page: 1,
+    limit: pageSize,
+    total: 0,
+    totalPages: 1,
+  });
+  const [isTableLoading, setIsTableLoading] = useState(false);
 
   const { searchTerm, selectedSession, selectedTerm } = useGlobalSearchFilter({
     availableSessions: dashboardData?.availableSessions || [],
     availableTerms: dashboardData?.availableTerms || [],
   });
+
+  // Sync table state whenever dashboardData.performance arrives (initial load or session/term change)
+  useEffect(() => {
+    if (dashboardData?.performance) {
+      setTableStudents(dashboardData.performance.topStudents || []);
+      if (dashboardData.performance.pagination) {
+        setTablePagination(dashboardData.performance.pagination);
+      } else {
+        const total = dashboardData.performance.topStudents?.length || 0;
+        setTablePagination({
+          page: 1,
+          limit: pageSize,
+          total,
+          totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        });
+      }
+    }
+  }, [dashboardData?.performance, pageSize]);
+
+  // Handle global academic session / term dropdown changes (refreshes entire dashboard including cards)
+  const lastSessionTermRef = useRef<{ session?: string; term?: string }>({});
+  useEffect(() => {
+    const sessionVal = selectedSession?.id;
+    const termVal = selectedTerm?.id;
+
+    if (!sessionVal && !termVal) return;
+
+    if (
+      (sessionVal && sessionVal !== lastSessionTermRef.current.session) ||
+      (termVal && termVal !== lastSessionTermRef.current.term)
+    ) {
+      lastSessionTermRef.current = { session: sessionVal, term: termVal };
+      if (onSearchParamsChange) {
+        onSearchParamsChange({
+          session: sessionVal,
+          term: termVal,
+          includeStats: true,
+          includePerformance: true,
+        });
+      }
+    }
+  }, [selectedSession?.id, selectedTerm?.id, onSearchParamsChange]);
 
   // Debounce search term
   useEffect(() => {
@@ -64,81 +116,82 @@ const Dashboard: React.FC<DashboardProps> = ({
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Call API when search parameters change
-  useEffect(() => {
-    if (onSearchParamsChange) {
-      const params = {
-        search: debouncedSearchTerm || undefined,
-        session: selectedSession?.id || undefined,
-        term: selectedTerm?.id || undefined,
+  // Fetch only table data when paginating or searching within the table (cards are NOT refreshed!)
+  const fetchTablePage = async (page: number, search?: string) => {
+    setIsTableLoading(true);
+    try {
+      const activeSession = selectedSession?.id || dashboardData?.currentSession?.id;
+      const activeTerm = selectedTerm?.id || dashboardData?.currentTerm?.id;
+      const res = await getAdminDashboardPerformanceTable({
+        session: activeSession,
+        term: activeTerm,
+        page,
+        limit: pageSize,
+        search: search !== undefined ? search : debouncedSearchTerm || undefined,
         lgaId: lgaFilter
           ? dashboardData?.data?.lgas?.find((l) => l.name === lgaFilter)?.id
           : undefined,
         schoolId: schoolFilter
-          ? dashboardData?.data?.schools?.find((s) => s.name === schoolFilter)
-              ?.id
+          ? dashboardData?.data?.schools?.find((s) => s.name === schoolFilter)?.id
           : undefined,
-        includeStats: true,
-        includePerformance: true,
-      };
+      });
 
-      const hasValidParams = Object.values(params).some(
-        (val) => val !== undefined
-      );
-      const hasValidSession = selectedSession?.id && selectedSession.id !== "";
-      const hasValidTerm = selectedTerm?.id && selectedTerm.id !== "";
-
-      if (hasValidParams && hasValidSession && hasValidTerm) {
-        onSearchParamsChange(params);
+      if (res?.success && res.data) {
+        setTableStudents(res.data.topStudents || []);
+        if (res.data.pagination) {
+          setTablePagination(res.data.pagination);
+        }
       }
+    } catch (err) {
+      console.error("Failed to fetch performance table page:", err);
+    } finally {
+      setIsTableLoading(false);
     }
-  }, [
-    debouncedSearchTerm,
-    selectedSession?.id,
-    selectedTerm?.id,
-    lgaFilter,
-    schoolFilter,
-    onSearchParamsChange,
-    dashboardData?.data?.lgas,
-    dashboardData?.data?.schools,
-  ]);
+  };
 
-  // Reset page when filters change
+  // Re-fetch table when search term changes (after initial mount)
+  const isInitialMount = useRef(true);
   useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedSession?.id, selectedTerm?.id, lgaFilter, schoolFilter, debouncedSearchTerm]);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    fetchTablePage(1, debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
 
-  // Get ranked students (up to top 100)
-  const students =
-    dashboardData?.performance?.topStudents ||
-    dashboardData?.data?.students ||
-    [];
+  // Handle server-side page navigation (ONLY fetches table data)
+  const handlePageChange = (targetPage: number) => {
+    fetchTablePage(targetPage);
+  };
 
-  const totalPages = Math.max(1, Math.ceil(students.length / pageSize));
-  const paginatedStudents = students.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const totalItems = tablePagination.total;
+  const totalPages = tablePagination.totalPages;
+  const activePage = tablePagination.page;
+  const startRank = totalItems === 0 ? 0 : (activePage - 1) * pageSize + 1;
+  const endRank = Math.min(activePage * pageSize, totalItems);
+
+  // Get ranked students for the active page directly from server response
+  const students = tableStudents;
 
   const renderPositionBadge = (pos: number) => {
     if (pos === 1) {
       return (
-        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 text-amber-900 font-bold text-xs border border-amber-300 shadow-2xs">
-          🥇 1
+        <span className="inline-flex items-center justify-center min-w-7 h-7 px-1.5 rounded-md bg-amber-100 text-amber-900 font-bold text-xs border border-amber-300">
+          #1
         </span>
       );
     }
     if (pos === 2) {
       return (
-        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300 shadow-2xs">
-          🥈 2
+        <span className="inline-flex items-center justify-center min-w-7 h-7 px-1.5 rounded-md bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300">
+          #2
         </span>
       );
     }
     if (pos === 3) {
       return (
-        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-orange-100 text-orange-900 font-bold text-xs border border-orange-300 shadow-2xs">
-          🥉 3
+        <span className="inline-flex items-center justify-center min-w-7 h-7 px-1.5 rounded-md bg-orange-100 text-orange-900 font-bold text-xs border border-orange-300">
+          #3
         </span>
       );
     }
@@ -165,13 +218,17 @@ const Dashboard: React.FC<DashboardProps> = ({
         </span>
       );
     }
-    return <span className="text-gray-400 text-xs">N/A</span>;
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
+        {gender || "N/A"}
+      </span>
+    );
   };
 
   return (
     <div className="space-y-8">
       {/* Stats Cards */}
-      {loading || !dashboardData ? (
+      {loading && !dashboardData ? (
         <StatsCardsSkeleton />
       ) : (
         <StatsCards dashboardData={dashboardData} />
@@ -181,7 +238,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       <CollapsibleCharts dashboardData={dashboardData} />
 
       {/* Top Students Ranking Table */}
-      {loading || !dashboardData ? (
+      {!dashboardData && loading ? (
         <StudentsTableSkeleton />
       ) : (
         <Card className="border-gray-200 shadow-xs overflow-hidden">
@@ -196,8 +253,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                     Top Ranked Students
                   </CardTitle>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Showing {paginatedStudents.length} of {students.length} top ranked students across the state
-                    {searchTerm && ` matching "${searchTerm}"`}
+                    Showing {startRank} to {endRank} of {totalItems} top ranked students across the state
+                    {debouncedSearchTerm && ` matching "${debouncedSearchTerm}"`}
                     {lgaFilter && ` • LGA: ${lgaFilter}`}
                     {schoolFilter && ` • School: ${schoolFilter}`}
                   </p>
@@ -205,24 +262,25 @@ const Dashboard: React.FC<DashboardProps> = ({
               </div>
 
               {/* Pagination Controls */}
-              {students.length > 0 && (
+              {totalItems > 0 && (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
+                    onClick={() => handlePageChange(Math.max(1, activePage - 1))}
+                    disabled={activePage <= 1 || isTableLoading}
                     className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium shadow-2xs"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                     Previous
                   </button>
 
-                  <span className="px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-xs font-semibold">
-                    Page {currentPage} of {totalPages}
+                  <span className="px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-xs font-semibold flex items-center gap-1.5">
+                    {isTableLoading && <Loader2 className="w-3 h-3 animate-spin text-emerald-600" />}
+                    Page {activePage} of {totalPages}
                   </span>
 
                   <button
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
+                    onClick={() => handlePageChange(Math.min(totalPages, activePage + 1))}
+                    disabled={activePage >= totalPages || isTableLoading}
                     className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium shadow-2xs"
                   >
                     Next
@@ -233,7 +291,15 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </CardHeader>
 
-          <CardContent className="p-0">
+          <CardContent className="p-0 relative">
+            {isTableLoading && (
+              <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white rounded-full border border-gray-200 shadow-sm text-xs font-medium text-gray-700">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                  Loading...
+                </div>
+              </div>
+            )}
             {students.length === 0 ? (
               <div className="px-6 py-12 text-center">
                 <Trophy className="w-10 h-10 text-gray-300 mx-auto mb-2" />
@@ -269,8 +335,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedStudents.map((student, index) => {
-                    const pos = student.position || (currentPage - 1) * pageSize + index + 1;
+                  {students.map((student, index) => {
+                    const pos = student.position || (activePage - 1) * pageSize + index + 1;
                     return (
                       <TableRow
                         key={student.id || index}

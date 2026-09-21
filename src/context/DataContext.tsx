@@ -178,10 +178,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
       },
       forceRefresh = false
     ) => {
-      // Check if we have search parameters that require a new API call
+      // Check if we have specific filter parameters that require a new API call
       const hasSearchParams =
         params &&
-        Object.values(params).some((val) => val !== undefined && val !== "");
+        Boolean(
+          params.session ||
+          params.term ||
+          params.search ||
+          params.schoolId ||
+          params.classId ||
+          params.gender ||
+          params.lgaId
+        );
 
       // Return cached data only if no search params and not forcing refresh
       if (!forceRefresh && !hasSearchParams && isAdminDashboardCached()) {
@@ -335,8 +343,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
         session: adminData.currentSession?.name || "",
         term: adminData.currentTerm?.name || "",
         performanceTable,
-        lgas,
-        schools,
+        lgas: (lgas as any[]).map((l) => ({
+          id: l.id,
+          name: l.name,
+          code: l.code || "",
+          state: l.state || "Anambra",
+        })),
+        schools: (schools as any[]).map((s) => ({
+          id: s.id,
+          name: s.name,
+          code: s.code || "",
+          level: s.level || "",
+        })),
         classes,
         subjects,
         genders:

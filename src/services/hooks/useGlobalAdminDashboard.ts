@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useData } from "@/context/DataContext";
 
 export const useGlobalAdminDashboard = () => {
@@ -11,51 +11,53 @@ export const useGlobalAdminDashboard = () => {
   const [searchParams, setSearchParams] = useState<{
     session?: string;
     term?: string;
-    page?: number;
-    limit?: number;
-    search?: string;
-    schoolId?: string;
-    classId?: string;
-    gender?: string;
-    schoolLevel?: string;
-    lgaId?: string;
-    sortBy?: string;
-    sortOrder?: string;
     includeStats?: boolean;
     includePerformance?: boolean;
-  }>({});
+  }>({
+    includeStats: true,
+    includePerformance: true,
+  });
+
+  const lastFetchedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     // STOP THE INFINITE LOOP - Don't make API calls if there's an error
     if (adminDashboard.error) {
-      // console.log('🚫 STOPPING - Skipping API call due to existing error:', adminDashboard.error);
       return;
     }
 
-    // Always fetch when search params change, but use cache for initial load
-    const hasSearchParams = Object.values(searchParams).some(
-      (val) => val !== undefined && val !== ""
-    );
+    const currentKey = `${searchParams.session || ""}_${searchParams.term || ""}`;
 
-    // Only fetch if we have search params or if there's no cached data
-    if (hasSearchParams || !isAdminDashboardCached()) {
-      // console.log('🔄 useGlobalAdminDashboard - Triggering API call:', { hasSearchParams, isCached: isAdminDashboardCached() });
+    // If already cached and no specific session/term filter requested, mark as fetched and do nothing
+    if (!searchParams.session && !searchParams.term && isAdminDashboardCached()) {
+      lastFetchedKeyRef.current = currentKey;
+      return;
+    }
+
+    // Only fetch if session/term key changed or if initial fetch hasn't occurred
+    if (lastFetchedKeyRef.current !== currentKey) {
+      lastFetchedKeyRef.current = currentKey;
       fetchAdminDashboard(searchParams);
     }
   }, [
-    fetchAdminDashboard,
-    isAdminDashboardCached,
-    searchParams,
+    searchParams.session,
+    searchParams.term,
     adminDashboard.error,
+    isAdminDashboardCached,
+    fetchAdminDashboard,
   ]);
 
   const refetch = useCallback(() => {
+    lastFetchedKeyRef.current = `${searchParams.session || ""}_${searchParams.term || ""}`;
     fetchAdminDashboard(searchParams, true); // Force refresh
   }, [fetchAdminDashboard, searchParams]);
 
-  const updateSearchParams = useCallback((newParams: typeof searchParams) => {
-    setSearchParams((prev) => ({ ...prev, ...newParams }));
-  }, []);
+  const updateSearchParams = useCallback(
+    (newParams: Partial<typeof searchParams>) => {
+      setSearchParams((prev) => ({ ...prev, ...newParams }));
+    },
+    []
+  );
 
   return {
     data: adminDashboard.data,

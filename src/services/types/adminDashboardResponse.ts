@@ -37,19 +37,19 @@ export interface Summary {
 export interface School {
   id: string;
   name: string;
-  code: string;
-  level: string;
+  code?: string;
+  level?: string;
   address?: string;
   lga?: string;
-  totalStudents: number;
-  totalTeachers: number;
+  totalStudents?: number;
+  totalTeachers?: number;
 }
 
 export interface LGA {
   id: string;
   name: string;
-  code: string;
-  state: string;
+  code?: string;
+  state?: string;
 }
 
 export interface Class {
@@ -102,26 +102,27 @@ export interface AdminDashboardData {
   data: {
     schools: School[];
     lgas: LGA[];
-    classes: Class[];
-    students: TopStudent[];
-    subjects: Subject[];
+    classes?: Class[];
+    students?: TopStudent[];
+    subjects?: Subject[];
   };
-  statistics: {
-    genderDistribution: Array<{
+  statistics?: {
+    genderDistribution?: Array<{
       gender: string;
       _count: { gender: number };
     }>;
-    schoolLevelDistribution: Array<{
+    schoolLevelDistribution?: Array<{
       level: string;
       _count: { level: number };
     }>;
-    classGradeDistribution: Array<{
+    classGradeDistribution?: Array<{
       grade: string;
       _count: { grade: number };
     }>;
   };
-  performance: {
+  performance?: {
     topStudents: TopStudent[];
+    pagination?: Pagination;
   };
   // Legacy fields for backward compatibility
   schools?: School[];

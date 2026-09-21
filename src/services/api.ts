@@ -1,6 +1,7 @@
 import {
   AdminDashboardResponse,
   ApiErrorResponse,
+  TopStudent,
 } from "./types/adminDashboardResponse";
 import {
   StudentsDashboardResponse,
@@ -199,6 +200,46 @@ class ApiClient {
     }
   }
 
+  async getAdminDashboardPerformanceTable(params?: {
+    session?: string;
+    term?: string;
+    page?: number;
+    limit?: number;
+    search?: string;
+    schoolId?: string;
+    classId?: string;
+    gender?: string;
+    lgaId?: string;
+  }): Promise<{
+    success: boolean;
+    message?: string;
+    data: {
+      topStudents: TopStudent[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+    };
+  }> {
+    try {
+      const queryParams: Record<string, string> = {};
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            queryParams[key] = String(value);
+          }
+        });
+      }
+
+      return await this.get("/admin/dashboard/performance-table", queryParams);
+    } catch (error) {
+      console.error("❌ API Client - Error in getAdminDashboardPerformanceTable:", error);
+      throw error;
+    }
+  }
+
   // Students Dashboard API Methods
   async getStudentsDashboard(
     filters: StudentsFilters = {}
@@ -347,6 +388,9 @@ export default apiClient;
 export const getAdminDashboard = (
   params?: Parameters<typeof apiClient.getAdminDashboard>[0]
 ) => apiClient.getAdminDashboard(params);
+export const getAdminDashboardPerformanceTable = (
+  params?: Parameters<typeof apiClient.getAdminDashboardPerformanceTable>[0]
+) => apiClient.getAdminDashboardPerformanceTable(params);
 export const getStudentsDashboard = (filters?: StudentsFilters) =>
   apiClient.getStudentsDashboard(filters);
 export const getCurrentSession = () => apiClient.getCurrentSession();

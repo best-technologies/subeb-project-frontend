@@ -407,34 +407,36 @@ export default function AcademicSettingsPage() {
                 </DialogTitle>
               </div>
             </div>
-            <DialogDescription className="text-sm text-gray-600 pt-3 space-y-2">
-              {confirmDialog.type === "session" ? (
-                <>
-                  <p>
-                    Are you sure you want to open and activate{" "}
-                    <strong className="text-gray-900 font-semibold">{confirmDialog.name}</strong>?
-                  </p>
-                  <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-md border border-amber-200">
-                    <strong>Notice:</strong> This will make{" "}
-                    <strong>{confirmDialog.name}</strong> the state-wide active session. All other
-                    sessions and their terms will be automatically closed, and the admin dashboard
-                    will immediately reflect this active period.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    Are you sure you want to open and activate{" "}
-                    <strong className="text-gray-900 font-semibold">{confirmDialog.name}</strong>{" "}
-                    for <strong className="text-gray-900">{selectedSession?.name}</strong>?
-                  </p>
-                  <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-md border border-amber-200">
-                    <strong>Notice:</strong> This will set <strong>{confirmDialog.name}</strong> as
-                    the current active term for student evaluations and results. Previously active
-                    terms will be closed.
-                  </p>
-                </>
-              )}
+            <DialogDescription asChild>
+              <div className="text-sm text-gray-600 pt-3 space-y-2">
+                {confirmDialog.type === "session" ? (
+                  <>
+                    <p>
+                      Are you sure you want to open and activate{" "}
+                      <strong className="text-gray-900 font-semibold">{confirmDialog.name}</strong>?
+                    </p>
+                    <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-md border border-amber-200">
+                      <strong>Notice:</strong> This will make{" "}
+                      <strong>{confirmDialog.name}</strong> the state-wide active session. All other
+                      sessions and their terms will be automatically closed, and the admin dashboard
+                      will immediately reflect this active period.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      Are you sure you want to open and activate{" "}
+                      <strong className="text-gray-900 font-semibold">{confirmDialog.name}</strong>{" "}
+                      for <strong className="text-gray-900">{selectedSession?.name}</strong>?
+                    </p>
+                    <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-md border border-amber-200">
+                      <strong>Notice:</strong> This will set <strong>{confirmDialog.name}</strong> as
+                      the current active term for student evaluations and results. Previously active
+                      terms will be closed.
+                    </p>
+                  </>
+                )}
+              </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4 gap-2 sm:gap-0">
