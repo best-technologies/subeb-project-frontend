@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   useSessions,
   useActivateSession,
@@ -53,7 +53,11 @@ export default function AcademicSettingsPage() {
     name: "",
   });
 
-  const sessions = sessionsData?.data || [];
+  const sessions = useMemo(() => {
+    return (sessionsData?.data || [])
+      .slice()
+      .sort((a: any, b: any) => b.name.localeCompare(a.name));
+  }, [sessionsData?.data]);
 
   // Auto-select the active session on first load
   useEffect(() => {
@@ -467,6 +471,7 @@ export default function AcademicSettingsPage() {
       <CreateTermModal
         isOpen={isTermModalOpen}
         onClose={() => setIsTermModalOpen(false)}
+        defaultSessionId={selectedSessionId || undefined}
       />
     </div>
   );

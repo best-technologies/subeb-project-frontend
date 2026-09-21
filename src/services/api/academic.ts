@@ -6,6 +6,8 @@ export interface SessionData {
   name: string;
   status: 'OPEN' | 'CLOSED';
   isCurrent: boolean;
+  startDate?: string;
+  endDate?: string;
   createdAt: string;
 }
 
@@ -15,6 +17,8 @@ export interface TermData {
   sessionId: string;
   status: 'OPEN' | 'CLOSED';
   isCurrent: boolean;
+  startDate?: string;
+  endDate?: string;
   createdAt: string;
 }
 
