@@ -82,8 +82,9 @@ export interface TopStudent {
   id: string;
   studentName: string;
   examNumber: string;
+  lga?: string;
   school: string;
-  schoolCode: string;
+  schoolCode?: string;
   class: string;
   gender: "MALE" | "FEMALE";
   // Optional fields for backward compatibility

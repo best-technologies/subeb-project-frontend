@@ -7,7 +7,7 @@ import CollapsibleCharts from "./CollapsibleCharts";
 import { useGlobalSearchFilter } from "@/services";
 import { getAdminDashboardPerformanceTable } from "@/services/api";
 import { AdminDashboardData, TopStudent, Pagination } from "@/services/types/adminDashboardResponse";
-import { capitalizeInitials } from "@/utils/formatters";
+import { capitalizeInitials, formatEducationalText } from "@/utils/formatters";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -324,6 +324,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                       Gender
                     </TableHead>
                     <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      LGA
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       School
                     </TableHead>
                     <TableHead className="w-[110px] text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -357,12 +360,17 @@ const Dashboard: React.FC<DashboardProps> = ({
                           {renderGenderBadge(student.gender)}
                         </TableCell>
                         <TableCell className="text-sm text-gray-600">
+                          {student.lga ? capitalizeInitials(student.lga) : "N/A"}
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-600">
                           {student.school
                             ? capitalizeInitials(student.school)
                             : "N/A"}
                         </TableCell>
                         <TableCell className="text-sm text-gray-600">
-                          {student.class || "N/A"}
+                          {student.class
+                            ? formatEducationalText(student.class)
+                            : "N/A"}
                         </TableCell>
                         <TableCell className="text-right pr-6">
                           <span className="inline-block font-bold text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/60">
