@@ -5,88 +5,88 @@ const ROWS = 10;
 
 const StudentsTableSkeleton: React.FC = () => {
   return (
-    <div className="bg-brand-accent-background border border-brand-accent/20 rounded-xl overflow-hidden shadow-lg animate-pulse">
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs animate-pulse">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-brand-primary-2">
+          <thead className="bg-gray-50/80 border-b border-gray-200">
             <tr>
               {/* Position Column */}
               <th className="px-6 py-4">
-                <div className="h-4 w-20 bg-brand-primary-2-contrast/30 rounded shimmer" />
+                <div className="h-3.5 w-16 bg-gray-300/70 rounded" />
               </th>
               {/* Student Column */}
               <th className="px-6 py-4">
-                <div className="h-4 w-16 bg-brand-primary-2-contrast/30 rounded shimmer" />
+                <div className="h-3.5 w-20 bg-gray-300/70 rounded" />
               </th>
               {/* Exam No Column */}
               <th className="px-6 py-4">
-                <div className="h-4 w-20 bg-brand-primary-2-contrast/30 rounded shimmer" />
+                <div className="h-3.5 w-16 bg-gray-300/70 rounded" />
               </th>
               {/* School Column */}
               <th className="px-6 py-4">
-                <div className="h-4 w-16 bg-brand-primary-2-contrast/30 rounded shimmer" />
+                <div className="h-3.5 w-20 bg-gray-300/70 rounded" />
               </th>
               {/* Class Column */}
               <th className="px-6 py-4">
-                <div className="h-4 w-12 bg-brand-primary-2-contrast/30 rounded shimmer" />
+                <div className="h-3.5 w-14 bg-gray-300/70 rounded" />
               </th>
               {/* Total Column */}
               <th className="px-6 py-4">
-                <div className="h-4 w-12 bg-brand-primary-2-contrast/30 rounded shimmer" />
+                <div className="h-3.5 w-12 bg-gray-300/70 rounded" />
               </th>
               {/* Average Column */}
               <th className="px-6 py-4">
-                <div className="h-4 w-16 bg-brand-primary-2-contrast/30 rounded shimmer" />
+                <div className="h-3.5 w-16 bg-gray-300/70 rounded" />
               </th>
               {/* Actions Column */}
               <th className="px-6 py-4">
-                <div className="h-4 w-16 bg-brand-primary-2-contrast/30 rounded shimmer" />
+                <div className="h-3.5 w-16 bg-gray-300/70 rounded" />
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-brand-accent/10">
+          <tbody className="divide-y divide-gray-100">
             {Array.from({ length: ROWS }).map((_, rowIdx) => (
-              <tr key={rowIdx} className="hover:bg-brand-accent/5">
+              <tr key={rowIdx} className="hover:bg-transparent">
                 {/* Position Cell */}
                 <td className="px-6 py-4">
-                  <div className="w-8 h-6 bg-brand-accent/30 rounded-full shimmer" />
+                  <div className="w-8 h-6 bg-gray-200/80 rounded-md" />
                 </td>
                 {/* Student Cell */}
                 <td className="px-6 py-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-brand-accent/30 rounded-full shimmer" />
+                    <div className="w-9 h-9 bg-gray-200/80 rounded-full" />
                     <div>
-                      <div className="h-4 w-32 bg-brand-accent/20 rounded mb-1 shimmer" />
-                      <div className="h-3 w-16 bg-brand-accent/15 rounded shimmer" />
+                      <div className="h-4 w-32 bg-gray-300/70 rounded mb-1" />
+                      <div className="h-3 w-16 bg-gray-200/60 rounded" />
                     </div>
                   </div>
                 </td>
                 {/* Exam No Cell */}
                 <td className="px-6 py-4">
-                  <div className="h-6 w-20 bg-brand-accent/20 rounded shimmer" />
+                  <div className="h-5 w-20 bg-gray-200/70 rounded" />
                 </td>
                 {/* School Cell */}
                 <td className="px-6 py-4">
                   <div>
-                    <div className="h-4 w-28 bg-brand-accent/20 rounded mb-1 shimmer" />
-                    <div className="h-3 w-16 bg-brand-accent/15 rounded shimmer" />
+                    <div className="h-4 w-28 bg-gray-300/70 rounded mb-1" />
+                    <div className="h-3 w-16 bg-gray-200/60 rounded" />
                   </div>
                 </td>
                 {/* Class Cell */}
                 <td className="px-6 py-4">
-                  <div className="h-6 w-16 bg-brand-accent/25 rounded-full shimmer" />
+                  <div className="h-5 w-16 bg-gray-200/70 rounded-full" />
                 </td>
                 {/* Total Cell */}
                 <td className="px-6 py-4">
-                  <div className="h-6 w-12 bg-brand-accent/25 rounded shimmer" />
+                  <div className="h-5 w-12 bg-gray-200/70 rounded" />
                 </td>
                 {/* Average Cell */}
                 <td className="px-6 py-4">
-                  <div className="h-6 w-14 bg-brand-accent/25 rounded shimmer" />
+                  <div className="h-5 w-14 bg-gray-200/70 rounded" />
                 </td>
                 {/* Actions Cell */}
                 <td className="px-6 py-4">
-                  <div className="h-4 w-20 bg-brand-primary/25 rounded shimmer" />
+                  <div className="h-5 w-16 bg-gray-200/70 rounded" />
                 </td>
               </tr>
             ))}

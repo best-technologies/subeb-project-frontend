@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import StatsCards from "./StatsCards";
 import StatsCardsSkeleton from "./StatsCardsSkeleton";
-import StudentsTableSkeleton from "@/components/students/StudentsTableSkeleton";
+import DashboardTableSkeleton from "./DashboardTableSkeleton";
 import CollapsibleCharts from "./CollapsibleCharts";
 import { useGlobalSearchFilter } from "@/services";
 import { getAdminDashboardPerformanceTable } from "@/services/api";
@@ -18,6 +18,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Trophy, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import StudentPerformanceSheet from "./StudentPerformanceSheet";
 
 interface DashboardProps {
   dashboardData: AdminDashboardData | null;
@@ -59,6 +60,15 @@ const Dashboard: React.FC<DashboardProps> = ({
     totalPages: 1,
   });
   const [isTableLoading, setIsTableLoading] = useState(false);
+
+  // State for slide-in sheet showing student's subject breakdown
+  const [selectedStudentForSheet, setSelectedStudentForSheet] = useState<TopStudent | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const handleRowClick = (student: TopStudent) => {
+    setSelectedStudentForSheet(student);
+    setIsSheetOpen(true);
+  };
 
   const { searchTerm, selectedSession, selectedTerm } = useGlobalSearchFilter({
     availableSessions: dashboardData?.availableSessions || [],
@@ -239,7 +249,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Top Students Ranking Table */}
       {!dashboardData && loading ? (
-        <StudentsTableSkeleton />
+        <DashboardTableSkeleton />
       ) : (
         <Card className="border-gray-200 shadow-xs overflow-hidden">
           <CardHeader className="bg-gray-50/80 border-b border-gray-100 px-6 py-4">
@@ -343,7 +353,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                     return (
                       <TableRow
                         key={student.id || index}
-                        className="hover:bg-emerald-50/30 transition-colors duration-150 border-b border-gray-100"
+                        onClick={() => handleRowClick(student)}
+                        className="cursor-pointer hover:bg-gray-100/80 transition-colors duration-150 border-b border-gray-100 group"
                       >
                         <TableCell className="text-center font-medium">
                           {renderPositionBadge(pos)}
@@ -386,6 +397,20 @@ const Dashboard: React.FC<DashboardProps> = ({
           </CardContent>
         </Card>
       )}
+
+      {/* Student Performance Breakdown Slide-In Sheet */}
+      <StudentPerformanceSheet
+        student={selectedStudentForSheet}
+        isOpen={isSheetOpen}
+        onClose={() => {
+          setIsSheetOpen(false);
+          setSelectedStudentForSheet(null);
+        }}
+        sessionName={dashboardData?.currentSession?.name}
+        termName={dashboardData?.currentTerm?.name}
+        sessionId={selectedSession?.id || dashboardData?.currentSession?.id}
+        termId={selectedTerm?.id || dashboardData?.currentTerm?.id}
+      />
     </div>
   );
 };
