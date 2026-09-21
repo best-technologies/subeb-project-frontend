@@ -5,6 +5,7 @@ import React, {
   useReducer,
   ReactNode,
   useCallback,
+  useEffect,
 } from "react";
 import { AdminDashboardData } from "@/services/types/adminDashboardResponse";
 import { StudentsDashboardData } from "@/services/types/studentsDashboardResponse";
@@ -243,6 +244,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const clearCache = useCallback(() => {
     dispatch({ type: "CLEAR_CACHE" });
   }, []);
+
+  useEffect(() => {
+    const handleInvalidate = () => {
+      clearCache();
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("subeb:invalidate-dashboard-cache", handleInvalidate);
+      return () => {
+        window.removeEventListener("subeb:invalidate-dashboard-cache", handleInvalidate);
+      };
+    }
+  }, [clearCache]);
 
   // Function to check if admin data can be used for students page
   const hasAdminDataForStudents = useCallback(() => {

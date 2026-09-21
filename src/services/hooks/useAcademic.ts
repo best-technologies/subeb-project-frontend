@@ -14,12 +14,19 @@ export function useSessions() {
   });
 }
 
+const invalidateDashboardCache = () => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("subeb:invalidate-dashboard-cache"));
+  }
+};
+
 export function useUpdateSessionStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'OPEN' | 'CLOSED' }) => updateSessionStatus(id, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: academicKeys.sessions() });
+      queryClient.invalidateQueries({ queryKey: academicKeys.all });
+      invalidateDashboardCache();
     },
   });
 }
@@ -29,7 +36,8 @@ export function useActivateSession() {
   return useMutation({
     mutationFn: (id: string) => activateSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: academicKeys.sessions() });
+      queryClient.invalidateQueries({ queryKey: academicKeys.all });
+      invalidateDashboardCache();
     },
   });
 }
@@ -39,7 +47,8 @@ export function useCreateSession() {
   return useMutation({
     mutationFn: createSession,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: academicKeys.sessions() });
+      queryClient.invalidateQueries({ queryKey: academicKeys.all });
+      invalidateDashboardCache();
     },
   });
 }
@@ -58,6 +67,7 @@ export function useUpdateTermStatus() {
     mutationFn: ({ id, status }: { id: string; status: 'OPEN' | 'CLOSED' }) => updateTermStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: academicKeys.all });
+      invalidateDashboardCache();
     },
   });
 }
@@ -68,6 +78,7 @@ export function useActivateTerm() {
     mutationFn: (id: string) => activateTerm(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: academicKeys.all });
+      invalidateDashboardCache();
     },
   });
 }
@@ -78,6 +89,7 @@ export function useCreateTerm() {
     mutationFn: createTerm,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: academicKeys.all });
+      invalidateDashboardCache();
     },
   });
 }
