@@ -442,12 +442,23 @@ const Dashboard: React.FC<DashboardProps> = ({
                             : "N/A"}
                         </TableCell>
                         <TableCell className="text-right pr-6">
-                          <span className="inline-block font-bold text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/60 whitespace-nowrap">
-                            {student.totalScore?.toLocaleString() || "0"}
-                            <span className="text-emerald-600/80 font-medium text-xs">
-                              /{student.totalMaxScore ? student.totalMaxScore.toLocaleString() : (activeTermFilter === "COMBINED" ? "3,000" : "1,000")}
-                            </span>
-                          </span>
+                          {(() => {
+                            const score = student.totalScore ?? 0;
+                            const rawMax = student.totalMaxScore;
+                            const defaultMax = activeTermFilter === "COMBINED" ? 3000 : 1000;
+                            const maxScore = rawMax && rawMax >= score
+                              ? rawMax
+                              : Math.max(score > 0 ? Math.ceil(score / 100) * 100 : defaultMax, defaultMax);
+
+                            return (
+                              <span className="inline-block font-bold text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/60 whitespace-nowrap">
+                                {score.toLocaleString()}
+                                <span className="text-emerald-600/80 font-medium text-xs">
+                                  /{maxScore.toLocaleString()}
+                                </span>
+                              </span>
+                            );
+                          })()}
                         </TableCell>
                       </TableRow>
                     );
