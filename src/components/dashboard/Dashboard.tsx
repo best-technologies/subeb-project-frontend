@@ -17,6 +17,13 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Trophy, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import StudentPerformanceSheet from "./StudentPerformanceSheet";
 
@@ -93,6 +100,23 @@ const Dashboard: React.FC<DashboardProps> = ({
     }
   }, [dashboardData?.performance, pageSize]);
 
+  // Dedicated state for term dropdown on the top students table
+  const [tableTermFilter, setTableTermFilter] = useState<string>("");
+
+  const currentTermName = dashboardData?.currentTerm?.name;
+  const normalizedCurrentTerm = currentTermName
+    ? currentTermName.toUpperCase().replace(/\s+/g, "_")
+    : "SECOND_TERM";
+  const activeTermFilter = tableTermFilter || normalizedCurrentTerm;
+
+  const getTermDisplayLabel = (termVal: string) => {
+    if (termVal === "COMBINED") return "Combined";
+    if (termVal === "FIRST_TERM") return "First Term";
+    if (termVal === "SECOND_TERM") return "Second Term";
+    if (termVal === "THIRD_TERM") return "Third Term";
+    return formatEducationalText(termVal.replace(/_/g, " "));
+  };
+
   // Handle global academic session / term dropdown changes (refreshes entire dashboard including cards)
   const lastSessionTermRef = useRef<{ session?: string; term?: string }>({});
   useEffect(() => {
@@ -106,6 +130,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       (termVal && termVal !== lastSessionTermRef.current.term)
     ) {
       lastSessionTermRef.current = { session: sessionVal, term: termVal };
+      setTableTermFilter("");
       if (onSearchParamsChange) {
         onSearchParamsChange({
           session: sessionVal,
@@ -126,15 +151,15 @@ const Dashboard: React.FC<DashboardProps> = ({
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch only table data when paginating or searching within the table (cards are NOT refreshed!)
-  const fetchTablePage = async (page: number, search?: string) => {
+  // Fetch only table data when paginating, searching, or changing term within the table (cards are NOT refreshed!)
+  const fetchTablePage = async (page: number, search?: string, termOverride?: string) => {
     setIsTableLoading(true);
     try {
       const activeSession = selectedSession?.id || dashboardData?.currentSession?.id;
-      const activeTerm = selectedTerm?.id || dashboardData?.currentTerm?.id;
+      const termToUse = termOverride !== undefined ? termOverride : activeTermFilter;
       const res = await getAdminDashboardPerformanceTable({
         session: activeSession,
-        term: activeTerm,
+        term: termToUse,
         page,
         limit: pageSize,
         search: search !== undefined ? search : debouncedSearchTerm || undefined,
@@ -159,6 +184,11 @@ const Dashboard: React.FC<DashboardProps> = ({
     }
   };
 
+  const handleTermChange = (newTerm: string) => {
+    setTableTermFilter(newTerm);
+    fetchTablePage(1, debouncedSearchTerm, newTerm);
+  };
+
   // Re-fetch table when search term changes (after initial mount)
   const isInitialMount = useRef(true);
   useEffect(() => {
@@ -166,12 +196,12 @@ const Dashboard: React.FC<DashboardProps> = ({
       isInitialMount.current = false;
       return;
     }
-    fetchTablePage(1, debouncedSearchTerm);
+    fetchTablePage(1, debouncedSearchTerm, activeTermFilter);
   }, [debouncedSearchTerm]);
 
   // Handle server-side page navigation (ONLY fetches table data)
   const handlePageChange = (targetPage: number) => {
-    fetchTablePage(targetPage);
+    fetchTablePage(targetPage, debouncedSearchTerm, activeTermFilter);
   };
 
   const totalItems = tablePagination.total;
@@ -259,11 +289,39 @@ const Dashboard: React.FC<DashboardProps> = ({
                   <Trophy className="w-5 h-5 text-emerald-700" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold text-gray-900">
-                    Top Ranked Students
-                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-lg font-bold text-gray-900 whitespace-nowrap">
+                      Top Ranked Students
+                    </CardTitle>
+                    <Select
+                      value={activeTermFilter}
+                      onValueChange={handleTermChange}
+                      disabled={isTableLoading}
+                    >
+                      <SelectTrigger className="h-7 w-[125px] px-2.5 py-0 text-xs bg-white border-gray-200 text-gray-800 shadow-2xs rounded-lg font-medium focus:ring-1 focus:ring-emerald-500 cursor-pointer shrink-0">
+                        <SelectValue placeholder="Select term" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-gray-200 shadow-md">
+                        <SelectItem value="FIRST_TERM" className="text-xs font-medium cursor-pointer">
+                          First Term
+                        </SelectItem>
+                        <SelectItem value="SECOND_TERM" className="text-xs font-medium cursor-pointer">
+                          Second Term
+                        </SelectItem>
+                        <SelectItem value="THIRD_TERM" className="text-xs font-medium cursor-pointer">
+                          Third Term
+                        </SelectItem>
+                        <SelectItem value="COMBINED" className="text-xs font-medium cursor-pointer">
+                          Combined
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <p className="text-xs text-gray-500 mt-0.5">
                     Showing {startRank} to {endRank} of {totalItems} top ranked students across the state
+                    {activeTermFilter === "COMBINED"
+                      ? " (Cumulative across all terms)"
+                      : ` (${getTermDisplayLabel(activeTermFilter)})`}
                     {debouncedSearchTerm && ` matching "${debouncedSearchTerm}"`}
                     {lgaFilter && ` • LGA: ${lgaFilter}`}
                     {schoolFilter && ` • School: ${schoolFilter}`}
@@ -407,9 +465,19 @@ const Dashboard: React.FC<DashboardProps> = ({
           setSelectedStudentForSheet(null);
         }}
         sessionName={dashboardData?.currentSession?.name}
-        termName={dashboardData?.currentTerm?.name}
+        termName={
+          activeTermFilter === "COMBINED"
+            ? "Combined (All Terms)"
+            : getTermDisplayLabel(activeTermFilter)
+        }
         sessionId={selectedSession?.id || dashboardData?.currentSession?.id}
-        termId={selectedTerm?.id || dashboardData?.currentTerm?.id}
+        termId={
+          activeTermFilter === "COMBINED"
+            ? "COMBINED"
+            : dashboardData?.availableTerms?.find(
+                (t) => t.name.toUpperCase().replace(/\s+/g, "_") === activeTermFilter
+              )?.id || activeTermFilter
+        }
       />
     </div>
   );

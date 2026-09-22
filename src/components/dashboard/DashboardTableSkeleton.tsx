@@ -8,7 +8,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { Trophy, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trophy, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 
 interface DashboardTableSkeletonProps {
   rows?: number;
@@ -27,9 +27,15 @@ const DashboardTableSkeleton: React.FC<DashboardTableSkeletonProps> = ({
               <Trophy className="w-5 h-5 text-emerald-700" />
             </div>
             <div>
-              <CardTitle className="text-lg font-bold text-gray-900">
-                Top Ranked Students
-              </CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-lg font-bold text-gray-900 whitespace-nowrap">
+                  Top Ranked Students
+                </CardTitle>
+                <div className="h-7 w-[125px] px-2.5 py-0 bg-white border border-gray-200 rounded-lg text-xs text-gray-400 font-medium flex items-center justify-between shadow-2xs shrink-0">
+                  <span>Select term</span>
+                  <ChevronDown className="h-3.5 w-3.5 opacity-40 ml-1 flex-shrink-0" />
+                </div>
+              </div>
               <p className="text-xs text-gray-500 mt-0.5">
                 Showing top ranked students across the state
               </p>
