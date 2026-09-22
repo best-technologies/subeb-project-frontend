@@ -90,7 +90,7 @@ const DashboardTableSkeleton: React.FC<DashboardTableSkeletonProps> = ({
               <TableHead className="w-[110px] text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Class
               </TableHead>
-              <TableHead className="w-[120px] text-right text-xs font-semibold text-gray-600 uppercase tracking-wider pr-6">
+              <TableHead className="w-[140px] text-right text-xs font-semibold text-gray-600 uppercase tracking-wider pr-6">
                 Total Score
               </TableHead>
             </TableRow>
@@ -136,7 +136,7 @@ const DashboardTableSkeleton: React.FC<DashboardTableSkeletonProps> = ({
 
                 {/* Total Score */}
                 <TableCell className="text-right pr-6">
-                  <div className="inline-block h-7 w-16 bg-emerald-50 rounded-md border border-emerald-200/60 animate-pulse" />
+                  <div className="inline-block h-7 w-20 bg-emerald-50 rounded-md border border-emerald-200/60 animate-pulse" />
                 </TableCell>
               </TableRow>
             ))}

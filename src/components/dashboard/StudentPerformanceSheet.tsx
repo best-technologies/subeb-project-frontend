@@ -232,8 +232,8 @@ export const StudentPerformanceSheet: React.FC<StudentPerformanceSheetProps> = (
                 <span className="text-lg font-extrabold tracking-tight">
                   {(summary?.totalScore ?? student?.totalScore ?? 0).toLocaleString()}
                 </span>
-                {summary?.totalMaxScore ? (
-                  <span className="text-[10px] text-emerald-200 block">/ {summary.totalMaxScore}</span>
+                {(summary?.totalMaxScore || student?.totalMaxScore) ? (
+                  <span className="text-[10px] text-emerald-200 block">/ {(summary?.totalMaxScore ?? student?.totalMaxScore)?.toLocaleString()}</span>
                 ) : null}
               </div>
 

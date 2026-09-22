@@ -400,7 +400,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     <TableHead className="w-[110px] text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Class
                     </TableHead>
-                    <TableHead className="w-[120px] text-right text-xs font-semibold text-gray-600 uppercase tracking-wider pr-6">
+                    <TableHead className="w-[140px] text-right text-xs font-semibold text-gray-600 uppercase tracking-wider pr-6">
                       Total Score
                     </TableHead>
                   </TableRow>
@@ -442,8 +442,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                             : "N/A"}
                         </TableCell>
                         <TableCell className="text-right pr-6">
-                          <span className="inline-block font-bold text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/60">
+                          <span className="inline-block font-bold text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/60 whitespace-nowrap">
                             {student.totalScore?.toLocaleString() || "0"}
+                            <span className="text-emerald-600/80 font-medium text-xs">
+                              /{student.totalMaxScore ? student.totalMaxScore.toLocaleString() : (activeTermFilter === "COMBINED" ? "3,000" : "1,000")}
+                            </span>
                           </span>
                         </TableCell>
                       </TableRow>

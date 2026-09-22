@@ -90,6 +90,7 @@ export interface TopStudent {
   // Optional fields for backward compatibility
   position?: number;
   totalScore?: number;
+  totalMaxScore?: number;
 }
 
 export interface AdminDashboardData {
