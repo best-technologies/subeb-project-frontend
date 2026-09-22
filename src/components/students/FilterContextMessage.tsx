@@ -2,13 +2,61 @@ import React from "react";
 import { Info } from "lucide-react";
 import { formatEducationalText } from "@/utils/formatters";
 
-interface FilterContextMessageProps {
+export interface FilterContextParams {
   lgaName?: string;
   schoolName?: string;
   className?: string;
   sessionName?: string;
   termName?: string;
   searchTerm?: string;
+}
+
+export const buildFilterContextMessage = ({
+  lgaName,
+  schoolName,
+  className,
+  sessionName,
+  termName,
+  searchTerm,
+}: FilterContextParams): string => {
+  // Determine the academic period prefix
+  let periodText = "";
+  if (sessionName || termName) {
+    const parts = [];
+    if (sessionName) parts.push(`Session ${sessionName}`);
+    if (termName) parts.push(formatEducationalText(termName.replace(/_/g, " ")));
+    periodText = `for ${parts.join(", ")} `;
+  }
+
+  // Handle the case where search is used with or without filters
+  if (searchTerm && searchTerm.trim()) {
+    if (lgaName || schoolName || className) {
+      // Search with filters
+      const filterParts = [];
+      if (lgaName) filterParts.push(`${formatEducationalText(lgaName)} LGA`);
+      if (schoolName) filterParts.push(formatEducationalText(schoolName));
+      if (className) filterParts.push(formatEducationalText(className));
+
+      return `You're now viewing students ${periodText}from ${filterParts.join(
+        " > "
+      )} matching "${searchTerm}"`;
+    } else {
+      // Search only
+      return `Showing students ${periodText}matching "${searchTerm}"`;
+    }
+  }
+
+  // Handle the case where all three filters are applied (class is selected)
+  if (lgaName && schoolName && className) {
+    return `You're now viewing students ${periodText}from ${formatEducationalText(
+      lgaName
+    )} LGA > ${formatEducationalText(schoolName)} > ${formatEducationalText(className)}`;
+  }
+
+  return "";
+};
+
+interface FilterContextMessageProps extends FilterContextParams {
   isVisible: boolean;
 }
 
@@ -23,43 +71,14 @@ const FilterContextMessage: React.FC<FilterContextMessageProps> = ({
 }) => {
   if (!isVisible) return null;
 
-  const buildMessage = () => {
-    // Determine the academic period prefix
-    let periodText = "";
-    if (sessionName || termName) {
-      const parts = [];
-      if (sessionName) parts.push(`Session ${sessionName}`);
-      if (termName) parts.push(`${formatEducationalText(termName)}`);
-      periodText = `for ${parts.join(", ")} `;
-    }
-
-    // Handle the case where search is used with or without filters
-    if (searchTerm && searchTerm.trim()) {
-      if (lgaName || schoolName || className) {
-        // Search with filters
-        const filterParts = [];
-        if (lgaName) filterParts.push(`${lgaName} LGA`);
-        if (schoolName) filterParts.push(schoolName);
-        if (className) filterParts.push(className);
-
-        return `You're now viewing students ${periodText}from ${filterParts.join(
-          " > "
-        )} matching "${searchTerm}"`;
-      } else {
-        // Search only
-        return `Showing students ${periodText}matching "${searchTerm}"`;
-      }
-    }
-
-    // Handle the case where all three filters are applied (class is selected)
-    if (lgaName && schoolName && className) {
-      return `You're now viewing students ${periodText}from ${lgaName} LGA > ${schoolName} > ${className}`;
-    }
-
-    return "";
-  };
-
-  const message = buildMessage();
+  const message = buildFilterContextMessage({
+    lgaName,
+    schoolName,
+    className,
+    sessionName,
+    termName,
+    searchTerm,
+  });
 
   if (!message) return null;
 

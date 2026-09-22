@@ -107,7 +107,6 @@ export const capitalizeInitials = (name: string): string => {
     .join(" ");
 };
 
-// Utility function to join class names conditionally
-export function cn(...classes: (string | undefined | false)[]) {
-  return classes.filter(Boolean).join(" ");
-}
+// Utility function to join class names conditionally with Tailwind merge
+import { cn } from "@/lib/utils";
+export { cn };

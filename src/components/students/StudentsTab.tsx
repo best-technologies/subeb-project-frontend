@@ -10,7 +10,7 @@ import StudentsFilters from "./StudentsFilters";
 import StudentsTable from "./StudentsTable";
 import EditStudentDialog from "./EditStudentDialog";
 import AddStudentDialog from "./AddStudentDialog";
-import FilterContextMessage from "./FilterContextMessage";
+import { buildFilterContextMessage } from "./FilterContextMessage";
 import { Button } from "@/components/ui/Button";
 import { LoadingModal } from "@/components/ui/LoadingModal";
 
@@ -313,19 +313,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         onClearFilters={handleClearFilters}
       />
 
-      {/* Filter Context Message */}
-      {shouldShowFilterContext && (
-        <FilterContextMessage
-          lgaName={selectedLgaName}
-          schoolName={selectedSchoolName}
-          className={selectedClassName}
-          sessionName={selectedSessionName}
-          termName={selectedTermName}
-          searchTerm={searchParams.classId ? searchParams.search : searchTerm}
-          isVisible={true}
-        />
-      )}
-
       {/* Table Component */}
       <StudentsTable
         students={students}
@@ -337,6 +324,18 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         getPositionBadge={getPositionBadge}
         onEditStudent={handleEditStudent}
         hasActiveFilters={!!hasActiveFilters}
+        filterContextMessage={
+          shouldShowFilterContext
+            ? buildFilterContextMessage({
+                lgaName: selectedLgaName,
+                schoolName: selectedSchoolName,
+                className: selectedClassName,
+                sessionName: selectedSessionName,
+                termName: selectedTermName,
+                searchTerm: searchParams.classId ? searchParams.search : searchTerm,
+              })
+            : undefined
+        }
       />
 
       {/* Edit Student Dialog */}

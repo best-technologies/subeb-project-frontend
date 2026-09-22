@@ -264,7 +264,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
               placeholder="Search by name, exam no, school..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full bg-white border border-gray-200/90 rounded-lg pl-9 pr-4 py-0 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs sm:text-sm transition-all duration-200 h-9 shadow-2xs"
+              className="w-full h-9 bg-white border border-gray-200/90 rounded-lg pl-9 pr-4 py-0 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs sm:text-sm transition-all duration-200 shadow-2xs"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="w-4 h-4 text-gray-400" />
@@ -276,7 +276,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
         <div className="flex items-end">
           <Button
             onClick={onClearFilters}
-            className="w-full sm:w-auto h-9 px-5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors font-medium text-xs shadow-2xs cursor-pointer"
+            className="w-full sm:w-auto h-9 px-5 py-0 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors font-medium text-xs shadow-2xs cursor-pointer inline-flex items-center justify-center"
           >
             Clear Filters
           </Button>

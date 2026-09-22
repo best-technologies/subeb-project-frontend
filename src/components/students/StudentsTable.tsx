@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Users, UserX, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import { Users, UserX, ArrowUpDown, ChevronUp, ChevronDown, Info } from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import StudentRow from "./StudentRow";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -23,6 +23,7 @@ interface StudentsTableProps {
   getPositionBadge: (position: number) => string;
   onEditStudent: (student: PerformanceStudent) => void;
   hasActiveFilters?: boolean;
+  filterContextMessage?: string;
 }
 
 const StudentsTable: React.FC<StudentsTableProps> = ({
@@ -35,6 +36,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
   getPositionBadge,
   onEditStudent,
   hasActiveFilters,
+  filterContextMessage,
 }) => {
   const renderSortIndicator = (field: string) => {
     if (sortBy === field) {
@@ -50,9 +52,9 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
   return (
     <Card className="border-gray-200 shadow-xs overflow-hidden">
       <CardHeader className="bg-gray-50/80 border-b border-gray-100 px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shadow-2xs">
+            <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shadow-2xs shrink-0">
               <Users className="w-5 h-5 text-emerald-700" />
             </div>
             <div>
@@ -68,6 +70,15 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
               </p>
             </div>
           </div>
+
+          {filterContextMessage && (
+            <div className="flex items-center gap-2 bg-emerald-50/90 border border-emerald-200/80 text-emerald-800 px-3 py-1.5 rounded-lg text-xs font-medium max-w-2xl shadow-2xs self-start lg:self-auto">
+              <Info className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+              <span className="leading-snug">
+                {filterContextMessage}
+              </span>
+            </div>
+          )}
         </div>
       </CardHeader>
 
