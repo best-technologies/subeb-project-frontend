@@ -39,10 +39,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const [studentToEdit, setStudentToEdit] = useState<PerformanceStudent | null>(
     null
   );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("position");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
   // Use the new search hook
   const {
     // Data
@@ -79,6 +75,14 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     isClassEnabled,
     isTermEnabled,
   } = useStudentSearch();
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.search || "");
+  const [sortBy, setSortBy] = useState("position");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  useEffect(() => {
+    setSearchTerm(searchParams.search || "");
+  }, [searchParams.search]);
 
   const { data: sessionsData } = useSessions();
   const { data: termsData } = useTerms(searchParams.session);

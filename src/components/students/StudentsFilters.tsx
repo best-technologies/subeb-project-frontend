@@ -85,26 +85,26 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
   };
 
   return (
-    <div className="bg-brand-secondary rounded-xl p-6 shadow-lg hover:opacity-90 transition-all duration-300">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+    <div className="bg-brand-secondary border border-emerald-200/60 rounded-xl p-4 shadow-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-3.5">
         {/* Session Filter */}
         <div>
-          <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+          <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
             Session
           </Label>
           <Select
             value={filters.session || "all-sessions"}
             onValueChange={(val) => onSessionChange(val === "all-sessions" ? "" : val)}
           >
-            <SelectTrigger className="w-full bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast h-12">
+            <SelectTrigger className="w-full h-9 bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-sm font-medium rounded-lg shadow-2xs hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer">
               <SelectValue placeholder="All Sessions" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
               <SelectGroup>
-                <SelectLabel>Sessions</SelectLabel>
-                <SelectItem value="all-sessions">All Sessions</SelectItem>
+                <SelectLabel className="text-xs font-semibold text-gray-500">Sessions</SelectLabel>
+                <SelectItem value="all-sessions" className="text-xs font-medium cursor-pointer">All Sessions</SelectItem>
                 {availableSessions.map((session) => (
-                  <SelectItem key={session.id} value={session.id}>
+                  <SelectItem key={session.id} value={session.id} className="text-xs font-medium cursor-pointer">
                     {session.name}
                   </SelectItem>
                 ))}
@@ -115,7 +115,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
 
         {/* Term Filter */}
         <div>
-          <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+          <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
             Term
           </Label>
           <Select
@@ -124,24 +124,24 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
             disabled={!isTermEnabled}
           >
             <SelectTrigger
-              className={`w-full h-12 transition-all duration-200 ${
+              className={`w-full h-9 text-xs sm:text-sm font-medium rounded-lg shadow-2xs transition-colors ${
                 isTermEnabled
-                  ? "bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast"
-                  : "bg-brand-secondary-contrast/5 border-brand-secondary-contrast/10 text-brand-secondary-contrast/40 cursor-not-allowed"
+                  ? "bg-white border border-gray-200/90 text-gray-800 hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  : "bg-white/60 border border-gray-200 text-gray-400 cursor-not-allowed"
               }`}
             >
               <SelectValue
                 placeholder={isTermEnabled ? "All Terms" : "Select Session first"}
               />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
               <SelectGroup>
-                <SelectLabel>Terms</SelectLabel>
-                <SelectItem value="all-terms">All Terms</SelectItem>
+                <SelectLabel className="text-xs font-semibold text-gray-500">Terms</SelectLabel>
+                <SelectItem value="all-terms" className="text-xs font-medium cursor-pointer">All Terms</SelectItem>
                 {isTermEnabled &&
                   availableTerms.map((term) => (
-                    <SelectItem key={term.id} value={term.id}>
-                      {term.name}
+                    <SelectItem key={term.id} value={term.id} className="text-xs font-medium cursor-pointer">
+                      {formatEducationalText(term.name.replace(/_/g, " "))}
                     </SelectItem>
                   ))}
               </SelectGroup>
@@ -151,22 +151,22 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
 
         {/* LGA Filter */}
         <div>
-          <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+          <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
             LGA
           </Label>
           <Select
             value={filters.lga || "all-lgas"}
             onValueChange={handleLgaChange}
           >
-            <SelectTrigger className="w-full bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast h-12">
+            <SelectTrigger className="w-full h-9 bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-sm font-medium rounded-lg shadow-2xs hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer">
               <SelectValue placeholder="All LGAs" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
               <SelectGroup>
-                <SelectLabel>LGAs</SelectLabel>
-                <SelectItem value="all-lgas">All LGAs</SelectItem>
+                <SelectLabel className="text-xs font-semibold text-gray-500">LGAs</SelectLabel>
+                <SelectItem value="all-lgas" className="text-xs font-medium cursor-pointer">All LGAs</SelectItem>
                 {lgas.map((lga) => (
-                  <SelectItem key={lga.id} value={lga.id}>
+                  <SelectItem key={lga.id} value={lga.id} className="text-xs font-medium cursor-pointer">
                     {formatEducationalText(lga.name)}
                   </SelectItem>
                 ))}
@@ -177,7 +177,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
 
         {/* School Filter - Enabled only after LGA selection */}
         <div>
-          <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+          <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
             School
           </Label>
           <Select
@@ -186,10 +186,10 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
             disabled={!isSchoolEnabled}
           >
             <SelectTrigger
-              className={`w-full h-12 transition-all duration-200 ${
+              className={`w-full h-9 text-xs sm:text-sm font-medium rounded-lg shadow-2xs transition-colors ${
                 isSchoolEnabled
-                  ? "bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast"
-                  : "bg-brand-secondary-contrast/5 border-brand-secondary-contrast/10 text-brand-secondary-contrast/40 cursor-not-allowed"
+                  ? "bg-white border border-gray-200/90 text-gray-800 hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  : "bg-white/60 border border-gray-200 text-gray-400 cursor-not-allowed"
               }`}
             >
               <SelectValue
@@ -198,13 +198,13 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
                 }
               />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
               <SelectGroup>
-                <SelectLabel>Schools</SelectLabel>
-                <SelectItem value="all-schools">All Schools</SelectItem>
+                <SelectLabel className="text-xs font-semibold text-gray-500">Schools</SelectLabel>
+                <SelectItem value="all-schools" className="text-xs font-medium cursor-pointer">All Schools</SelectItem>
                 {isSchoolEnabled &&
                   availableSchools.map((school) => (
-                    <SelectItem key={school.id} value={school.id}>
+                    <SelectItem key={school.id} value={school.id} className="text-xs font-medium cursor-pointer">
                       {formatEducationalText(school.name)}
                     </SelectItem>
                   ))}
@@ -215,7 +215,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
 
         {/* Class Filter - Enabled only after School selection */}
         <div>
-          <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+          <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
             Class
           </Label>
           <Select
@@ -224,10 +224,10 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
             disabled={!isClassEnabled}
           >
             <SelectTrigger
-              className={`w-full h-12 transition-all duration-200 ${
+              className={`w-full h-9 text-xs sm:text-sm font-medium rounded-lg shadow-2xs transition-colors ${
                 isClassEnabled
-                  ? "bg-brand-secondary-contrast/10 border-brand-secondary-contrast/20 text-brand-secondary-contrast"
-                  : "bg-brand-secondary-contrast/5 border-brand-secondary-contrast/10 text-brand-secondary-contrast/40 cursor-not-allowed"
+                  ? "bg-white border border-gray-200/90 text-gray-800 hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  : "bg-white/60 border border-gray-200 text-gray-400 cursor-not-allowed"
               }`}
             >
               <SelectValue
@@ -236,13 +236,13 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
                 }
               />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
               <SelectGroup>
-                <SelectLabel>Classes</SelectLabel>
-                <SelectItem value="all-classes">All Classes</SelectItem>
+                <SelectLabel className="text-xs font-semibold text-gray-500">Classes</SelectLabel>
+                <SelectItem value="all-classes" className="text-xs font-medium cursor-pointer">All Classes</SelectItem>
                 {isClassEnabled &&
                   availableClasses.map((classItem) => (
-                    <SelectItem key={classItem.id} value={classItem.id}>
+                    <SelectItem key={classItem.id} value={classItem.id} className="text-xs font-medium cursor-pointer">
                       {formatEducationalText(classItem.name)}
                     </SelectItem>
                   ))}
@@ -252,11 +252,10 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-4">
-
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
         {/* Search Field */}
         <div>
-          <Label className="block text-sm font-medium text-brand-secondary-contrast/80 mb-2">
+          <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
             Search Students
           </Label>
           <div className="relative">
@@ -265,10 +264,10 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
               placeholder="Search by name, exam no, school..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full bg-brand-secondary-contrast/10 border border-brand-secondary-contrast/20 rounded-lg pl-10 pr-4 py-0 text-brand-secondary-contrast placeholder-brand-secondary-contrast/60 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all duration-200 h-12"
+              className="w-full bg-white border border-gray-200/90 rounded-lg pl-9 pr-4 py-0 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs sm:text-sm transition-all duration-200 h-9 shadow-2xs"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="w-4 h-4 text-brand-secondary-contrast/60" />
+              <Search className="w-4 h-4 text-gray-400" />
             </div>
           </div>
         </div>
@@ -277,7 +276,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
         <div className="flex items-end">
           <Button
             onClick={onClearFilters}
-            className="w-full h-[48px] bg-brand-primary hover:bg-brand-primary-2 text-brand-primary-contrast rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            className="w-full sm:w-auto h-9 px-5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors font-medium text-xs shadow-2xs cursor-pointer"
           >
             Clear Filters
           </Button>

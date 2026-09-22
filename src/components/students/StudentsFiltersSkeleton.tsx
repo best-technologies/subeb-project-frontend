@@ -3,41 +3,48 @@ import React from "react";
 
 const StudentsFiltersSkeleton: React.FC = () => {
   return (
-    <div className="bg-brand-secondary rounded-xl p-6 shadow-lg animate-pulse">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-        {/* LGA Filter Skeleton */}
+    <div className="bg-brand-secondary border border-emerald-200/60 rounded-xl p-4 shadow-xs animate-pulse">
+      {/* 5 Filters Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-3.5">
+        {/* Session Filter */}
         <div>
-          <div className="h-4 w-8 bg-brand-secondary-contrast/20 rounded mb-2 shimmer"></div>
-          <div className="h-10 w-full bg-brand-secondary-contrast/15 rounded-lg shimmer"></div>
+          <div className="h-3.5 w-12 bg-emerald-800/20 rounded mb-1.5" />
+          <div className="h-9 w-full bg-white/80 border border-gray-200/80 rounded-lg" />
         </div>
 
-        {/* School Filter Skeleton */}
+        {/* Term Filter */}
         <div>
-          <div className="h-4 w-12 bg-brand-secondary-contrast/20 rounded mb-2 shimmer"></div>
-          <div className="h-10 w-full bg-brand-secondary-contrast/10 rounded-lg shimmer"></div>
+          <div className="h-3.5 w-10 bg-emerald-800/20 rounded mb-1.5" />
+          <div className="h-9 w-full bg-white/80 border border-gray-200/80 rounded-lg" />
         </div>
 
-        {/* Class Filter Skeleton */}
+        {/* LGA Filter */}
         <div>
-          <div className="h-4 w-10 bg-brand-secondary-contrast/20 rounded mb-2 shimmer"></div>
-          <div className="h-10 w-full bg-brand-secondary-contrast/10 rounded-lg shimmer"></div>
+          <div className="h-3.5 w-8 bg-emerald-800/20 rounded mb-1.5" />
+          <div className="h-9 w-full bg-white/80 border border-gray-200/80 rounded-lg" />
         </div>
 
-        {/* Gender Filter Skeleton */}
+        {/* School Filter */}
         <div>
-          <div className="h-4 w-14 bg-brand-secondary-contrast/20 rounded mb-2 shimmer"></div>
-          <div className="h-10 w-full bg-brand-secondary-contrast/10 rounded-lg shimmer"></div>
+          <div className="h-3.5 w-12 bg-emerald-800/20 rounded mb-1.5" />
+          <div className="h-9 w-full bg-white/80 border border-gray-200/80 rounded-lg" />
         </div>
 
-        {/* Subject Filter Skeleton */}
+        {/* Class Filter */}
         <div>
-          <div className="h-4 w-16 bg-brand-secondary-contrast/20 rounded mb-2 shimmer"></div>
-          <div className="h-10 w-full bg-brand-secondary-contrast/15 rounded-lg shimmer"></div>
+          <div className="h-3.5 w-10 bg-emerald-800/20 rounded mb-1.5" />
+          <div className="h-9 w-full bg-white/80 border border-gray-200/80 rounded-lg" />
         </div>
+      </div>
 
-        {/* Clear Filters Button Skeleton */}
+      {/* Search & Clear Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+        <div>
+          <div className="h-3.5 w-24 bg-emerald-800/20 rounded mb-1.5" />
+          <div className="h-9 w-full bg-white/80 border border-gray-200/80 rounded-lg" />
+        </div>
         <div className="flex items-end">
-          <div className="h-10 w-full bg-brand-primary/30 rounded-lg shimmer"></div>
+          <div className="h-9 w-24 bg-emerald-700/40 rounded-lg" />
         </div>
       </div>
     </div>
