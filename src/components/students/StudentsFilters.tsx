@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { Search, Loader2 } from "lucide-react";
 import { StudentsFilters as StudentsFiltersType } from "@/services/types/studentsDashboardResponse";
-import { formatEducationalText } from "@/utils/formatters";
+import { formatEducationalText, formatTermName } from "@/utils/formatters";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
@@ -186,7 +186,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
                 {isTermEnabled &&
                   availableTerms.map((term) => (
                     <SelectItem key={term.id} value={term.id} className="text-xs font-medium cursor-pointer">
-                      {formatEducationalText(term.name.replace(/_/g, " "))}
+                      {formatTermName(term.name)}
                     </SelectItem>
                   ))}
               </SelectGroup>
@@ -417,7 +417,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
                 <SelectLabel className="text-xs font-semibold text-gray-500">Terms</SelectLabel>
                 {availableSearchTerms.map((term) => (
                   <SelectItem key={term.id} value={term.id} className="text-xs font-medium cursor-pointer">
-                    {formatEducationalText(term.name.replace(/_/g, " "))}
+                    {formatTermName(term.name)}
                   </SelectItem>
                 ))}
               </SelectGroup>

@@ -35,6 +35,7 @@ import {
   Clock,
   ArrowRight,
 } from "lucide-react";
+import { formatTermName } from "@/utils/formatters";
 
 interface StudentChartsSectionProps {
   initialSession?: string;
@@ -311,7 +312,7 @@ export const StudentChartsSection: React.FC<StudentChartsSectionProps> = ({
                 </SelectItem>
                 {dynamicTerms.map((t) => (
                   <SelectItem key={t.id} value={t.name} className="text-xs py-1.5 cursor-pointer">
-                    {t.name.replace(/_/g, " ")}
+                    {formatTermName(t.name)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -367,7 +368,7 @@ export const StudentChartsSection: React.FC<StudentChartsSectionProps> = ({
                       No Assessment Records Found for {analytics?.session} (
                       {analytics?.term === "ALL_TERMS"
                         ? "All Terms (Session Overview)"
-                        : analytics?.term.replace(/_/g, " ")}
+                        : formatTermName(analytics?.term)}
                       )
                     </h3>
                     <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">

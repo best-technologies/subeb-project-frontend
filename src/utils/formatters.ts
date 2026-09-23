@@ -107,6 +107,25 @@ export const capitalizeInitials = (name: string): string => {
     .join(" ");
 };
 
+// Utility function to format academic terms cleanly into Title Case (e.g. 'SECOND_TERM' -> 'Second Term')
+export const formatTermName = (termName?: string | null): string => {
+  if (!termName) return "";
+  if (
+    termName === "ALL_TERMS" ||
+    termName.toLowerCase() === "all_terms" ||
+    termName.toLowerCase() === "all terms"
+  ) {
+    return "All Terms";
+  }
+  return termName
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 // Utility function to join class names conditionally with Tailwind merge
 import { cn } from "@/lib/utils";
 export { cn };
+

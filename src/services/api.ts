@@ -10,6 +10,11 @@ import {
 import { CurrentSessionResponse } from "./api/session";
 import { StudentDetailsResponse } from "./types/studentDetailsResponse";
 import { StudentAnalyticsResponse } from "./types/studentAnalyticsResponse";
+import { SchoolAnalyticsResponse } from "./types/schoolAnalyticsResponse";
+import {
+  SchoolsDirectoryResponse,
+  SchoolQueryParams,
+} from "./types/schoolsDirectoryResponse";
 import { getAccessToken } from "@/lib/tokens";
 
 // API Configuration
@@ -493,6 +498,72 @@ export const getStudentAnalytics = async (params?: {
       errorData.message || `HTTP ${response.status}: ${response.statusText}`;
     console.error("Student analytics error:", response.status, errorMessage);
     throw new Error(errorMessage || "Unable to load student analytics.");
+  }
+
+  return response.json();
+};
+
+export const getSchoolAnalytics = async (params?: {
+  session?: string;
+  term?: string;
+  lgaId?: string;
+}): Promise<SchoolAnalyticsResponse> => {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+
+  const url = `${API_BASE_URL}/api/${API_VERSION}/admin/schools/analytics?${queryParams.toString()}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage =
+      errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+    console.error("School analytics error:", response.status, errorMessage);
+    throw new Error(errorMessage || "Unable to load school analytics.");
+  }
+
+  return response.json();
+};
+
+export const getSchoolsDirectory = async (
+  params?: SchoolQueryParams
+): Promise<SchoolsDirectoryResponse> => {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+
+  const url = `${API_BASE_URL}/api/${API_VERSION}/admin/schools?${queryParams.toString()}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage =
+      errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+    console.error("Schools directory error:", response.status, errorMessage);
+    throw new Error(errorMessage || "Unable to load schools directory.");
   }
 
   return response.json();
