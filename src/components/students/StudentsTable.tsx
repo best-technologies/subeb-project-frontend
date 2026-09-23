@@ -1,6 +1,19 @@
 "use client";
 import React from "react";
-import { Users, UserX, ChevronLeft, ChevronRight, Info, Loader2 } from "lucide-react";
+import {
+  Users,
+  UserX,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Loader2,
+  Calendar,
+  Layers,
+  MapPin,
+  School as SchoolIcon,
+  GraduationCap,
+  Search,
+} from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import StudentRow from "./StudentRow";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -31,6 +44,15 @@ interface StudentsTableProps {
   itemsPerPage?: number;
   isTableLoading?: boolean;
   onPageChange?: (page: number) => void;
+
+  // Progressive guidance props
+  filterStage?: 1 | 2 | 3 | 4 | 5 | 6;
+  selectedSessionName?: string;
+  selectedTermName?: string;
+  selectedLgaName?: string;
+  selectedSchoolName?: string;
+  selectedClassName?: string;
+  searchTerm?: string;
 }
 
 const StudentsTable: React.FC<StudentsTableProps> = ({
@@ -51,10 +73,159 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
   itemsPerPage = 10,
   isTableLoading = false,
   onPageChange,
+  filterStage = 1,
+  selectedSessionName,
+  selectedTermName,
+  selectedLgaName,
+  selectedSchoolName,
+  selectedClassName,
+  searchTerm,
 }) => {
-
   const startItem = totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  const renderEmptyPrompt = () => {
+    switch (filterStage) {
+      case 1:
+        return (
+          <div className="max-w-lg mx-auto py-8 text-center flex flex-col items-center">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold mb-3">
+              Step 1 of 5 • Session
+            </span>
+            <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-3 text-emerald-700 shadow-2xs">
+              <Calendar className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-gray-900 mb-1">
+              Select an Academic Session
+            </h3>
+            <p className="text-xs text-gray-500 max-w-md leading-relaxed mb-4">
+              To begin exploring student performance records, select an academic session from the filters above.
+            </p>
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-50/70 border border-emerald-200/60 text-xs text-emerald-900 font-medium">
+              <Search className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>
+                <strong>Quick search:</strong> You can also search for a student directly by name, exam number, or school below.
+              </span>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="max-w-lg mx-auto py-8 text-center flex flex-col items-center">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold mb-3">
+              Step 2 of 5 • Term
+            </span>
+            <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-3 text-emerald-700 shadow-2xs">
+              <Layers className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-gray-900 mb-1">
+              Select an Academic Term
+            </h3>
+            <p className="text-xs text-gray-500 max-w-md leading-relaxed mb-4">
+              Session <strong className="text-gray-800">"{selectedSessionName || 'Selected'}"</strong> is active. Now select an academic term above to proceed, or search for a student.
+            </p>
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-50/70 border border-emerald-200/60 text-xs text-emerald-900 font-medium">
+              <Search className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>
+                <strong>Quick search:</strong> You can also search for a student directly by name, exam number, or school below.
+              </span>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="max-w-lg mx-auto py-8 text-center flex flex-col items-center">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold mb-3">
+              Step 3 of 5 • LGA
+            </span>
+            <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-3 text-emerald-700 shadow-2xs">
+              <MapPin className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-gray-900 mb-1">
+              Select a Local Government Area (LGA)
+            </h3>
+            <p className="text-xs text-gray-500 max-w-md leading-relaxed mb-4">
+              <strong className="text-gray-800">{selectedSessionName || 'Session'} • {selectedTermName || 'Term'}</strong> active. Select an LGA above to view its educational institutions, or search for a student.
+            </p>
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-50/70 border border-emerald-200/60 text-xs text-emerald-900 font-medium">
+              <Search className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>
+                <strong>Quick search:</strong> You can also search for a student directly by name, exam number, or school below.
+              </span>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="max-w-lg mx-auto py-8 text-center flex flex-col items-center">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold mb-3">
+              Step 4 of 5 • School
+            </span>
+            <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-3 text-emerald-700 shadow-2xs">
+              <SchoolIcon className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-gray-900 mb-1">
+              Select a School
+            </h3>
+            <p className="text-xs text-gray-500 max-w-md leading-relaxed mb-4">
+              Filtering within <strong className="text-gray-800">{selectedLgaName || 'selected LGA'} LGA</strong>. Select a school above to view available classes, or search for a student.
+            </p>
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-50/70 border border-emerald-200/60 text-xs text-emerald-900 font-medium">
+              <Search className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>
+                <strong>Quick search:</strong> You can also search for a student directly by name, exam number, or school below.
+              </span>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="max-w-lg mx-auto py-8 text-center flex flex-col items-center">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold mb-3">
+              Step 5 of 5 • Class
+            </span>
+            <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-3 text-emerald-700 shadow-2xs">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-gray-900 mb-1">
+              Select a Class to View Enrolled Students
+            </h3>
+            <p className="text-xs text-gray-500 max-w-md leading-relaxed mb-4">
+              Filtering in <strong className="text-gray-800">{selectedSchoolName || 'selected School'}</strong>. Select a class above to load and display enrolled student records, or search for a student.
+            </p>
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-50/70 border border-emerald-200/60 text-xs text-emerald-900 font-medium">
+              <Search className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>
+                <strong>Quick search:</strong> You can also search for a student directly by name, exam number, or school below.
+              </span>
+            </div>
+          </div>
+        );
+
+      case 6:
+      default:
+        return (
+          <div className="max-w-md mx-auto py-10 text-center">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+              <UserX className="w-6 h-6 text-gray-400" />
+            </div>
+            <p className="text-base font-semibold text-gray-800 mb-1">
+              No Students Found
+            </p>
+            <p className="text-xs text-gray-500 mb-1">
+              There are no students matching your selected criteria.
+            </p>
+            <p className="text-xs text-gray-400">
+              Try adjusting your search query, or selecting a different session, term, or class.
+            </p>
+          </div>
+        );
+    }
+  };
 
   return (
     <Card className="border-gray-200 shadow-xs overflow-hidden">
@@ -78,6 +249,8 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                   `Showing ${startItem} to ${endItem} of ${totalItems.toLocaleString()} students in directory`
                 ) : students && students.length > 0 ? (
                   `Showing ${students.length} student${students.length === 1 ? "" : "s"} in directory`
+                ) : filterStage && filterStage < 6 ? (
+                  "Follow the progressive filters above or search below to display students"
                 ) : hasActiveFilters ? (
                   "No students match your active filters"
                 ) : (
@@ -180,39 +353,10 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                     onEditStudent={onEditStudent}
                   />
                 ))
-              ) : hasActiveFilters ? (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={9} className="py-16 text-center">
-                    <div className="max-w-md mx-auto">
-                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                        <UserX className="w-6 h-6 text-gray-400" />
-                      </div>
-                      <p className="text-base font-semibold text-gray-800 mb-1">
-                        No Students Found
-                      </p>
-                      <p className="text-xs text-gray-500 mb-1">
-                        There are no students matching your selected filters.
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Try adjusting the Session, Term, or clearing the search query.
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
               ) : (
                 <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={9} className="py-16 text-center">
-                    <div className="max-w-md mx-auto">
-                      <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-3">
-                        <Users className="w-6 h-6 text-emerald-600" />
-                      </div>
-                      <p className="text-base font-semibold text-gray-800 mb-1">
-                        No Students Available
-                      </p>
-                      <p className="text-xs text-gray-500 mb-1">
-                        There are no student records found for this session and term.
-                      </p>
-                    </div>
+                  <TableCell colSpan={9} className="py-12 text-center">
+                    {renderEmptyPrompt()}
                   </TableCell>
                 </TableRow>
               )}

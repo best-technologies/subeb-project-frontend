@@ -43,43 +43,101 @@ export const useStudentSearch = () => {
     search: false,
   });
 
-  // Initialize with original students data (only populates table if no active filters are stored)
+  // Initialize: save original data, but do NOT populate table initially unless full filter or search is active
   const initializeStudents = useCallback(
     (initialStudents: PerformanceStudent[]) => {
       setOriginalStudents(initialStudents);
-      const hasActive = Boolean(
-        searchParams.lgaId ||
-        searchParams.schoolId ||
-        searchParams.classId ||
-        searchParams.search
+      const hasActiveResult = Boolean(
+        searchParams.search?.trim() ||
+        (searchParams.session && searchParams.term && searchParams.lgaId && searchParams.schoolId && searchParams.classId)
       );
-      if (!hasActive) {
-        setStudents(initialStudents);
-        setTotalStudents(initialStudents.length);
+      if (!hasActiveResult) {
+        setStudents([]);
+        setTotalStudents(0);
       }
     },
     [
+      searchParams.search,
+      searchParams.session,
+      searchParams.term,
       searchParams.lgaId,
       searchParams.schoolId,
       searchParams.classId,
-      searchParams.search,
       setOriginalStudents,
       setStudents,
       setTotalStudents,
     ]
   );
 
-  // Select LGA - fetch schools
+  // 1. Select Session - clears dependent filters down the chain
+  const selectSession = useCallback(
+    async (sessionId: string) => {
+      setSearchParams((prev) => ({
+        ...prev,
+        session: sessionId || undefined,
+        term: undefined,
+        lgaId: undefined,
+        schoolId: undefined,
+        classId: undefined,
+        page: 1,
+      }));
+      setFilterOptions({ schools: [], classes: [] });
+      setSelectedLgaName("");
+      setSelectedSchoolName("");
+      setSchoolStats(null);
+      setStudents([]);
+      setTotalStudents(0);
+      setTotalPages(1);
+    },
+    [setSearchParams, setFilterOptions, setSelectedLgaName, setSelectedSchoolName, setSchoolStats, setStudents, setTotalStudents, setTotalPages]
+  );
+
+  // 2. Select Term - clears dependent filters down the chain
+  const selectTerm = useCallback(
+    async (termId: string) => {
+      setSearchParams((prev) => ({
+        ...prev,
+        term: termId || undefined,
+        lgaId: undefined,
+        schoolId: undefined,
+        classId: undefined,
+        page: 1,
+      }));
+      setFilterOptions({ schools: [], classes: [] });
+      setSelectedLgaName("");
+      setSelectedSchoolName("");
+      setSchoolStats(null);
+      setStudents([]);
+      setTotalStudents(0);
+      setTotalPages(1);
+    },
+    [setSearchParams, setFilterOptions, setSelectedLgaName, setSelectedSchoolName, setSchoolStats, setStudents, setTotalStudents, setTotalPages]
+  );
+
+  // 3. Select LGA - fetch schools and clear downstream school/class
   const selectLGA = useCallback(
     async (lgaId: string, lgaName?: string) => {
-      if (!lgaId || lgaId.trim() === "") {
-        resetFilters();
-        setError(null);
+      if (!lgaId || lgaId.trim() === "" || lgaId === "all-lgas") {
+        setSearchParams((prev) => ({
+          ...prev,
+          lgaId: undefined,
+          schoolId: undefined,
+          classId: undefined,
+          page: 1,
+        }));
+        setFilterOptions({ schools: [], classes: [] });
+        setSelectedLgaName("");
+        setSelectedSchoolName("");
+        setSchoolStats(null);
+        setStudents([]);
+        setTotalStudents(0);
         return;
       }
 
       setLoadingStates((prev) => ({ ...prev, lga: true }));
       setSelectedLgaName(lgaName || "selected LGA");
+      setSelectedSchoolName("");
+      setSchoolStats(null);
       setError(null);
 
       try {
@@ -97,7 +155,6 @@ export const useStudentSearch = () => {
             classes: [], // Clear classes when LGA changes
           });
 
-          // Update search params and table data for this LGA
           setSearchParams((prev) => ({
             ...prev,
             lgaId,
@@ -106,12 +163,10 @@ export const useStudentSearch = () => {
             page: 1,
           }));
 
-          const studentsData = response.data.performanceTable || [];
-          setStudents(studentsData);
-          const pagination = response.data.pagination || {};
-          setTotalStudents(pagination.totalItems || studentsData.length);
-          setTotalPages(pagination.totalPages || 1);
-          setSchoolStats(null);
+          // Keep table clean and guided towards selecting a school
+          setStudents([]);
+          setTotalStudents(0);
+          setTotalPages(1);
         } else {
           console.error("Failed to fetch schools:", response.message);
           throw new Error("Unable to load schools. Please try again.");
@@ -128,23 +183,36 @@ export const useStudentSearch = () => {
       }
     },
     [
-      originalStudents,
-      resetFilters,
       setError,
       setFilterOptions,
       setLoadingStates,
       setSchoolStats,
       setSearchParams,
       setSelectedLgaName,
+      setSelectedSchoolName,
       setStudents,
+      setTotalPages,
       setTotalStudents,
     ]
   );
 
-  // Select School - fetch classes
+  // 4. Select School - fetch classes and clear downstream class
   const selectSchool = useCallback(
     async (schoolId: string, schoolName?: string) => {
-      if (!schoolId || !searchParams.lgaId) return;
+      if (!schoolId || schoolId === "all-schools") {
+        setSearchParams((prev) => ({
+          ...prev,
+          schoolId: undefined,
+          classId: undefined,
+          page: 1,
+        }));
+        setFilterOptions((prev) => ({ ...prev, classes: [] }));
+        setSelectedSchoolName("");
+        setSchoolStats(null);
+        setStudents([]);
+        setTotalStudents(0);
+        return;
+      }
 
       setLoadingStates((prev) => ({ ...prev, school: true }));
       setSelectedSchoolName(schoolName || "selected school");
@@ -182,11 +250,10 @@ export const useStudentSearch = () => {
             page: 1,
           }));
 
-          const studentsData = response.data.performanceTable || [];
-          setStudents(studentsData);
-          const pagination = response.data.pagination || {};
-          setTotalStudents(pagination.totalItems || studentsData.length);
-          setTotalPages(pagination.totalPages || 1);
+          // Keep table clean and guided towards selecting a class
+          setStudents([]);
+          setTotalStudents(0);
+          setTotalPages(1);
         } else {
           console.error("Failed to fetch classes:", response.message);
           throw new Error("Unable to load classes. Please try again.");
@@ -204,7 +271,6 @@ export const useStudentSearch = () => {
     },
     [
       searchParams.lgaId,
-      originalStudents,
       setError,
       setFilterOptions,
       setLoadingStates,
@@ -212,14 +278,24 @@ export const useStudentSearch = () => {
       setSearchParams,
       setSelectedSchoolName,
       setStudents,
+      setTotalPages,
       setTotalStudents,
     ]
   );
 
-  // Select Class - fetch students (final step that updates table)
+  // 5. Select Class - loads student records into the table
   const selectClass = useCallback(
     async (classId: string) => {
-      if (!classId || !searchParams.lgaId || !searchParams.schoolId) return;
+      if (!classId || classId === "all-classes") {
+        setSearchParams((prev) => ({
+          ...prev,
+          classId: undefined,
+          page: 1,
+        }));
+        setStudents([]);
+        setTotalStudents(0);
+        return;
+      }
 
       setLoadingStates((prev) => ({ ...prev, class: true }));
       setError(null);
@@ -231,7 +307,7 @@ export const useStudentSearch = () => {
           classId,
           session: searchParams.session,
           term: searchParams.term,
-          page: searchParams.page || 1,
+          page: 1,
           limit: searchParams.limit || 10,
           search: searchParams.search,
           gender: searchParams.gender,
@@ -248,6 +324,7 @@ export const useStudentSearch = () => {
           setSearchParams((prev) => ({
             ...prev,
             classId,
+            page: 1,
           }));
         } else {
           console.error("Failed to fetch students:", response.message);
@@ -275,94 +352,20 @@ export const useStudentSearch = () => {
     ]
   );
 
-  // Clear all filters and reload default students
-  const clearFilters = useCallback(async () => {
+  // Clear all filters and return to initial unpopulated state
+  const clearFilters = useCallback(() => {
     resetFilters();
     setError(null);
-    try {
-      setLoadingStates((prev) => ({ ...prev, search: true }));
-      const response = await searchStudents({
-        page: 1,
-        limit: 10,
-      });
-      if (response.success && response.data) {
-        const studentsData = response.data.performanceTable || [];
-        setStudents(studentsData);
-        const pagination = response.data.pagination || {};
-        setTotalStudents(pagination.totalItems || studentsData.length);
-        setTotalPages(pagination.totalPages || 1);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingStates((prev) => ({ ...prev, search: false }));
-    }
-  }, [resetFilters, setStudents, setTotalStudents, setTotalPages]);
+  }, [resetFilters]);
 
-  const selectSession = useCallback(
-    async (sessionId: string) => {
-      setSearchParams((prev) => ({ ...prev, session: sessionId, term: undefined, page: 1 }));
-
-      try {
-        setLoadingStates((prev) => ({ ...prev, search: true }));
-        const response = await searchStudents({
-          ...searchParams,
-          session: sessionId,
-          term: undefined,
-          page: 1,
-        });
-
-        if (response.success && response.data) {
-          const studentsData = response.data.performanceTable || [];
-          setStudents(studentsData);
-          const pagination = response.data.pagination || {};
-          setTotalStudents(pagination.totalItems || studentsData.length);
-          setTotalPages(pagination.totalPages || 1);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingStates((prev) => ({ ...prev, search: false }));
-      }
-    },
-    [searchParams, setSearchParams, setStudents, setTotalStudents, setTotalPages]
-  );
-
-  const selectTerm = useCallback(
-    async (termId: string) => {
-      setSearchParams((prev) => ({ ...prev, term: termId, page: 1 }));
-
-      try {
-        setLoadingStates((prev) => ({ ...prev, search: true }));
-        const response = await searchStudents({
-          ...searchParams,
-          term: termId,
-          page: 1,
-        });
-
-        if (response.success && response.data) {
-          const studentsData = response.data.performanceTable || [];
-          setStudents(studentsData);
-          const pagination = response.data.pagination || {};
-          setTotalStudents(pagination.totalItems || studentsData.length);
-          setTotalPages(pagination.totalPages || 1);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingStates((prev) => ({ ...prev, search: false }));
-      }
-    },
-    [searchParams, setSearchParams, setStudents, setTotalStudents, setTotalPages]
-  );
-
+  // Search students (by name, exam number, etc.)
   const updateSearch = useCallback(
     async (searchTerm: string, overrideSession?: string, overrideTerm?: string) => {
       const trimmedSearch = searchTerm.trim();
       const sessionToUse = overrideSession !== undefined ? (overrideSession || undefined) : searchParams.session;
       const termToUse = overrideTerm !== undefined ? (overrideTerm || undefined) : searchParams.term;
 
-      if (!searchParams.classId && !trimmedSearch) {
+      if (!trimmedSearch) {
         setSearchParams((prev) => ({
           ...prev,
           search: undefined,
@@ -370,9 +373,16 @@ export const useStudentSearch = () => {
           term: termToUse,
           page: 1,
         }));
-        setStudents(originalStudents);
-        setTotalStudents(originalStudents.length);
-        setTotalPages(1);
+
+        // If class is selected, reload class students
+        if (searchParams.classId && searchParams.lgaId && searchParams.schoolId) {
+          selectClass(searchParams.classId);
+        } else {
+          // Revert to empty guided state
+          setStudents([]);
+          setTotalStudents(0);
+          setTotalPages(1);
+        }
         return;
       }
 
@@ -416,7 +426,7 @@ export const useStudentSearch = () => {
     },
     [
       searchParams,
-      originalStudents,
+      selectClass,
       setSearchParams,
       setStudents,
       setTotalStudents,
@@ -462,6 +472,14 @@ export const useStudentSearch = () => {
     [searchParams, totalPages, setSearchParams, setStudents, setTotalStudents, setTotalPages]
   );
 
+  // Progressive filter enablement chain:
+  // Session -> Term -> LGA -> School -> Class
+  const isSessionEnabled = true;
+  const isTermEnabled = Boolean(searchParams.session);
+  const isLgaEnabled = Boolean(searchParams.session && searchParams.term);
+  const isSchoolEnabled = Boolean(searchParams.session && searchParams.term && searchParams.lgaId);
+  const isClassEnabled = Boolean(searchParams.session && searchParams.term && searchParams.lgaId && searchParams.schoolId);
+
   return {
     // Data
     students,
@@ -497,8 +515,10 @@ export const useStudentSearch = () => {
     initializeStudents,
 
     // Check if filters are enabled
-    isSchoolEnabled: !!searchParams.lgaId,
-    isClassEnabled: !!searchParams.schoolId,
-    isTermEnabled: !!searchParams.session,
+    isSessionEnabled,
+    isTermEnabled,
+    isLgaEnabled,
+    isSchoolEnabled,
+    isClassEnabled,
   };
 };

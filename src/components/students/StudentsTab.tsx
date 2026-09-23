@@ -75,9 +75,11 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     initializeStudents,
 
     // Check if filters are enabled
+    isSessionEnabled,
+    isTermEnabled,
+    isLgaEnabled,
     isSchoolEnabled,
     isClassEnabled,
-    isTermEnabled,
   } = useStudentSearch();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.search || "");
@@ -128,14 +130,12 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     }
   }, [availableSearchTerms, searchTermId]);
 
-  // Initialize with original data on mount, or fetch page 1
+  // Initialize data on mount without auto-fetching unprompted records
   useEffect(() => {
     if (performanceTable && performanceTable.length > 0) {
       initializeStudents(performanceTable);
-    } else {
-      changePage(1);
     }
-  }, [performanceTable, initializeStudents, changePage]);
+  }, [performanceTable, initializeStudents]);
 
   const hasActiveFilters = useMemo(() => {
     return (
@@ -375,6 +375,17 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     return term?.name || searchTermId;
   }, [searchTermId, availableSearchTerms]);
 
+  // Compute the current sequential filtering stage
+  const filterStage = useMemo<1 | 2 | 3 | 4 | 5 | 6>(() => {
+    if (searchParams.search?.trim()) return 6;
+    if (searchParams.classId) return 6;
+    if (!searchParams.session) return 1;
+    if (!searchParams.term) return 2;
+    if (!searchParams.lgaId) return 3;
+    if (!searchParams.schoolId) return 4;
+    return 5;
+  }, [searchParams]);
+
   // Determine if filter context message should be shown
   const shouldShowFilterContext = useMemo(() => {
     // Show when class is selected (full filter path) OR when search is used
@@ -462,6 +473,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         onSearchSessionChange={handleSearchSessionChange}
         onSearchTermChange={handleSearchTermChange}
         onClearSearch={handleClearSearch}
+        isLgaEnabled={isLgaEnabled}
         isSchoolEnabled={isSchoolEnabled}
         isClassEnabled={isClassEnabled}
         isTermEnabled={isTermEnabled}
@@ -488,6 +500,13 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         itemsPerPage={10}
         isTableLoading={loading && !isSearching}
         onPageChange={changePage}
+        filterStage={filterStage}
+        selectedSessionName={selectedSessionName}
+        selectedTermName={selectedTermName}
+        selectedLgaName={selectedLgaName}
+        selectedSchoolName={selectedSchoolName}
+        selectedClassName={selectedClassName}
+        searchTerm={searchParams.search}
         filterContextMessage={
           shouldShowFilterContext
             ? buildFilterContextMessage({

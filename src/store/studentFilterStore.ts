@@ -109,12 +109,12 @@ export const useStudentFilterStore = create<StudentFilterState>()(
       setSelectedSchoolName: (selectedSchoolName) => set({ selectedSchoolName }),
 
       resetFilters: () =>
-        set((state) => ({
+        set(() => ({
           searchParams: initialSearchParams,
           filterOptions: initialFilterOptions,
           schoolStats: null,
-          students: state.originalStudents,
-          totalStudents: state.originalStudents.length,
+          students: [],
+          totalStudents: 0,
           totalPages: 1,
           selectedLgaName: "",
           selectedSchoolName: "",

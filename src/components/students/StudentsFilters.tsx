@@ -42,6 +42,7 @@ interface StudentsFiltersProps {
   onClearSearch: () => void;
 
   // Progressive filter states
+  isLgaEnabled: boolean;
   isSchoolEnabled: boolean;
   isClassEnabled: boolean;
   isTermEnabled: boolean;
@@ -75,6 +76,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
   onSearchSessionChange,
   onSearchTermChange,
   onClearSearch,
+  isLgaEnabled,
   isSchoolEnabled,
   isClassEnabled,
   isTermEnabled,
@@ -200,19 +202,27 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
           <Select
             value={filters.lga || "all-lgas"}
             onValueChange={handleLgaChange}
+            disabled={!isLgaEnabled}
           >
-            <SelectTrigger className="w-full h-9 bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-sm font-medium rounded-lg hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 shadow-2xs transition-colors cursor-pointer">
-              <SelectValue placeholder="All LGAs" />
+            <SelectTrigger
+              className={`w-full h-9 text-xs sm:text-sm font-medium rounded-lg shadow-2xs transition-colors ${
+                isLgaEnabled
+                  ? "bg-white border border-gray-200/90 text-gray-800 hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  : "bg-white/60 border border-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              <SelectValue placeholder={isLgaEnabled ? "All LGAs" : "Select Term first"} />
             </SelectTrigger>
             <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
               <SelectGroup>
                 <SelectLabel className="text-xs font-semibold text-gray-500">LGAs</SelectLabel>
                 <SelectItem value="all-lgas" className="text-xs font-medium cursor-pointer">All LGAs</SelectItem>
-                {lgas.map((lga) => (
-                  <SelectItem key={lga.id} value={lga.id} className="text-xs font-medium cursor-pointer">
-                    {formatEducationalText(lga.name)}
-                  </SelectItem>
-                ))}
+                {isLgaEnabled &&
+                  lgas.map((lga) => (
+                    <SelectItem key={lga.id} value={lga.id} className="text-xs font-medium cursor-pointer">
+                      {formatEducationalText(lga.name)}
+                    </SelectItem>
+                  ))}
               </SelectGroup>
             </SelectContent>
           </Select>
