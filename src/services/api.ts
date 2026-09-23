@@ -9,6 +9,7 @@ import {
 } from "./types/studentsDashboardResponse";
 import { CurrentSessionResponse } from "./api/session";
 import { StudentDetailsResponse } from "./types/studentDetailsResponse";
+import { StudentAnalyticsResponse } from "./types/studentAnalyticsResponse";
 import { getAccessToken } from "@/lib/tokens";
 
 // API Configuration
@@ -457,6 +458,41 @@ export const searchStudents = async (params: {
     } else {
       throw new Error("Unable to load data. Please try again.");
     }
+  }
+
+  return response.json();
+};
+
+export const getStudentAnalytics = async (params?: {
+  session?: string;
+  term?: string;
+  lgaId?: string;
+  schoolId?: string;
+}): Promise<StudentAnalyticsResponse> => {
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        queryParams.append(key, value.toString());
+      }
+    });
+  }
+
+  const url = `${API_BASE_URL}/api/${API_VERSION}/admin/students/analytics?${queryParams.toString()}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage =
+      errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+    console.error("Student analytics error:", response.status, errorMessage);
+    throw new Error(errorMessage || "Unable to load student analytics.");
   }
 
   return response.json();

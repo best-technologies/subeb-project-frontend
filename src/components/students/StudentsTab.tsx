@@ -8,6 +8,7 @@ import { StudentsFilters as StudentsFiltersType } from "@/services/types/student
 import StudentsHeader from "./StudentsHeader";
 import StudentsFilters from "./StudentsFilters";
 import StudentsTable from "./StudentsTable";
+import { StudentChartsSection } from "./charts/StudentChartsSection";
 import EditStudentDialog from "./EditStudentDialog";
 import AddStudentDialog from "./AddStudentDialog";
 import { buildFilterContextMessage } from "./FilterContextMessage";
@@ -432,6 +433,12 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         averageScore={averageScore}
         getScoreColor={getScoreColor}
         onAddStudent={() => setShowAddDialog(true)}
+      />
+
+      {/* Analytics Overview Suite directly below page header card and above table filters card */}
+      <StudentChartsSection
+        availableSessions={availableSessions}
+        availableTerms={availableTerms}
       />
 
       {/* Filters Component */}
