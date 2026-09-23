@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { TriangleAlert } from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { StudentsFilters as StudentsFiltersType } from "@/services/types/studentsDashboardResponse";
@@ -48,6 +48,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
 
     // States
     loading: searchLoading,
+    isSearching,
     error: searchError,
     searchParams,
 
@@ -77,6 +78,8 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   } = useStudentSearch();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.search || "");
+  const [searchSession, setSearchSession] = useState<string>("");
+  const [searchTermId, setSearchTermId] = useState<string>("");
   const [sortBy, setSortBy] = useState("position");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
@@ -86,9 +89,43 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
 
   const { data: sessionsData } = useSessions();
   const { data: termsData } = useTerms(searchParams.session);
+  const { data: searchTermsData } = useTerms(searchSession || undefined);
 
   const availableSessions = useMemo(() => sessionsData?.data || [], [sessionsData]);
   const availableTerms = useMemo(() => termsData?.data || [], [termsData]);
+  const availableSearchTerms = useMemo(
+    () => searchTermsData?.data || [],
+    [searchTermsData]
+  );
+
+  // Set default searchSession to current/active session
+  useEffect(() => {
+    if (!searchSession && sessionsData?.data && sessionsData.data.length > 0) {
+      const currentSession =
+        sessionsData.data.find((s) => s.isCurrent) ||
+        sessionsData.data.find((s) => s.status === "OPEN") ||
+        sessionsData.data[0];
+      if (currentSession) {
+        setSearchSession(currentSession.id);
+      }
+    }
+  }, [sessionsData, searchSession]);
+
+  // Set default searchTermId to current/active term within searchSession
+  useEffect(() => {
+    if (availableSearchTerms.length > 0) {
+      const exists = availableSearchTerms.some((t) => t.id === searchTermId);
+      if (!searchTermId || !exists) {
+        const currentTerm =
+          availableSearchTerms.find((t) => t.isCurrent) ||
+          availableSearchTerms.find((t) => t.status === "OPEN") ||
+          availableSearchTerms[0];
+        if (currentTerm) {
+          setSearchTermId(currentTerm.id);
+        }
+      }
+    }
+  }, [availableSearchTerms, searchTermId]);
 
   // Initialize with original data on mount
   useEffect(() => {
@@ -139,24 +176,124 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     return;
   };
 
+  const SEARCH_DEBOUNCE_MS = 3000;
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastExecutedSearchRef = useRef<string | undefined>(searchParams.search);
+
+  useEffect(() => {
+    lastExecutedSearchRef.current = searchParams.search;
+  }, [searchParams.search]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const triggerSearchImmediately = useCallback(
+    (termToSearch: string, sessionOverride?: string, termOverride?: string) => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
+
+      const activeSession =
+        sessionOverride !== undefined ? sessionOverride : searchSession;
+      const activeTerm =
+        termOverride !== undefined ? termOverride : searchTermId;
+
+      lastExecutedSearchRef.current = termToSearch;
+      updateSearch(termToSearch, activeSession, activeTerm);
+    },
+    [updateSearch, searchSession, searchTermId]
+  );
 
   const handleSearch = (search: string) => {
     setSearchTerm(search);
-    
+
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-    
+
     searchTimeoutRef.current = setTimeout(() => {
-      // Use server-side search when there is a search term or class selected
-      updateSearch(search);
-    }, 500);
+      triggerSearchImmediately(search);
+    }, SEARCH_DEBOUNCE_MS);
+  };
+
+  const handleSearchBlur = (e?: React.FocusEvent<HTMLInputElement>) => {
+    const relatedTarget = e?.relatedTarget as HTMLElement | null;
+    if (
+      relatedTarget?.closest('[data-clear-filters="true"]') ||
+      relatedTarget?.closest('[data-clear-search="true"]') ||
+      relatedTarget?.closest('[role="listbox"]') ||
+      relatedTarget?.closest('[data-radix-popper-content-wrapper]')
+    ) {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
+      return;
+    }
+
+    if (searchTimeoutRef.current) {
+      triggerSearchImmediately(searchTerm);
+    }
+  };
+
+  const handleSearchClickOutside = (e: MouseEvent | PointerEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (
+      target?.closest('[data-clear-filters="true"]') ||
+      target?.closest('[data-clear-search="true"]') ||
+      target?.closest('[role="listbox"]') ||
+      target?.closest('[data-radix-popper-content-wrapper]')
+    ) {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
+      return;
+    }
+
+    if (searchTimeoutRef.current) {
+      triggerSearchImmediately(searchTerm);
+    }
+  };
+
+  const handleSearchSubmit = () => {
+    triggerSearchImmediately(searchTerm);
+  };
+
+  const handleSearchSessionChange = (sessionId: string) => {
+    setSearchSession(sessionId);
+    setSearchTermId("");
+    if (searchTerm.trim()) {
+      triggerSearchImmediately(searchTerm, sessionId, "");
+    }
+  };
+
+  const handleSearchTermChange = (termId: string) => {
+    setSearchTermId(termId);
+    if (searchTerm.trim()) {
+      triggerSearchImmediately(searchTerm, searchSession, termId);
+    }
+  };
+
+  const handleClearSearch = () => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = null;
+    }
+    setSearchTerm("");
+    lastExecutedSearchRef.current = "";
+    updateSearch("", searchSession, searchTermId);
   };
 
   const handleClearFilters = () => {
     clearFilters();
-    setSearchTerm("");
     setSortBy("position");
     setSortOrder("asc");
   };
@@ -230,6 +367,18 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     return term?.name || searchParams.term;
   }, [searchParams.term, availableTerms]);
 
+  const searchSessionName = useMemo(() => {
+    if (!searchSession) return undefined;
+    const session = availableSessions?.find((s) => s.id === searchSession);
+    return session?.name || searchSession;
+  }, [searchSession, availableSessions]);
+
+  const searchTermName = useMemo(() => {
+    if (!searchTermId) return undefined;
+    const term = availableSearchTerms?.find((t) => t.id === searchTermId);
+    return term?.name || searchTermId;
+  }, [searchTermId, availableSearchTerms]);
+
   // Determine if filter context message should be shown
   const shouldShowFilterContext = useMemo(() => {
     // Show when class is selected (full filter path) OR when search is used
@@ -298,10 +447,19 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         availableClasses={availableClasses}
         availableSessions={availableSessions}
         availableTerms={availableTerms}
-        searchTerm={
-          searchParams.classId ? searchParams.search || "" : searchTerm
-        }
+        searchTerm={searchTerm}
+        isSearching={isSearching}
         onSearchChange={handleSearch}
+        onSearchBlur={handleSearchBlur}
+        onSearchSubmit={handleSearchSubmit}
+        onSearchClickOutside={handleSearchClickOutside}
+        searchSession={searchSession}
+        searchTermId={searchTermId}
+        availableSearchTerms={availableSearchTerms}
+        isSearchTermEnabled={Boolean(searchSession && availableSearchTerms.length > 0)}
+        onSearchSessionChange={handleSearchSessionChange}
+        onSearchTermChange={handleSearchTermChange}
+        onClearSearch={handleClearSearch}
         isSchoolEnabled={isSchoolEnabled}
         isClassEnabled={isClassEnabled}
         isTermEnabled={isTermEnabled}
@@ -324,15 +482,16 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         getPositionBadge={getPositionBadge}
         onEditStudent={handleEditStudent}
         hasActiveFilters={!!hasActiveFilters}
+        isSearching={isSearching}
         filterContextMessage={
           shouldShowFilterContext
             ? buildFilterContextMessage({
                 lgaName: selectedLgaName,
                 schoolName: selectedSchoolName,
                 className: selectedClassName,
-                sessionName: selectedSessionName,
-                termName: selectedTermName,
-                searchTerm: searchParams.classId ? searchParams.search : searchTerm,
+                sessionName: searchParams.search ? searchSessionName : selectedSessionName,
+                termName: searchParams.search ? searchTermName : selectedTermName,
+                searchTerm: searchParams.search,
               })
             : undefined
         }
@@ -359,7 +518,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
             loadingStates.lga ||
             loadingStates.school ||
             loadingStates.class ||
-            (loading && hasActiveFilters && students.length === 0)
+            (loading && hasActiveFilters && students.length === 0 && !isSearching)
           )
         }
         message={

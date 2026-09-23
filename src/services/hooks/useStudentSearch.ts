@@ -40,6 +40,7 @@ export const useStudentSearch = () => {
     lga: false,
     school: false,
     class: false,
+    search: false,
   });
 
   // Initialize with original students data (only populates table if no active filters are stored)
@@ -322,15 +323,41 @@ export const useStudentSearch = () => {
   );
 
   const updateSearch = useCallback(
-    async (searchTerm: string) => {
-      if (!searchParams.classId && !searchTerm.trim()) return;
+    async (searchTerm: string, overrideSession?: string, overrideTerm?: string) => {
+      const trimmedSearch = searchTerm.trim();
+      const sessionToUse = overrideSession !== undefined ? (overrideSession || undefined) : searchParams.session;
+      const termToUse = overrideTerm !== undefined ? (overrideTerm || undefined) : searchParams.term;
 
-      setSearchParams((prev) => ({ ...prev, search: searchTerm, page: 1 }));
+      if (!searchParams.classId && !trimmedSearch) {
+        setSearchParams((prev) => ({
+          ...prev,
+          search: undefined,
+          session: sessionToUse,
+          term: termToUse,
+          page: 1,
+        }));
+        setStudents(originalStudents);
+        setTotalStudents(originalStudents.length);
+        setTotalPages(1);
+        return;
+      }
+
+      const searchParamValue = trimmedSearch || undefined;
+      setSearchParams((prev) => ({
+        ...prev,
+        search: searchParamValue,
+        session: sessionToUse,
+        term: termToUse,
+        page: 1,
+      }));
 
       try {
+        setLoadingStates((prev) => ({ ...prev, search: true }));
         const response = await searchStudents({
           ...searchParams,
-          search: searchTerm,
+          session: sessionToUse,
+          term: termToUse,
+          search: searchParamValue,
           page: 1,
         });
 
@@ -349,9 +376,18 @@ export const useStudentSearch = () => {
             ? err.message
             : "Unable to search students. Please try again."
         );
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, search: false }));
       }
     },
-    [searchParams, setSearchParams, setStudents, setTotalStudents, setTotalPages]
+    [
+      searchParams,
+      originalStudents,
+      setSearchParams,
+      setStudents,
+      setTotalStudents,
+      setTotalPages,
+    ]
   );
 
   // Change page
@@ -400,6 +436,7 @@ export const useStudentSearch = () => {
 
     // States
     loading: Object.values(loadingStates).some(Boolean),
+    isSearching: loadingStates.search,
     error,
     searchParams,
 

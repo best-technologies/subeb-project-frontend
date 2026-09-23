@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { Search } from "lucide-react";
+import React, { useRef, useEffect } from "react";
+import { Search, Loader2 } from "lucide-react";
 import { StudentsFilters as StudentsFiltersType } from "@/services/types/studentsDashboardResponse";
 import { formatEducationalText } from "@/utils/formatters";
 import { Button } from "@/components/ui/Button";
@@ -26,7 +26,20 @@ interface StudentsFiltersProps {
 
   // Search functionality
   searchTerm: string;
+  isSearching?: boolean;
   onSearchChange: (value: string) => void;
+  onSearchBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onSearchSubmit?: () => void;
+  onSearchClickOutside?: (e: MouseEvent | PointerEvent) => void;
+
+  // Search session & term
+  searchSession: string;
+  searchTermId: string;
+  availableSearchTerms: Array<{ id: string; name: string }>;
+  isSearchTermEnabled: boolean;
+  onSearchSessionChange: (sessionId: string) => void;
+  onSearchTermChange: (termId: string) => void;
+  onClearSearch: () => void;
 
   // Progressive filter states
   isSchoolEnabled: boolean;
@@ -50,7 +63,18 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
   availableSessions,
   availableTerms,
   searchTerm,
+  isSearching = false,
   onSearchChange,
+  onSearchBlur,
+  onSearchSubmit,
+  onSearchClickOutside,
+  searchSession,
+  searchTermId,
+  availableSearchTerms,
+  isSearchTermEnabled,
+  onSearchSessionChange,
+  onSearchTermChange,
+  onClearSearch,
   isSchoolEnabled,
   isClassEnabled,
   isTermEnabled,
@@ -84,9 +108,28 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
     onSchoolChange(schoolId, selectedSchool?.name);
   };
 
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent | MouseEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node)
+      ) {
+        onSearchClickOutside?.(event);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [onSearchClickOutside]);
+
   return (
-    <div className="bg-brand-secondary border border-emerald-200/60 rounded-xl p-4 shadow-xs">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-3.5">
+    <div className="bg-brand-secondary border border-emerald-200/60 rounded-xl p-4 shadow-xs space-y-3.5">
+      {/* Top Row: Progressive Cascading Filters + Dedicated Clear Filters Button */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 items-end">
         {/* Session Filter */}
         <div>
           <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
@@ -96,7 +139,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
             value={filters.session || "all-sessions"}
             onValueChange={(val) => onSessionChange(val === "all-sessions" ? "" : val)}
           >
-            <SelectTrigger className="w-full h-9 bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-sm font-medium rounded-lg shadow-2xs hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer">
+            <SelectTrigger className="w-full h-9 bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-sm font-medium rounded-lg hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 shadow-2xs transition-colors cursor-pointer">
               <SelectValue placeholder="All Sessions" />
             </SelectTrigger>
             <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
@@ -158,7 +201,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
             value={filters.lga || "all-lgas"}
             onValueChange={handleLgaChange}
           >
-            <SelectTrigger className="w-full h-9 bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-sm font-medium rounded-lg shadow-2xs hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer">
+            <SelectTrigger className="w-full h-9 bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-sm font-medium rounded-lg hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 shadow-2xs transition-colors cursor-pointer">
               <SelectValue placeholder="All LGAs" />
             </SelectTrigger>
             <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
@@ -175,7 +218,7 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
           </Select>
         </div>
 
-        {/* School Filter - Enabled only after LGA selection */}
+        {/* School Filter */}
         <div>
           <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
             School
@@ -193,12 +236,10 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
               }`}
             >
               <SelectValue
-                placeholder={
-                  isSchoolEnabled ? "All Schools" : "Select LGA first"
-                }
+                placeholder={isSchoolEnabled ? "All Schools" : "Select LGA first"}
               />
             </SelectTrigger>
-            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
+            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800 max-h-60">
               <SelectGroup>
                 <SelectLabel className="text-xs font-semibold text-gray-500">Schools</SelectLabel>
                 <SelectItem value="all-schools" className="text-xs font-medium cursor-pointer">All Schools</SelectItem>
@@ -213,14 +254,14 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
           </Select>
         </div>
 
-        {/* Class Filter - Enabled only after School selection */}
+        {/* Class Filter */}
         <div>
           <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
             Class
           </Label>
           <Select
             value={filters.class || "all-classes"}
-            onValueChange={onClassChange}
+            onValueChange={(val) => onClassChange(val)}
             disabled={!isClassEnabled}
           >
             <SelectTrigger
@@ -231,12 +272,10 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
               }`}
             >
               <SelectValue
-                placeholder={
-                  isClassEnabled ? "All Classes" : "Select School first"
-                }
+                placeholder={isClassEnabled ? "All Classes" : "Select School first"}
               />
             </SelectTrigger>
-            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
+            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800 max-h-60">
               <SelectGroup>
                 <SelectLabel className="text-xs font-semibold text-gray-500">Classes</SelectLabel>
                 <SelectItem value="all-classes" className="text-xs font-medium cursor-pointer">All Classes</SelectItem>
@@ -250,35 +289,141 @@ const StudentsFilters: React.FC<StudentsFiltersProps> = ({
             </SelectContent>
           </Select>
         </div>
+
+        {/* Dedicated Clear Filters Button on the Same Row */}
+        <div>
+          <Button
+            type="button"
+            data-clear-filters="true"
+            onClick={onClearFilters}
+            className="w-full h-9 px-2.5 py-0 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors font-medium text-xs shadow-2xs cursor-pointer inline-flex items-center justify-center whitespace-nowrap"
+          >
+            Clear Filters
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+      {/* Subtle Row Divider */}
+      <div className="border-t border-emerald-200/60" />
+
+      {/* Bottom Row: Search Field + Search Session + Search Term + Dedicated Clear Search Button */}
+      <div
+        ref={searchContainerRef}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_160px_160px_auto] gap-2.5 items-end"
+      >
         {/* Search Field */}
         <div>
-          <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
-            Search Students
-          </Label>
+          <div className="flex items-center justify-between mb-1">
+            <Label className="block text-xs font-semibold text-brand-secondary-contrast">
+              Search Students
+            </Label>
+            {isSearching && (
+              <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-800 animate-pulse">
+                <Loader2 className="w-3 h-3 animate-spin text-emerald-700" />
+                (Searching...)
+              </span>
+            )}
+          </div>
           <div className="relative">
             <Input
               type="text"
               placeholder="Search by name, exam no, school..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full h-9 bg-white border border-gray-200/90 rounded-lg pl-9 pr-4 py-0 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs sm:text-sm transition-all duration-200 shadow-2xs"
+              onBlur={onSearchBlur}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onSearchSubmit?.();
+                }
+              }}
+              className={`w-full h-9 bg-white border border-gray-200/90 rounded-lg pl-9 ${
+                isSearching ? "pr-24" : "pr-4"
+              } py-0 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs sm:text-sm transition-all duration-200 shadow-2xs`}
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="w-4 h-4 text-gray-400" />
+              {isSearching ? (
+                <Loader2 className="w-4 h-4 text-emerald-600 animate-spin" />
+              ) : (
+                <Search className="w-4 h-4 text-gray-400" />
+              )}
             </div>
+            {isSearching && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center gap-1 pointer-events-none text-xs font-semibold text-emerald-800 animate-pulse">
+                <span>(Searching...)</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Clear Filters */}
-        <div className="flex items-end">
-          <Button
-            onClick={onClearFilters}
-            className="w-full sm:w-auto h-9 px-5 py-0 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors font-medium text-xs shadow-2xs cursor-pointer inline-flex items-center justify-center"
+        {/* Search Session Selector */}
+        <div>
+          <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
+            Search Session
+          </Label>
+          <Select
+            value={searchSession || "default-session"}
+            onValueChange={(val) => onSearchSessionChange(val === "default-session" ? "" : val)}
           >
-            Clear Filters
+            <SelectTrigger className="w-full h-9 bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-sm font-medium rounded-lg hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 shadow-2xs transition-colors cursor-pointer">
+              <SelectValue placeholder="Select Session" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
+              <SelectGroup>
+                <SelectLabel className="text-xs font-semibold text-gray-500">Sessions</SelectLabel>
+                {availableSessions.map((session) => (
+                  <SelectItem key={session.id} value={session.id} className="text-xs font-medium cursor-pointer">
+                    {session.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Search Term Selector */}
+        <div>
+          <Label className="block text-xs font-semibold text-brand-secondary-contrast mb-1">
+            Search Term
+          </Label>
+          <Select
+            value={searchTermId || "default-term"}
+            onValueChange={(val) => onSearchTermChange(val === "default-term" ? "" : val)}
+            disabled={!isSearchTermEnabled}
+          >
+            <SelectTrigger
+              className={`w-full h-9 text-xs sm:text-sm font-medium rounded-lg shadow-2xs transition-colors ${
+                isSearchTermEnabled
+                  ? "bg-white border border-gray-200/90 text-gray-800 hover:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  : "bg-white/60 border border-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              <SelectValue
+                placeholder={isSearchTermEnabled ? "Select Term" : "Select Session"}
+              />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-gray-200 shadow-lg text-gray-800">
+              <SelectGroup>
+                <SelectLabel className="text-xs font-semibold text-gray-500">Terms</SelectLabel>
+                {availableSearchTerms.map((term) => (
+                  <SelectItem key={term.id} value={term.id} className="text-xs font-medium cursor-pointer">
+                    {formatEducationalText(term.name.replace(/_/g, " "))}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Dedicated Clear Search Button on the Same Row */}
+        <div>
+          <Button
+            type="button"
+            data-clear-search="true"
+            onClick={onClearSearch}
+            className="w-full sm:w-auto h-9 px-3.5 py-0 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors font-medium text-xs shadow-2xs cursor-pointer inline-flex items-center justify-center whitespace-nowrap"
+          >
+            Clear Search
           </Button>
         </div>
       </div>

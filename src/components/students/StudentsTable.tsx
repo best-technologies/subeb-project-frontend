@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Users, UserX, ArrowUpDown, ChevronUp, ChevronDown, Info } from "lucide-react";
+import { Users, UserX, ArrowUpDown, ChevronUp, ChevronDown, Info, Loader2 } from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import StudentRow from "./StudentRow";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -23,6 +23,7 @@ interface StudentsTableProps {
   getPositionBadge: (position: number) => string;
   onEditStudent: (student: PerformanceStudent) => void;
   hasActiveFilters?: boolean;
+  isSearching?: boolean;
   filterContextMessage?: string;
 }
 
@@ -36,6 +37,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
   getPositionBadge,
   onEditStudent,
   hasActiveFilters,
+  isSearching = false,
   filterContextMessage,
 }) => {
   const renderSortIndicator = (field: string) => {
@@ -62,11 +64,18 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                 Enrolled Students
               </CardTitle>
               <p className="text-xs text-gray-500 mt-0.5">
-                {students && students.length > 0
-                  ? `Showing ${students.length} student${students.length === 1 ? "" : "s"} in directory`
-                  : hasActiveFilters
-                  ? "No students match your active filters"
-                  : "Select LGA, School, and Class above to view students"}
+                {isSearching ? (
+                  <span className="inline-flex items-center gap-1.5 text-emerald-700 font-medium">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    (Searching...)
+                  </span>
+                ) : students && students.length > 0 ? (
+                  `Showing ${students.length} student${students.length === 1 ? "" : "s"} in directory`
+                ) : hasActiveFilters ? (
+                  "No students match your active filters"
+                ) : (
+                  "Select LGA, School, and Class above to view students"
+                )}
               </p>
             </div>
           </div>
@@ -156,7 +165,23 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {students && students.length > 0 ? (
+              {isSearching ? (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={8} className="py-16 text-center">
+                    <div className="max-w-md mx-auto">
+                      <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-3">
+                        <Loader2 className="w-6 h-6 text-emerald-600 animate-spin" />
+                      </div>
+                      <p className="text-base font-semibold text-gray-800 mb-1">
+                        (Searching...)
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Finding student records matching your query...
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : students && students.length > 0 ? (
                 students.map((student) => (
                   <StudentRow
                     key={`${student.examNo}-${student.position}`}
