@@ -40,12 +40,14 @@ export interface GenderCount {
 
 export interface PerformanceStudent {
   id: string; // UUID for API calls
-  position: number;
+  position?: number;
   studentName: string;
   examNo: string;
+  lga?: string;
   school: string;
   class: string;
   total: number;
+  totalMaxScore?: number;
   average: number;
   percentage: number;
   gender: "MALE" | "FEMALE";

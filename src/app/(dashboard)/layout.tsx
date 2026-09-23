@@ -89,13 +89,13 @@ export default function DashboardLayout({
         </div>
 
         {/* Scrollable Page Content */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
+        <main className="flex-1 px-2 sm:px-3 lg:px-4 py-4 overflow-y-auto">
           {children}
         </main>
 
         {/* Footer */}
         <footer className="bg-white border-t border-gray-200 flex-shrink-0">
-          <div className="px-4 sm:px-6 lg:px-8 py-6">
+          <div className="px-2 sm:px-3 lg:px-4 py-3">
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="flex items-center space-x-4 mb-4 md:mb-0">
                 <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">

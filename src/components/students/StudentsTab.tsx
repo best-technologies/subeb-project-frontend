@@ -44,7 +44,8 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     // Data
     students: searchStudents,
     total: searchTotal,
-    // currentPage, // Not used since we removed pagination
+    currentPage,
+    totalPages,
 
     // States
     loading: searchLoading,
@@ -68,6 +69,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     selectSession,
     selectTerm,
     updateSearch,
+    changePage,
     clearFilters,
     initializeStudents,
 
@@ -80,8 +82,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   const [searchTerm, setSearchTerm] = useState(searchParams.search || "");
   const [searchSession, setSearchSession] = useState<string>("");
   const [searchTermId, setSearchTermId] = useState<string>("");
-  const [sortBy, setSortBy] = useState("position");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     setSearchTerm(searchParams.search || "");
@@ -127,10 +127,15 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     }
   }, [availableSearchTerms, searchTermId]);
 
-  // Initialize with original data on mount
+  // Initialize with original data on mount, or fetch page 1
   useEffect(() => {
-    initializeStudents(performanceTable);
-  }, [performanceTable, initializeStudents]); // Determine if we should use search results or initial data
+    if (performanceTable && performanceTable.length > 0) {
+      initializeStudents(performanceTable);
+    } else {
+      changePage(1);
+    }
+  }, [performanceTable, initializeStudents, changePage]);
+
   const hasActiveFilters = useMemo(() => {
     return (
       searchParams.lgaId ||
@@ -140,12 +145,9 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     );
   }, [searchParams]);
 
-  // Only use search results when filters are applied, otherwise show empty
-  const students = useMemo(() => {
-    return searchParams.classId || searchParams.search ? searchStudents : [];
-  }, [searchParams.classId, searchParams.search, searchStudents]);
-
-  const total = searchParams.classId || searchParams.search ? searchTotal : 0;
+  // Always show the students from the query/directory
+  const students = searchStudents;
+  const total = searchTotal;
   const loading = searchLoading;
   const error = searchError;
 
@@ -170,11 +172,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
     console.log("Student updated:", updatedStudent);
   };
 
-  const handleSort = () => {
-    // Sorting is disabled when no data is loaded
-    // For server-side sorting when class is selected, this can be implemented later
-    return;
-  };
 
   const SEARCH_DEBOUNCE_MS = 3000;
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -294,8 +291,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
 
   const handleClearFilters = () => {
     clearFilters();
-    setSortBy("position");
-    setSortOrder("asc");
   };
 
   // Wrapper functions to handle special "all-*" values
@@ -474,15 +469,18 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
       {/* Table Component */}
       <StudentsTable
         students={students}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        onSort={handleSort}
         getScoreColor={getScoreColor}
         getScoreBgColor={getScoreBgColor}
         getPositionBadge={getPositionBadge}
         onEditStudent={handleEditStudent}
         hasActiveFilters={!!hasActiveFilters}
         isSearching={isSearching}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={total}
+        itemsPerPage={10}
+        isTableLoading={loading && !isSearching}
+        onPageChange={changePage}
         filterContextMessage={
           shouldShowFilterContext
             ? buildFilterContextMessage({

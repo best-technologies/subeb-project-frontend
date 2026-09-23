@@ -1,74 +1,53 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Eye, UserRoundPen } from "lucide-react";
+import { Eye, UserRoundPen, MoreVertical } from "lucide-react";
 import { PerformanceStudent } from "@/services/types/studentsDashboardResponse";
 import { formatEducationalText, capitalizeInitials } from "@/utils/formatters";
 import { StudentNameText, SchoolNameText } from "@/utils/truncateText";
 import { TableRow, TableCell } from "@/components/ui/table";
+import { Button } from "@/components/ui/Button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 interface StudentRowProps {
   student: PerformanceStudent;
-  getScoreColor: (score: number) => string;
-  getScoreBgColor: (score: number) => string;
-  getPositionBadge: (position: number) => string;
+  serialNumber?: number;
+  getScoreColor?: (score: number) => string;
+  getScoreBgColor?: (score: number) => string;
+  getPositionBadge?: (position: number) => string;
   onEditStudent: (student: PerformanceStudent) => void;
 }
 
 const StudentRow: React.FC<StudentRowProps> = ({
   student,
+  serialNumber,
   onEditStudent,
 }) => {
   const router = useRouter();
 
   const handleViewDetails = () => {
-    // Use the student UUID (id) for API calls, not examNo
     router.push(`/students/${student.id}`);
-  };
-
-  const renderPositionBadge = (pos: number) => {
-    if (pos === 1) {
-      return (
-        <span className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-          #1
-        </span>
-      );
-    }
-    if (pos === 2) {
-      return (
-        <span className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-md text-xs font-bold bg-slate-200 text-slate-800 border border-slate-300 shadow-2xs">
-          #2
-        </span>
-      );
-    }
-    if (pos === 3) {
-      return (
-        <span className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-md text-xs font-bold bg-orange-100 text-orange-800 border border-orange-200 shadow-2xs">
-          #3
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-md text-xs font-semibold bg-gray-100 text-gray-700">
-        #{pos}
-      </span>
-    );
   };
 
   const isMale = student.gender?.toUpperCase() === "MALE";
 
   return (
     <TableRow
-      key={`${student.examNo}-${student.position}`}
+      key={student.id || student.examNo}
       className="border-b border-gray-100 hover:bg-emerald-50/40 transition-colors duration-150 group"
     >
-      {/* Position */}
-      <TableCell className="text-center py-3.5">
-        {renderPositionBadge(student.position)}
+      {/* S/N */}
+      <TableCell className="pl-6 pr-3 py-3.5 text-xs font-semibold text-gray-500 whitespace-nowrap w-[60px]">
+        {serialNumber ?? "-"}
       </TableCell>
 
       {/* Student Name & Avatar */}
-      <TableCell className="py-3.5">
+      <TableCell className="py-3.5 pr-4">
         <div className="flex items-center gap-3">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
@@ -108,6 +87,11 @@ const StudentRow: React.FC<StudentRowProps> = ({
         </span>
       </TableCell>
 
+      {/* LGA (Between Exam No. and School) */}
+      <TableCell className="py-3.5 text-sm text-gray-700">
+        {student.lga ? capitalizeInitials(student.lga) : "N/A"}
+      </TableCell>
+
       {/* School */}
       <TableCell className="py-3.5 text-sm text-gray-700">
         <SchoolNameText
@@ -123,11 +107,26 @@ const StudentRow: React.FC<StudentRowProps> = ({
         </span>
       </TableCell>
 
-      {/* Total Score */}
+      {/* Total Score / Max Score */}
       <TableCell className="py-3.5 text-right">
-        <span className="inline-block font-bold text-sm text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200/60">
-          {student.total?.toLocaleString() || "0"}
-        </span>
+        {(() => {
+          const score = student.total ?? 0;
+          const rawMax = student.totalMaxScore;
+          const defaultMax = 1000;
+          const maxScore =
+            rawMax && rawMax >= score
+              ? rawMax
+              : Math.max(score > 0 ? Math.ceil(score / 100) * 100 : defaultMax, defaultMax);
+
+          return (
+            <span className="inline-block font-bold text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/60 whitespace-nowrap">
+              {score.toLocaleString()}
+              <span className="text-emerald-600/80 font-medium text-xs">
+                /{maxScore.toLocaleString()}
+              </span>
+            </span>
+          );
+        })()}
       </TableCell>
 
       {/* Average Score */}
@@ -137,28 +136,36 @@ const StudentRow: React.FC<StudentRowProps> = ({
         </span>
       </TableCell>
 
-      {/* Actions */}
-      <TableCell className="py-3.5 text-center">
-        <div className="flex items-center justify-center gap-1">
-          <button
-            type="button"
-            aria-label="View student details"
-            onClick={handleViewDetails}
-            className="p-1.5 text-gray-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-            title="View Details"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            aria-label="Edit student"
-            onClick={() => onEditStudent(student)}
-            className="p-1.5 text-gray-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-            title="Edit Student"
-          >
-            <UserRoundPen className="w-4 h-4" />
-          </button>
-        </div>
+      {/* Actions (ShadCN Dropdown with Ellipsis-Vertical) */}
+      <TableCell className="py-3.5 pr-6 pl-2 text-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 p-0 text-gray-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors"
+              aria-label="Student actions"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-md min-w-[130px] p-1">
+            <DropdownMenuItem
+              onClick={handleViewDetails}
+              className="cursor-pointer gap-2 text-xs font-medium text-gray-700 hover:text-emerald-700 hover:bg-emerald-50 px-2.5 py-1.5 rounded"
+            >
+              <Eye className="w-3.5 h-3.5 text-emerald-600" />
+              <span>View Details</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onEditStudent(student)}
+              className="cursor-pointer gap-2 text-xs font-medium text-gray-700 hover:text-emerald-700 hover:bg-emerald-50 px-2.5 py-1.5 rounded"
+            >
+              <UserRoundPen className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Edit Student</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   );

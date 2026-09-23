@@ -97,16 +97,20 @@ export const useStudentSearch = () => {
             classes: [], // Clear classes when LGA changes
           });
 
-          // Update search params but keep original table data
+          // Update search params and table data for this LGA
           setSearchParams((prev) => ({
             ...prev,
             lgaId,
             schoolId: undefined,
             classId: undefined,
+            page: 1,
           }));
 
-          setStudents(originalStudents);
-          setTotalStudents(originalStudents.length);
+          const studentsData = response.data.performanceTable || [];
+          setStudents(studentsData);
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
           setSchoolStats(null);
         } else {
           console.error("Failed to fetch schools:", response.message);
@@ -175,10 +179,14 @@ export const useStudentSearch = () => {
             ...prev,
             schoolId,
             classId: undefined,
+            page: 1,
           }));
 
-          setStudents(originalStudents);
-          setTotalStudents(originalStudents.length);
+          const studentsData = response.data.performanceTable || [];
+          setStudents(studentsData);
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
         } else {
           console.error("Failed to fetch classes:", response.message);
           throw new Error("Unable to load classes. Please try again.");
@@ -267,59 +275,85 @@ export const useStudentSearch = () => {
     ]
   );
 
-  // Clear all filters
-  const clearFilters = useCallback(() => {
+  // Clear all filters and reload default students
+  const clearFilters = useCallback(async () => {
     resetFilters();
     setError(null);
-  }, [resetFilters]);
+    try {
+      setLoadingStates((prev) => ({ ...prev, search: true }));
+      const response = await searchStudents({
+        page: 1,
+        limit: 10,
+      });
+      if (response.success && response.data) {
+        const studentsData = response.data.performanceTable || [];
+        setStudents(studentsData);
+        const pagination = response.data.pagination || {};
+        setTotalStudents(pagination.totalItems || studentsData.length);
+        setTotalPages(pagination.totalPages || 1);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, search: false }));
+    }
+  }, [resetFilters, setStudents, setTotalStudents, setTotalPages]);
 
   const selectSession = useCallback(
     async (sessionId: string) => {
-      setSearchParams((prev) => ({ ...prev, session: sessionId, term: undefined }));
-      if (!searchParams.classId) return;
+      setSearchParams((prev) => ({ ...prev, session: sessionId, term: undefined, page: 1 }));
 
       try {
-        setLoadingStates((prev) => ({ ...prev, class: true }));
+        setLoadingStates((prev) => ({ ...prev, search: true }));
         const response = await searchStudents({
           ...searchParams,
           session: sessionId,
           term: undefined,
+          page: 1,
         });
 
         if (response.success && response.data) {
-          setStudents(response.data.performanceTable || []);
+          const studentsData = response.data.performanceTable || [];
+          setStudents(studentsData);
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
         }
       } catch (err) {
         console.error(err);
       } finally {
-        setLoadingStates((prev) => ({ ...prev, class: false }));
+        setLoadingStates((prev) => ({ ...prev, search: false }));
       }
     },
-    [searchParams, setSearchParams, setStudents]
+    [searchParams, setSearchParams, setStudents, setTotalStudents, setTotalPages]
   );
 
   const selectTerm = useCallback(
     async (termId: string) => {
-      setSearchParams((prev) => ({ ...prev, term: termId }));
-      if (!searchParams.classId) return;
+      setSearchParams((prev) => ({ ...prev, term: termId, page: 1 }));
 
       try {
-        setLoadingStates((prev) => ({ ...prev, class: true }));
+        setLoadingStates((prev) => ({ ...prev, search: true }));
         const response = await searchStudents({
           ...searchParams,
           term: termId,
+          page: 1,
         });
 
         if (response.success && response.data) {
-          setStudents(response.data.performanceTable || []);
+          const studentsData = response.data.performanceTable || [];
+          setStudents(studentsData);
+          const pagination = response.data.pagination || {};
+          setTotalStudents(pagination.totalItems || studentsData.length);
+          setTotalPages(pagination.totalPages || 1);
         }
       } catch (err) {
         console.error(err);
       } finally {
-        setLoadingStates((prev) => ({ ...prev, class: false }));
+        setLoadingStates((prev) => ({ ...prev, search: false }));
       }
     },
-    [searchParams, setSearchParams, setStudents]
+    [searchParams, setSearchParams, setStudents, setTotalStudents, setTotalPages]
   );
 
   const updateSearch = useCallback(
@@ -393,15 +427,14 @@ export const useStudentSearch = () => {
   // Change page
   const changePage = useCallback(
     async (page: number) => {
-      if (
-        (!searchParams.classId && !searchParams.search) ||
-        page === searchParams.page
-      )
+      if (page === searchParams.page || page < 1 || (totalPages && page > totalPages)) {
         return;
+      }
 
       setSearchParams((prev) => ({ ...prev, page }));
 
       try {
+        setLoadingStates((prev) => ({ ...prev, search: true }));
         const response = await searchStudents({
           ...searchParams,
           page,
@@ -422,9 +455,11 @@ export const useStudentSearch = () => {
             ? err.message
             : "Unable to load page. Please try again."
         );
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, search: false }));
       }
     },
-    [searchParams, setSearchParams, setStudents, setTotalStudents, setTotalPages]
+    [searchParams, totalPages, setSearchParams, setStudents, setTotalStudents, setTotalPages]
   );
 
   return {

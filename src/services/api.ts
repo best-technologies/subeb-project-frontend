@@ -415,6 +415,8 @@ export const searchStudents = async (params: {
   search?: string;
   page?: number;
   limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }) => {
   // console.log("searchStudents called with params:", params);
 
