@@ -42,7 +42,7 @@ export const AgeRangePerformanceChart: React.FC<AgeRangePerformanceChartProps> =
   }, [data]);
 
   return (
-    <Card className="border-gray-200 shadow-xs flex flex-col justify-between">
+    <Card className="border-gray-200 shadow-xs flex flex-col justify-between h-full">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-violet-100/80 text-violet-700 flex items-center justify-center">

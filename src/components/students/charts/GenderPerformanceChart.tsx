@@ -53,8 +53,8 @@ export const GenderPerformanceChart: React.FC<GenderPerformanceChartProps> = ({
   }, [data]);
 
   return (
-    <Card className="border-gray-200 shadow-xs flex flex-col justify-between">
-      <CardHeader className="pb-0">
+    <Card className="border-gray-200 shadow-xs flex flex-col justify-between h-full">
+      <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-100/80 text-indigo-700 flex items-center justify-center">
             <Users2 className="w-4 h-4" />
@@ -69,10 +69,49 @@ export const GenderPerformanceChart: React.FC<GenderPerformanceChartProps> = ({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col sm:flex-row items-center justify-around gap-4 pt-2">
+      <CardContent className="flex flex-col items-center justify-between gap-2 pt-1 flex-1">
+        {/* Inline Male & Female Mini Cards at top */}
+        <div className="grid grid-cols-2 gap-2.5 w-full">
+          {data.map((item) => (
+            <div
+              key={item.gender}
+              className={`p-2 rounded-lg border flex flex-col justify-between ${
+                item.gender === "MALE"
+                  ? "bg-blue-50/60 border-blue-100"
+                  : "bg-rose-50/60 border-rose-100"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-1.5 mb-1">
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      item.gender === "MALE" ? "bg-blue-500" : "bg-rose-500"
+                    }`}
+                  />
+                  <span className="text-xs font-bold text-gray-800">
+                    {item.gender === "MALE" ? "Male" : "Female"}
+                  </span>
+                </div>
+                <span className="text-[10px] font-semibold text-gray-500">
+                  {item.sharePercentage}%
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-extrabold text-gray-900">
+                  {item.averagePercentage}% <span className="text-[10px] font-normal text-gray-500">avg</span>
+                </span>
+                <span className="text-[10px] text-gray-500">
+                  {item.studentCount.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Centered Donut / Radial Chart */}
         <ChartContainer
           config={chartConfig}
-          className="aspect-square h-[180px] w-[180px]"
+          className="aspect-square h-[175px] w-[175px] mx-auto my-auto"
         >
           <PieChart>
             <ChartTooltip
@@ -103,8 +142,8 @@ export const GenderPerformanceChart: React.FC<GenderPerformanceChartProps> = ({
               data={chartData}
               dataKey="value"
               nameKey="gender"
-              innerRadius={55}
-              outerRadius={75}
+              innerRadius={52}
+              outerRadius={72}
               strokeWidth={3}
               stroke="#fff"
             >
@@ -143,34 +182,6 @@ export const GenderPerformanceChart: React.FC<GenderPerformanceChartProps> = ({
             </Pie>
           </PieChart>
         </ChartContainer>
-
-        <div className="flex flex-col gap-2.5 w-full sm:w-auto">
-          {data.map((item) => (
-            <div
-              key={item.gender}
-              className="flex items-center justify-between gap-4 p-2 rounded-lg bg-gray-50/80 border border-gray-100"
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    item.gender === "MALE" ? "bg-blue-500" : "bg-rose-500"
-                  }`}
-                />
-                <span className="text-xs font-semibold text-gray-800">
-                  {item.gender === "MALE" ? "Male" : "Female"}
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="text-xs font-bold text-gray-900 block">
-                  {item.averagePercentage}% avg
-                </span>
-                <span className="text-[10px] text-gray-500">
-                  {item.sharePercentage}% ({item.studentCount.toLocaleString()})
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
       </CardContent>
     </Card>
   );

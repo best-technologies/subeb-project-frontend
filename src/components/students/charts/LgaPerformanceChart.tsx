@@ -43,16 +43,21 @@ export const LgaPerformanceChart: React.FC<LgaPerformanceChartProps> = ({
 }) => {
   const chartData = React.useMemo(() => {
     return data.map((item) => ({
-      lga: capitalizeInitials(item.lgaName),
+      lgaName: item.lgaName,
+      lgaCode: item.lgaCode || item.lgaName.substring(0, 4).toUpperCase(),
       averagePercentage: item.averagePercentage,
       passRate: item.passRate,
       studentCount: item.studentCount,
+      schoolCount: item.schoolCount,
+      change: item.change,
     }));
   }, [data]);
 
   const topLga = React.useMemo(() => {
     if (!data.length) return null;
-    return [...data].sort((a, b) => b.averagePercentage - a.averagePercentage)[0];
+    const active = data.filter((d) => d.studentCount > 0);
+    if (!active.length) return data[0];
+    return [...active].sort((a, b) => b.averagePercentage - a.averagePercentage)[0];
   }, [data]);
 
   return (
@@ -65,10 +70,10 @@ export const LgaPerformanceChart: React.FC<LgaPerformanceChartProps> = ({
             </div>
             <div>
               <CardTitle className="text-base font-bold text-gray-900">
-                Performance by LGA
+                Performance by LGA ({data.length} LGAs)
               </CardTitle>
               <CardDescription className="text-xs text-gray-500">
-                Average assessment score trajectory across local governments
+                Trajectory and demographic assessment across all local governments
               </CardDescription>
             </div>
           </div>
@@ -85,8 +90,8 @@ export const LgaPerformanceChart: React.FC<LgaPerformanceChartProps> = ({
           <AreaChart
             data={chartData}
             margin={{
-              left: 0,
-              right: 12,
+              left: -10,
+              right: 8,
               top: 10,
               bottom: 0,
             }}
@@ -99,12 +104,12 @@ export const LgaPerformanceChart: React.FC<LgaPerformanceChartProps> = ({
             </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis
-              dataKey="lga"
+              dataKey="lgaCode"
+              interval={0}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 5)}
-              className="text-[10px] text-gray-500 font-medium"
+              className="text-[9px] text-gray-600 font-semibold"
             />
             <YAxis
               tickLine={false}
@@ -116,17 +121,51 @@ export const LgaPerformanceChart: React.FC<LgaPerformanceChartProps> = ({
             />
             <ChartTooltip
               cursor={{ stroke: "#059669", strokeWidth: 1.5, strokeDasharray: "4 4" }}
-              content={
-                <ChartTooltipContent
-                  indicator="dot"
-                  formatter={(value, name, item) => (
-                    <div className="flex items-center justify-between gap-4 w-full text-xs">
-                      <span className="text-gray-600">{name === "averagePercentage" ? "Avg Score" : name}:</span>
-                      <span className="font-bold text-gray-900">{value}%</span>
+              content={({ active, payload }) => {
+                if (!active || !payload?.length) return null;
+                const p = payload[0].payload;
+                const change = p.change;
+                return (
+                  <div className="rounded-lg border border-gray-200 bg-white p-2.5 shadow-md text-xs min-w-[170px] space-y-1.5">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-1">
+                      <span className="font-bold text-gray-900">{p.lgaName}</span>
+                      <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded">
+                        {p.lgaCode}
+                      </span>
                     </div>
-                  )}
-                />
-              }
+                    <div className="flex items-center justify-between gap-3 text-gray-600">
+                      <span>Average Score:</span>
+                      <span className="font-bold text-emerald-700">{p.averagePercentage}%</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 text-gray-600">
+                      <span>Schools:</span>
+                      <span className="font-medium text-gray-900">{p.schoolCount}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 text-gray-600">
+                      <span>Assessed Students:</span>
+                      <span className="font-medium text-gray-900">{p.studentCount?.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-1 text-[11px]">
+                      <span className="text-gray-500">vs Previous:</span>
+                      {change !== null && change !== undefined ? (
+                        change > 0 ? (
+                          <span className="font-semibold text-emerald-600 flex items-center gap-0.5">
+                            +{change}% ▲
+                          </span>
+                        ) : change < 0 ? (
+                          <span className="font-semibold text-rose-600 flex items-center gap-0.5">
+                            {change}% ▼
+                          </span>
+                        ) : (
+                          <span className="font-medium text-gray-500">0.0% —</span>
+                        )
+                      ) : (
+                        <span className="font-medium text-gray-400 italic text-[10px]">No prior record</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              }}
             />
             <Area
               dataKey="averagePercentage"

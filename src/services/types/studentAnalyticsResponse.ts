@@ -19,9 +19,13 @@ export interface SchoolPerformanceItem {
 export interface LgaPerformanceItem {
   lgaId: string;
   lgaName: string;
+  lgaCode: string;
+  schoolCount: number;
   studentCount: number;
   averagePercentage: number;
   passRate: number;
+  previousAverage?: number | null;
+  change?: number | null;
 }
 
 export interface GenderPerformanceItem {

@@ -12,6 +12,13 @@ import { ClassPerformanceChart } from "./ClassPerformanceChart";
 import { TopSchoolsChart } from "./TopSchoolsChart";
 import { GenderPerformanceChart } from "./GenderPerformanceChart";
 import { AgeRangePerformanceChart } from "./AgeRangePerformanceChart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/Button";
 import {
   TrendingUp,
@@ -43,7 +50,7 @@ export const StudentChartsSection: React.FC<StudentChartsSectionProps> = ({
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<StudentAnalyticsData | null>(null);
   const [selectedSession, setSelectedSession] = useState<string>(initialSession || "");
-  const [selectedTerm, setSelectedTerm] = useState<string>(initialTerm || "");
+  const [selectedTerm, setSelectedTerm] = useState<string>(initialTerm || "ALL_TERMS");
 
   // Find selected session ID for terms query
   const selectedSessionObj = useMemo(() => {
@@ -58,7 +65,14 @@ export const StudentChartsSection: React.FC<StudentChartsSectionProps> = ({
     if (sessionTermsData?.data && sessionTermsData.data.length > 0) {
       return sessionTermsData.data;
     }
-    return initialAvailableTerms;
+    if (initialAvailableTerms.length > 0) {
+      return initialAvailableTerms;
+    }
+    return [
+      { id: "FIRST_TERM", name: "FIRST_TERM" },
+      { id: "SECOND_TERM", name: "SECOND_TERM" },
+      { id: "THIRD_TERM", name: "THIRD_TERM" },
+    ];
   }, [sessionTermsData, initialAvailableTerms]);
 
   // Sync with initial props when provided
@@ -79,7 +93,7 @@ export const StudentChartsSection: React.FC<StudentChartsSectionProps> = ({
         setLoading(true);
         const res: StudentAnalyticsResponse = await getStudentAnalytics({
           session: selectedSession || undefined,
-          term: selectedTerm || undefined,
+          term: selectedTerm === "ALL_TERMS" ? "ALL_TERMS" : (selectedTerm || undefined),
         });
         if (isMounted && res.success && res.data) {
           setAnalytics(res.data);
@@ -114,7 +128,7 @@ export const StudentChartsSection: React.FC<StudentChartsSectionProps> = ({
               </h2>
               {analytics && (
                 <span className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  {analytics.session} • {analytics.term.replace("_", " ")}
+                  {analytics.session} • {analytics.term === "ALL_TERMS" ? "All Terms (Session Overview)" : analytics.term.replace("_", " ")}
                 </span>
               )}
             </div>
@@ -129,45 +143,54 @@ export const StudentChartsSection: React.FC<StudentChartsSectionProps> = ({
           {/* Quick Academic Filter for Charts: Session & Term */}
           <div className="flex flex-wrap items-center gap-2">
             {availableSessions.length > 0 && (
-              <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs shadow-2xs">
-                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                <select
-                  aria-label="Filter Analytics by Session"
-                  value={selectedSession}
-                  onChange={(e) => {
-                    setSelectedSession(e.target.value);
-                    setSelectedTerm(""); // Reset term when session changes
-                  }}
-                  className="bg-transparent text-xs text-gray-700 font-medium focus:outline-hidden cursor-pointer"
-                >
-                  <option value="">Current Session</option>
+              <Select
+                value={selectedSession || "CURRENT_SESSION"}
+                onValueChange={(val) => {
+                  setSelectedSession(val === "CURRENT_SESSION" ? "" : val);
+                  setSelectedTerm("ALL_TERMS");
+                }}
+              >
+                <SelectTrigger className="h-8 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg px-2.5 shadow-2xs hover:bg-gray-50 focus:ring-1 focus:ring-emerald-600 focus:ring-offset-0 gap-1.5 w-auto min-w-[135px]">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <SelectValue placeholder="Current Session" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200 text-xs shadow-md z-50">
+                  <SelectItem value="CURRENT_SESSION" className="text-xs py-1.5 cursor-pointer">
+                    Current Session
+                  </SelectItem>
                   {availableSessions.map((s) => (
-                    <option key={s.id} value={s.name}>
+                    <SelectItem key={s.id} value={s.name} className="text-xs py-1.5 cursor-pointer">
                       {s.name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
+                </SelectContent>
+              </Select>
             )}
 
-            {dynamicTerms.length > 0 && (
-              <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs shadow-2xs">
-                <Layers className="w-3.5 h-3.5 text-emerald-600" />
-                <select
-                  aria-label="Filter Analytics by Term"
-                  value={selectedTerm}
-                  onChange={(e) => setSelectedTerm(e.target.value)}
-                  className="bg-transparent text-xs text-gray-700 font-medium focus:outline-hidden cursor-pointer"
-                >
-                  <option value="">All / Current Term</option>
-                  {dynamicTerms.map((t) => (
-                    <option key={t.id} value={t.name}>
-                      {t.name.replace(/_/g, " ")}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {/* Term Dropdown */}
+            <Select
+              value={selectedTerm || "ALL_TERMS"}
+              onValueChange={(val) => setSelectedTerm(val)}
+            >
+              <SelectTrigger className="h-8 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg px-2.5 shadow-2xs hover:bg-gray-50 focus:ring-1 focus:ring-emerald-600 focus:ring-offset-0 gap-1.5 w-auto min-w-[155px]">
+                <div className="flex items-center gap-1.5 truncate">
+                  <Layers className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <SelectValue placeholder="All Terms (Session Overview)" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="bg-white border-gray-200 text-xs shadow-md z-50">
+                <SelectItem value="ALL_TERMS" className="text-xs py-1.5 font-medium text-emerald-800 cursor-pointer">
+                  All Terms (Session Overview)
+                </SelectItem>
+                {dynamicTerms.map((t) => (
+                  <SelectItem key={t.id} value={t.name} className="text-xs py-1.5 cursor-pointer">
+                    {t.name.replace(/_/g, " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <Button

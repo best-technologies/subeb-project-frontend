@@ -53,7 +53,7 @@ export const ClassPerformanceChart: React.FC<ClassPerformanceChartProps> = ({
   }, [data]);
 
   return (
-    <Card className="border-gray-200 shadow-xs flex flex-col justify-between">
+    <Card className="border-gray-200 shadow-xs flex flex-col justify-between h-full">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-blue-100/80 text-blue-700 flex items-center justify-center">
