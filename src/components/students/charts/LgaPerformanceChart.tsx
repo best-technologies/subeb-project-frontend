@@ -60,6 +60,10 @@ export const LgaPerformanceChart: React.FC<LgaPerformanceChartProps> = ({
     return [...active].sort((a, b) => b.averagePercentage - a.averagePercentage)[0];
   }, [data]);
 
+  const hasData = React.useMemo(() => {
+    return data.some((d) => d.studentCount > 0);
+  }, [data]);
+
   return (
     <Card className="border-gray-200 shadow-xs flex flex-col justify-between">
       <CardHeader className="pb-2">
@@ -77,7 +81,7 @@ export const LgaPerformanceChart: React.FC<LgaPerformanceChartProps> = ({
               </CardDescription>
             </div>
           </div>
-          {topLga && (
+          {topLga && hasData && (
             <span className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
               <TrendingUp className="w-3 h-3" />
               Top: {capitalizeInitials(topLga.lgaName)} ({topLga.averagePercentage}%)
@@ -86,6 +90,15 @@ export const LgaPerformanceChart: React.FC<LgaPerformanceChartProps> = ({
         </div>
       </CardHeader>
       <CardContent className="pt-2">
+        {!hasData ? (
+          <div className="h-[240px] flex flex-col items-center justify-center text-center p-4 text-gray-400">
+            <MapPin className="w-8 h-8 stroke-[1.5] text-gray-300 mb-2" />
+            <p className="text-xs font-semibold text-gray-600">No LGA Assessment Records</p>
+            <p className="text-[11px] text-gray-400 max-w-[260px] mt-0.5">
+              No student performance records found across the 17 LGAs for this period.
+            </p>
+          </div>
+        ) : (
         <ChartContainer config={chartConfig} className="aspect-auto h-[240px] w-full">
           <AreaChart
             data={chartData}
@@ -177,6 +190,7 @@ export const LgaPerformanceChart: React.FC<LgaPerformanceChartProps> = ({
             />
           </AreaChart>
         </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );

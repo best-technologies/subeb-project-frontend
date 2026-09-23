@@ -58,8 +58,17 @@ export const AgeRangePerformanceChart: React.FC<AgeRangePerformanceChartProps> =
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-2">
-        <ChartContainer config={chartConfig} className="aspect-auto h-[240px] w-full">
+      <CardContent className="pt-2 flex-1 flex flex-col justify-center">
+        {chartData.length === 0 ? (
+          <div className="h-[240px] flex flex-col items-center justify-center text-center p-4 text-gray-400">
+            <Calendar className="w-8 h-8 stroke-[1.5] text-gray-300 mb-2" />
+            <p className="text-xs font-semibold text-gray-600">No Age Bracket Records</p>
+            <p className="text-[11px] text-gray-400 max-w-[220px] mt-0.5">
+              No age cohort performance records available for this period.
+            </p>
+          </div>
+        ) : (
+          <ChartContainer config={chartConfig} className="aspect-auto h-[240px] w-full">
           <BarChart
             data={chartData}
             margin={{
@@ -115,6 +124,7 @@ export const AgeRangePerformanceChart: React.FC<AgeRangePerformanceChartProps> =
             />
           </BarChart>
         </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );
