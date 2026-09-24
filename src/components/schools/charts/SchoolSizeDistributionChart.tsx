@@ -67,7 +67,7 @@ export const SchoolSizeDistributionChart: React.FC<SchoolSizeDistributionChartPr
           </div>
           <div>
             <CardTitle className="text-base font-bold text-gray-900">
-              School Size Cohorts
+              School Size Distribution
             </CardTitle>
             <CardDescription className="text-xs text-gray-500">
               Distribution by student enrollment capacity

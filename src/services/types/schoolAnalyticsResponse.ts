@@ -38,6 +38,8 @@ export interface SchoolSizeDistributionItem {
 
 export interface SchoolAnalyticsSummary {
   totalSchools: number;
+  primarySchoolsCount?: number;
+  secondarySchoolsCount?: number;
   statewideSchoolAverage: number;
   totalStudents: number;
   totalAssessedStudents: number;

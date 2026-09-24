@@ -16,6 +16,12 @@ import {
 } from "@/components/ui/chart";
 import { SchoolPerformanceBandItem } from "@/services/types/schoolAnalyticsResponse";
 import { BarChart3, Target } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SchoolPerformanceBandsChartProps {
   data: SchoolPerformanceBandItem[];
@@ -71,11 +77,6 @@ export const SchoolPerformanceBandsChart: React.FC<SchoolPerformanceBandsChartPr
               </CardDescription>
             </div>
           </div>
-          {hasData && (
-            <span className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-              {totalAssessedSchools} Schools Assessed
-            </span>
-          )}
         </div>
       </CardHeader>
       <CardContent className="pt-2 flex-1 flex flex-col justify-center">
@@ -148,17 +149,31 @@ export const SchoolPerformanceBandsChart: React.FC<SchoolPerformanceBandsChartPr
               </BarChart>
             </ChartContainer>
 
-            {/* Quick mini-legend */}
-            <div className="grid grid-cols-4 gap-2 mt-3 pt-2 border-t border-gray-100 text-center">
-              {chartData.map((b) => (
-                <div key={b.key} className="text-center">
-                  <span className="text-[10px] text-gray-500 block truncate">{b.band}</span>
-                  <span className="text-xs font-bold" style={{ color: b.color }}>
-                    {b.count} ({b.percentage}%)
-                  </span>
-                </div>
-              ))}
-            </div>
+            {/* Quick mini-legend with Tooltip for cut-off text */}
+            <TooltipProvider delayDuration={150}>
+              <div className="grid grid-cols-4 gap-2 mt-3 pt-2 border-t border-gray-100 text-center">
+                {chartData.map((b) => (
+                  <Tooltip key={b.key}>
+                    <TooltipTrigger asChild>
+                      <div className="text-center cursor-pointer group rounded-md p-1 hover:bg-gray-50 transition-colors">
+                        <span className="text-[10px] text-gray-500 block truncate group-hover:text-gray-900 transition-colors">
+                          {b.band}
+                        </span>
+                        <span className="text-xs font-bold block" style={{ color: b.color }}>
+                          {b.count} ({b.percentage}%)
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-center">
+                      <p className="font-semibold text-xs">{b.band}</p>
+                      <p className="text-[11px] text-gray-300 mt-0.5">
+                        {b.count} schools ({b.percentage}% of total)
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </TooltipProvider>
           </div>
         )}
       </CardContent>

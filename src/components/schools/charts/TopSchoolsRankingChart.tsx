@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/chart";
 import { TopSchoolRankingItem } from "@/services/types/schoolAnalyticsResponse";
 import { formatEducationalText } from "@/utils/formatters";
-import { Award, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 
 interface TopSchoolsRankingChartProps {
   data: TopSchoolRankingItem[];
@@ -57,16 +57,10 @@ export const TopSchoolsRankingChart: React.FC<TopSchoolsRankingChartProps> = ({ 
                 Top Performing Schools
               </CardTitle>
               <CardDescription className="text-xs text-gray-500">
-                Leading primary schools by assessment percentage
+                Top 8 schools by assessment percentage
               </CardDescription>
             </div>
           </div>
-          {hasData && (
-            <span className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-              <Award className="w-3 h-3" />
-              Rankings (Top {chartData.length})
-            </span>
-          )}
         </div>
       </CardHeader>
       <CardContent className="pt-2 flex-1 flex flex-col justify-center">

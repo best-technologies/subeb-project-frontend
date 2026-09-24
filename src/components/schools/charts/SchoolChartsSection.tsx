@@ -230,6 +230,23 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
   const summary = analytics?.summary;
   const hasAssessments = Boolean(summary && summary.totalAssessedStudents > 0);
 
+  // Dynamic school level distribution (Primary vs Secondary)
+  const schoolLevelSubtext = useMemo(() => {
+    const primary = summary?.primarySchoolsCount;
+    const secondary = summary?.secondarySchoolsCount;
+    if (primary !== undefined && secondary !== undefined) {
+      if (primary > 0 && secondary === 0) return "100% Primary Level";
+      if (secondary > 0 && primary === 0) return "100% Secondary Level";
+      if (primary > 0 && secondary > 0) {
+        const total = primary + secondary;
+        const primaryPct = Math.round((primary / total) * 100);
+        const secondaryPct = 100 - primaryPct;
+        return `${primaryPct}% Primary • ${secondaryPct}% Secondary`;
+      }
+    }
+    return "100% Primary Level";
+  }, [summary]);
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200/80 shadow-xs mb-6 overflow-hidden transition-all duration-300">
       {/* Header Bar */}
@@ -382,7 +399,7 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
                   {(summary?.totalSchools || 443).toLocaleString()}
                 </span>
                 <span className="text-[11px] text-emerald-700 font-medium block mt-0.5">
-                  100% Primary Level
+                  {schoolLevelSubtext}
                 </span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
