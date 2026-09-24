@@ -6,7 +6,7 @@ import {
   TrashIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { SquarePen, Camera, Loader2 } from "lucide-react";
+import { SquarePen, Camera, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
@@ -592,74 +592,104 @@ export default function EnrolStudentPage() {
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 lg:px-0 pt-4 sm:pt-6">
-        {/* Page Title - Centered */}
-        <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <h1 className="text-base sm:text-lg lg:text-3xl font-medium text-brand-black mb-1 sm:mb-2">
+      <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8 pt-2 sm:pt-4 pb-12">
+        {/* Page Title */}
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-brand-black mb-1 sm:mb-2">
             Student Enrollment
           </h1>
-          <p className="text-xs sm:text-sm md:text-lg text-brand-black-accent">
-            Add new students to the system
+          <p className="text-xs sm:text-sm md:text-base text-brand-black-accent">
+            Add and register new students into the ASUBEB system
           </p>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="bg-[#FCFCFC] rounded-lg mb-4 sm:mb-6 max-w-4xl mx-auto">
-          <div className="flex">
-            <button
-              onClick={() => handleTabChange("session")}
-              className={`flex-1 min-w-0 px-1 xs:px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 font-medium text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base text-center transition-colors rounded-bl-lg rounded-tl-lg leading-tight ${
-                activeTab === "session"
-                  ? "text-brand-primary border-b-4 border-brand-primary bg-brand-primary/4"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              1. Session Info
-            </button>
-            <button
-              onClick={() => canProceedToStudent && handleTabChange("student")}
-              disabled={!canProceedToStudent}
-              className={`flex-1 min-w-0 px-1 xs:px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 font-medium text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base text-center transition-colors leading-tight ${
-                activeTab === "student"
-                  ? "text-brand-primary border-b-4 border-brand-primary bg-brand-primary/4"
-                  : canProceedToStudent
-                  ? "text-gray-500 hover:text-gray-700"
-                  : "text-gray-300 cursor-not-allowed"
-              }`}
-            >
-              2. Add Students
-            </button>
-            <button
-              onClick={() => canProceedToReview && handleTabChange("review")}
-              disabled={!canProceedToReview}
-              className={`flex-1 min-w-0 px-1 xs:px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 font-medium text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base text-center transition-colors rounded-br-lg rounded-tr-lg leading-tight ${
-                activeTab === "review"
-                  ? "text-brand-primary border-b-4 border-brand-primary bg-brand-primary/4"
-                  : canProceedToReview
-                  ? "text-gray-500 hover:text-gray-700"
-                  : "text-gray-300 cursor-not-allowed"
-              }`}
-            >
-              3. Review & Submit
-            </button>
-          </div>
-        </div>
+        {/* 3 Steps Side-by-Side Sharing Full Width */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* =========================================
+              COLUMN 1: Step 1 - Session Information
+             ========================================= */}
+          <div
+            className={`rounded-xl border transition-all duration-200 ${
+              activeTab === "session"
+                ? "bg-white border-brand-primary shadow-md ring-1 ring-brand-primary/20"
+                : "bg-white border-gray-200/90 shadow-xs"
+            } p-5 sm:p-6 flex flex-col justify-between`}
+          >
+            <div>
+              {/* Header / Tab */}
+              <div
+                onClick={() => canProceedToStudent && handleTabChange("session")}
+                className={`flex items-center justify-between pb-4 border-b border-gray-100 ${
+                  activeTab !== "session" && canProceedToStudent
+                    ? "cursor-pointer group"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                      activeTab === "session"
+                        ? "bg-brand-primary text-white shadow-xs"
+                        : canProceedToStudent
+                        ? "bg-emerald-100 text-brand-primary"
+                        : "bg-gray-100 text-gray-500"
+                    }`}
+                  >
+                    {activeTab !== "session" && canProceedToStudent ? (
+                      <Check className="w-4 h-4 text-brand-primary stroke-[2.5]" />
+                    ) : (
+                      "1"
+                    )}
+                  </div>
+                  <div>
+                    <h2
+                      className={`font-semibold text-base transition-colors ${
+                        activeTab === "session"
+                          ? "text-brand-primary"
+                          : "text-gray-900 group-hover:text-brand-primary"
+                      }`}
+                    >
+                      1. Session Info
+                    </h2>
+                    <p className="text-xs text-gray-500">
+                      Session, term, LGA & school
+                    </p>
+                  </div>
+                </div>
 
-        {/* Tab Content */}
-        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
-          {/* Session Info Tab */}
-          {activeTab === "session" && (
-            <div className="space-y-4 sm:space-y-6">
-              <h2 className="text-base sm:text-lg lg:text-xl font-medium text-black mb-3 sm:mb-4">
-                Session Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent font-medium">
+                {activeTab === "session" ? (
+                  <span className="text-[11px] bg-brand-primary/10 text-brand-primary px-2.5 py-0.5 rounded-full font-medium">
+                    Active
+                  </span>
+                ) : canProceedToStudent ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTabChange("session");
+                    }}
+                    className="text-[11px] text-brand-primary bg-emerald-50 hover:bg-emerald-100 px-2.5 py-0.5 rounded-full font-medium border border-emerald-200/60 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <SquarePen className="w-3 h-3" />
+                    Edit
+                  </button>
+                ) : null}
+              </div>
+
+              {/* Form Fields Stacked in 1 Column */}
+              <div
+                className={`space-y-4 pt-4 transition-opacity duration-200 ${
+                  activeTab !== "session"
+                    ? "opacity-60 pointer-events-none select-none"
+                    : ""
+                }`}
+              >
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-brand-black-accent">
                     Academic Session
                   </Label>
                   <Select value={session} onValueChange={setSession} disabled>
-                    <SelectTrigger className="opacity-50 cursor-not-allowed focus:ring-brand-primary hover:border-brand-primary/40">
+                    <SelectTrigger className="opacity-50 cursor-not-allowed focus:ring-brand-primary hover:border-brand-primary/40 bg-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
@@ -672,18 +702,19 @@ export default function EnrolStudentPage() {
                     </SelectContent>
                   </Select>
                   {metadataLoading && (
-                    <p className="text-sm text-gray-500">Loading session...</p>
+                    <p className="text-[11px] text-gray-500">Loading session...</p>
                   )}
                   {metadataError && (
-                    <p className="text-sm text-red-500">{metadataError}</p>
+                    <p className="text-[11px] text-red-500">{metadataError}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent font-medium">
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-brand-black-accent">
                     Term
                   </Label>
                   <Select value={term} onValueChange={setTerm} disabled>
-                    <SelectTrigger className="opacity-50 cursor-not-allowed focus:ring-brand-primary hover:border-brand-primary/40">
+                    <SelectTrigger className="opacity-50 cursor-not-allowed focus:ring-brand-primary hover:border-brand-primary/40 bg-white">
                       <SelectValue placeholder="Select term" />
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
@@ -696,12 +727,13 @@ export default function EnrolStudentPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent font-medium">
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-brand-black-accent">
                     Local Government Area
                   </Label>
                   <Select value={lgaId} onValueChange={handleLgaChange}>
-                    <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40">
+                    <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40 bg-white">
                       <SelectValue placeholder="Select LGA" />
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
@@ -728,8 +760,9 @@ export default function EnrolStudentPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent font-medium">
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-brand-black-accent">
                     School
                   </Label>
                   <Select
@@ -738,7 +771,7 @@ export default function EnrolStudentPage() {
                     disabled={!lgaId || schools.length === 0}
                   >
                     <SelectTrigger
-                      className={`focus:ring-brand-primary hover:border-brand-primary/40 ${
+                      className={`focus:ring-brand-primary hover:border-brand-primary/40 bg-white ${
                         !lgaId ? "opacity-50" : ""
                       }`}
                     >
@@ -777,57 +810,156 @@ export default function EnrolStudentPage() {
                   </Select>
                 </div>
               </div>
-              <div className="flex justify-end pt-3 sm:pt-4">
+            </div>
+
+            {/* Bottom Action Button */}
+            <div className="pt-5 mt-6 border-t border-gray-100">
+              {activeTab === "session" ? (
                 <Button
+                  type="button"
                   onClick={() =>
                     canProceedToStudent && handleTabChange("student")
                   }
                   disabled={!canProceedToStudent}
-                  className="bg-brand-primary relative overflow-hidden text-xs sm:text-sm md:text-base w-full sm:w-auto"
+                  className="w-full bg-brand-primary text-white text-sm py-2.5 shadow-sm"
                 >
-                  {canProceedToStudent && (
-                    <>
-                      <span className="absolute inset-0 animate-ripple-wave"></span>
-                      <span className="absolute inset-0 animate-ripple-wave-delayed"></span>
-                    </>
-                  )}
-                  <span className="relative z-10">
-                    Continue to Add Students
-                  </span>
+                  Continue to Add Students
                 </Button>
-              </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleTabChange("session")}
+                  className="w-full text-xs text-brand-primary border-brand-primary/30 hover:bg-brand-primary/5"
+                >
+                  Revert to Edit Session
+                </Button>
+              )}
             </div>
-          )}
+          </div>
 
-          {/* Add Students Tab */}
-          {activeTab === "student" && (
-            <div className="space-y-4 sm:space-y-6">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-base sm:text-lg md:text-xl font-semibold text-brand-black">
-                  Add Students
-                </h2>
-                <span className="bg-brand-primary/10 text-brand-primary px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
-                  {students.length} {students.length !== 1 ? "s" : ""}
-                </span>
+          {/* =========================================
+              COLUMN 2: Step 2 - Add Students
+             ========================================= */}
+          <div
+            className={`rounded-xl border transition-all duration-200 ${
+              !canProceedToStudent
+                ? "bg-gray-50/70 border-gray-200 opacity-60"
+                : activeTab === "student"
+                ? "bg-white border-brand-primary shadow-md ring-1 ring-brand-primary/20"
+                : "bg-white border-gray-200/90 shadow-xs"
+            } p-5 sm:p-6 flex flex-col justify-between`}
+          >
+            <div>
+              {/* Header / Tab */}
+              <div
+                onClick={() =>
+                  canProceedToStudent && handleTabChange("student")
+                }
+                className={`flex items-center justify-between pb-4 border-b border-gray-100 ${
+                  canProceedToStudent && activeTab !== "student"
+                    ? "cursor-pointer group"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                      !canProceedToStudent
+                        ? "bg-gray-200 text-gray-400"
+                        : activeTab === "student"
+                        ? "bg-brand-primary text-white shadow-xs"
+                        : students.length > 0
+                        ? "bg-emerald-100 text-brand-primary"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {students.length > 0 && activeTab === "review" ? (
+                      <Check className="w-4 h-4 text-brand-primary stroke-[2.5]" />
+                    ) : (
+                      "2"
+                    )}
+                  </div>
+                  <div>
+                    <h2
+                      className={`font-semibold text-base transition-colors ${
+                        !canProceedToStudent
+                          ? "text-gray-400"
+                          : activeTab === "student"
+                          ? "text-brand-primary"
+                          : "text-gray-900 group-hover:text-brand-primary"
+                      }`}
+                    >
+                      2. Add Students
+                    </h2>
+                    <p
+                      className={`text-xs ${
+                        !canProceedToStudent ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
+                      {students.length} student
+                      {students.length !== 1 ? "s" : ""} added
+                    </p>
+                  </div>
+                </div>
+
+                {!canProceedToStudent ? (
+                  <span className="text-[11px] bg-gray-100 text-gray-400 px-2.5 py-0.5 rounded-full font-medium">
+                    Locked
+                  </span>
+                ) : activeTab === "student" ? (
+                  <span className="text-[11px] bg-brand-primary/10 text-brand-primary px-2.5 py-0.5 rounded-full font-medium">
+                    Active
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTabChange("student");
+                    }}
+                    className="text-[11px] text-brand-primary bg-emerald-50 hover:bg-emerald-100 px-2.5 py-0.5 rounded-full font-medium border border-emerald-200/60 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <SquarePen className="w-3 h-3" />
+                    Edit
+                  </button>
+                )}
               </div>
 
-              {/* Student Form */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 p-2 sm:p-4 rounded-lg">
-                <div className="md:col-span-2 flex justify-center mb-4">
+              {/* Form Fields Stacked in 1 Column */}
+              <div
+                className={`space-y-3.5 pt-4 transition-opacity duration-200 ${
+                  !canProceedToStudent || activeTab !== "student"
+                    ? "opacity-60 pointer-events-none select-none"
+                    : ""
+                }`}
+              >
+                {/* Photo Upload */}
+                <div className="flex items-center gap-3 pb-1">
                   <div className="relative">
-                    <div className="w-24 h-24 rounded-full border-2 border-brand-primary/20 bg-brand-primary/5 flex items-center justify-center overflow-hidden">
+                    <div className="w-14 h-14 rounded-full border-2 border-brand-primary/20 bg-brand-primary/5 flex items-center justify-center overflow-hidden">
                       {student.profilePicture ? (
-                        <img src={student.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                        <img
+                          src={student.profilePicture}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
-                        <Camera className="w-8 h-8 text-brand-primary/40" />
+                        <Camera className="w-6 h-6 text-brand-primary/40" />
                       )}
                     </div>
                     <button
+                      type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploadingImage}
-                      className="absolute bottom-0 right-0 bg-brand-primary text-white p-1.5 rounded-full shadow-lg hover:bg-brand-primary/90 disabled:opacity-50"
+                      disabled={isUploadingImage || activeTab !== "student"}
+                      className="absolute -bottom-1 -right-1 bg-brand-primary text-white p-1 rounded-full shadow-sm hover:bg-brand-primary/90 disabled:opacity-50"
+                      title="Upload profile picture"
                     >
-                      {isUploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusIcon className="w-4 h-4" />}
+                      {isUploadingImage ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <PlusIcon className="w-3 h-3" />
+                      )}
                     </button>
                     <input
                       type="file"
@@ -837,17 +969,26 @@ export default function EnrolStudentPage() {
                       className="hidden"
                     />
                   </div>
+                  <div>
+                    <p className="text-xs font-medium text-brand-black">
+                      Profile Photo
+                    </p>
+                    <p className="text-[11px] text-gray-500">
+                      Optional • Max 5MB
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <Label className="text-brand-black-accent">Class *</Label>
+                {/* Class */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-brand-black-accent">
+                    Class *
+                  </Label>
                   <Select
                     value={student.classId}
-                    onValueChange={(value) =>
-                      handleSelectChange("class", value)
-                    }
+                    onValueChange={(val) => handleSelectChange("class", val)}
                   >
-                    <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40">
+                    <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40 bg-white text-xs h-9">
                       <SelectValue placeholder="Select class" />
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
@@ -855,12 +996,12 @@ export default function EnrolStudentPage() {
                         <SelectItem
                           key={c.id}
                           value={c.id}
-                          className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
+                          className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary text-xs"
                         >
                           <div className="flex items-center justify-between w-full gap-2">
                             <span className="capitalize">{c.name}</span>
                             {c.capacity && (
-                              <span className="ml-auto text-xs text-gray-500">
+                              <span className="ml-auto text-[10px] text-gray-500">
                                 {c.currentStudents}/{c.capacity}
                               </span>
                             )}
@@ -870,8 +1011,10 @@ export default function EnrolStudentPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent">
+
+                {/* First Name */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-brand-black-accent">
                     First Name *
                   </Label>
                   <Input
@@ -879,19 +1022,27 @@ export default function EnrolStudentPage() {
                     value={student.firstName}
                     onChange={handleStudentChange}
                     placeholder="Enter first name"
+                    className="text-xs h-9 bg-white"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent">Last Name *</Label>
+
+                {/* Last Name */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-brand-black-accent">
+                    Last Name *
+                  </Label>
                   <Input
                     name="lastName"
                     value={student.lastName}
                     onChange={handleStudentChange}
                     placeholder="Enter last name"
+                    className="text-xs h-9 bg-white"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent">
+
+                {/* Date of Birth */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-brand-black-accent">
                     Date of Birth *
                   </Label>
                   <Input
@@ -900,200 +1051,309 @@ export default function EnrolStudentPage() {
                     value={student.dateOfBirth}
                     onChange={handleStudentChange}
                     max={new Date().toISOString().split("T")[0]}
+                    className="text-xs h-9 bg-white"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-brand-black-accent">Gender *</Label>
+
+                {/* Gender */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-brand-black-accent">
+                    Gender *
+                  </Label>
                   <Select
                     value={student.gender}
-                    onValueChange={(value) =>
-                      handleSelectChange("gender", value)
-                    }
+                    onValueChange={(val) => handleSelectChange("gender", val)}
                   >
-                    <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40">
+                    <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40 bg-white text-xs h-9">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
                       <SelectItem
                         value="MALE"
-                        className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
+                        className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary text-xs"
                       >
                         Male
                       </SelectItem>
                       <SelectItem
                         value="FEMALE"
-                        className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
+                        className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary text-xs"
                       >
                         Female
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 pt-3 sm:pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => handleTabChange("session")}
-                  className="text-brand-black-accent text-xs sm:text-sm order-2 sm:order-1 w-full sm:w-auto"
-                >
-                  Go back
-                </Button>
-                <Button
-                  onClick={handleAddStudent}
-                  className="flex items-center justify-center gap-2 !bg-[#E5E7EA] text-brand-black hover:bg-[#d5d7da] text-xs sm:text-sm order-1 sm:order-2 w-full sm:w-auto"
-                >
-                  <PlusIcon className="w-4 h-4" />
-                  Add Student
-                </Button>
-              </div>
-
-              {/* Added Students List */}
-              {students.length > 0 && (
-                <div className="mt-4 sm:mt-6 md:mt-8">
-                  <h3 className="text-base sm:text-lg font-medium text-brand-black mb-3 sm:mb-4">
-                    Added Students ({students.length})
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    {students.map((stu, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-start sm:items-center justify-between p-2 sm:p-3 bg-white border border-gray-200 rounded-md gap-2"
-                      >
-                        <div className="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs sm:text-sm font-medium flex-shrink-0">
-                            {getInitials(`${stu.firstName} ${stu.lastName}`)}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-brand-black text-xs sm:text-sm truncate">
-                              {stu.firstName} {stu.lastName}
-                            </p>
-                            <p className="text-[10px] sm:text-xs text-brand-black-accent truncate">
-                              {stu.dateOfBirth} • {stu.className} •{" "}
-                              {stu.gender === "MALE" ? "Male" : "Female"}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditStudent(idx)}
-                            className="text-brand-black-accent hover:text-brand-black"
-                          >
-                            <SquarePen className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveStudent(idx)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex justify-end mt-3 sm:mt-4">
-                    <Button
-                      className="bg-brand-primary text-xs sm:text-sm md:text-base w-full sm:w-auto"
-                      onClick={() => handleTabChange("review")}
-                    >
-                      Continue to Review
-                    </Button>
-                  </div>
+                {/* Add to Batch Button */}
+                <div className="pt-1">
+                  <Button
+                    type="button"
+                    onClick={handleAddStudent}
+                    disabled={activeTab !== "student"}
+                    className="w-full flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-brand-black text-xs py-2 h-9 border border-gray-200 shadow-2xs"
+                  >
+                    <PlusIcon className="w-3.5 h-3.5 text-brand-primary" />
+                    Add Student to Batch
+                  </Button>
                 </div>
-              )}
-            </div>
-          )}
 
-          {/* Review Tab */}
-          {activeTab === "review" && (
-            <div className="space-y-4 sm:space-y-6">
-              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-brand-black">
-                Review & Submit
-              </h2>
-
-              {/* Session Summary */}
-              <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
-                <h3 className="font-medium text-brand-black mb-2 text-sm sm:text-base">
-                  Session Information
-                </h3>
-                <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
-                  <div>
-                    <span className="text-brand-black-accent">Session:</span>{" "}
-                    <span className="font-medium">{session}</span>
-                  </div>
-                  <div>
-                    <span className="text-brand-black-accent">Term:</span>{" "}
-                    <span className="font-medium">{term}</span>
-                  </div>
-                  <div>
-                    <span className="text-brand-black-accent">School:</span>{" "}
-                    <span className="font-medium" title={school}>
-                      {school.length > 10
-                        ? `${school.slice(0, 10)}...`
-                        : school}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-brand-black-accent">LGA:</span>{" "}
-                    <span className="font-medium">{lgaValue}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-brand-black mb-3 sm:mb-4 text-sm sm:text-base">
-                  Students ({students.length})
-                </h3>
-                <div className="space-y-2">
-                  {students.map((stu, idx) => (
-                    <div
-                      key={idx}
-                      className="p-2 sm:p-3 border border-gray-200 rounded-md"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-primary text-white text-brand-primary-foreground flex items-center justify-center text-xs sm:text-sm font-medium flex-shrink-0">
-                            {getInitials(`${stu.firstName} ${stu.lastName}`)}
+                {/* Added Students List inside Column 2 */}
+                {students.length > 0 && (
+                  <div className="pt-3 border-t border-gray-100">
+                    <p className="text-xs font-semibold text-brand-black mb-2 flex items-center justify-between">
+                      <span>Draft Students ({students.length})</span>
+                    </p>
+                    <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                      {students.map((stu, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-2 bg-gray-50/80 border border-gray-200 rounded-md text-xs"
+                        >
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <div className="w-6 h-6 rounded-full bg-brand-primary text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
+                              {getInitials(`${stu.firstName} ${stu.lastName}`)}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-brand-black truncate">
+                                {stu.firstName} {stu.lastName}
+                              </p>
+                              <p className="text-[10px] text-gray-500 truncate">
+                                {stu.className} •{" "}
+                                {stu.gender === "MALE" ? "Male" : "Female"}
+                              </p>
+                            </div>
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-gray-900 text-xs sm:text-sm truncate">
-                              {stu.firstName} {stu.lastName}
-                            </p>
-                            <p className="text-[10px] sm:text-xs text-gray-500 truncate">
-                              {stu.dateOfBirth} • {stu.className} •{" "}
-                              {stu.gender === "MALE" ? "Male" : "Female"}
-                            </p>
+                          <div className="flex items-center gap-0.5 flex-shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleEditStudent(idx)}
+                              className="p-1 text-gray-500 hover:text-brand-primary"
+                              title="Edit"
+                            >
+                              <SquarePen className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveStudent(idx)}
+                              className="p-1 text-red-500 hover:text-red-700"
+                              title="Remove"
+                            >
+                              <TrashIcon className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
+            </div>
 
-              <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 pt-4 sm:pt-6">
+            {/* Bottom Action Button */}
+            <div className="pt-5 mt-6 border-t border-gray-100">
+              {activeTab === "student" ? (
                 <Button
+                  type="button"
+                  onClick={() =>
+                    canProceedToReview && handleTabChange("review")
+                  }
+                  disabled={!canProceedToReview}
+                  className="w-full bg-brand-primary text-white text-sm py-2.5 shadow-sm"
+                >
+                  Continue to Review ({students.length})
+                </Button>
+              ) : canProceedToStudent ? (
+                <Button
+                  type="button"
                   variant="outline"
                   onClick={() => handleTabChange("student")}
-                  className="text-xs sm:text-sm order-2 sm:order-1 w-full sm:w-auto"
+                  className="w-full text-xs text-brand-primary border-brand-primary/30 hover:bg-brand-primary/5"
                 >
-                  Back to Edit
+                  Revert to Edit Students
                 </Button>
-                <Button
-                  onClick={handleSubmitEnrollment}
-                  disabled={isSubmitting}
-                  className="flex items-center justify-center gap-2 font-medium bg-brand-primary text-xs sm:text-sm order-1 sm:order-2 w-full sm:w-auto"
-                >
-                  <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  {isSubmitting ? "Enrolling..." : "Submit"}
-                </Button>
+              ) : null}
+            </div>
+          </div>
+
+          {/* =========================================
+              COLUMN 3: Step 3 - Review & Submit
+             ========================================= */}
+          <div
+            className={`rounded-xl border transition-all duration-200 ${
+              !canProceedToReview
+                ? "bg-gray-50/70 border-gray-200 opacity-60"
+                : activeTab === "review"
+                ? "bg-white border-brand-primary shadow-md ring-1 ring-brand-primary/20"
+                : "bg-white border-gray-200/90 shadow-xs"
+            } p-5 sm:p-6 flex flex-col justify-between`}
+          >
+            <div>
+              {/* Header / Tab */}
+              <div
+                onClick={() =>
+                  canProceedToReview && handleTabChange("review")
+                }
+                className={`flex items-center justify-between pb-4 border-b border-gray-100 ${
+                  canProceedToReview && activeTab !== "review"
+                    ? "cursor-pointer group"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                      !canProceedToReview
+                        ? "bg-gray-200 text-gray-400"
+                        : activeTab === "review"
+                        ? "bg-brand-primary text-white shadow-xs"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    3
+                  </div>
+                  <div>
+                    <h2
+                      className={`font-semibold text-base transition-colors ${
+                        !canProceedToReview
+                          ? "text-gray-400"
+                          : activeTab === "review"
+                          ? "text-brand-primary"
+                          : "text-gray-900 group-hover:text-brand-primary"
+                      }`}
+                    >
+                      3. Review & Submit
+                    </h2>
+                    <p
+                      className={`text-xs ${
+                        !canProceedToReview ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
+                      Summary & final submission
+                    </p>
+                  </div>
+                </div>
+
+                {!canProceedToReview ? (
+                  <span className="text-[11px] bg-gray-100 text-gray-400 px-2.5 py-0.5 rounded-full font-medium">
+                    Locked
+                  </span>
+                ) : activeTab === "review" ? (
+                  <span className="text-[11px] bg-brand-primary/10 text-brand-primary px-2.5 py-0.5 rounded-full font-medium">
+                    Ready
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTabChange("review");
+                    }}
+                    className="text-[11px] text-brand-primary bg-emerald-50 hover:bg-emerald-100 px-2.5 py-0.5 rounded-full font-medium border border-emerald-200/60"
+                  >
+                    View
+                  </button>
+                )}
+              </div>
+
+              {/* Review Content Stacked in 1 Column */}
+              <div
+                className={`space-y-4 pt-4 transition-opacity duration-200 ${
+                  !canProceedToReview || activeTab !== "review"
+                    ? "opacity-60 pointer-events-none select-none"
+                    : ""
+                }`}
+              >
+                {/* Session Target Summary */}
+                <div className="p-3 bg-emerald-50/50 border border-emerald-200/60 rounded-lg space-y-2 text-xs">
+                  <div className="flex justify-between items-center py-0.5 border-b border-emerald-100/60">
+                    <span className="text-gray-500">Session:</span>
+                    <span className="font-semibold text-brand-black">
+                      {session || "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-0.5 border-b border-emerald-100/60">
+                    <span className="text-gray-500">Term:</span>
+                    <span className="font-semibold text-brand-black">
+                      {term ? `${term} Term` : "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-0.5 border-b border-emerald-100/60">
+                    <span className="text-gray-500">LGA:</span>
+                    <span className="font-semibold text-brand-black capitalize">
+                      {lgaValue || "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-0.5">
+                    <span className="text-gray-500">School:</span>
+                    <span
+                      className="font-semibold text-brand-black capitalize truncate max-w-[180px]"
+                      title={school}
+                    >
+                      {school || "-"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Students Roster Summary */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold text-brand-black">
+                      Enrolling Students ({students.length})
+                    </p>
+                    <span className="text-[11px] text-gray-500">
+                      Ready to submit
+                    </span>
+                  </div>
+
+                  {students.length > 0 ? (
+                    <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                      {students.map((stu, idx) => (
+                        <div
+                          key={idx}
+                          className="p-2 border border-gray-200 rounded-md bg-white text-xs flex items-center gap-2"
+                        >
+                          <div className="w-6 h-6 rounded-full bg-brand-primary text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
+                            {getInitials(`${stu.firstName} ${stu.lastName}`)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-brand-black truncate">
+                              {stu.firstName} {stu.lastName}
+                            </p>
+                            <p className="text-[10px] text-gray-500 truncate">
+                              {stu.className} •{" "}
+                              {stu.gender === "MALE" ? "Male" : "Female"} •{" "}
+                              {stu.dateOfBirth}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 italic py-6 text-center border border-dashed border-gray-200 rounded-lg">
+                      No students added to batch yet
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-          )}
+
+            {/* Bottom Action Button */}
+            <div className="pt-5 mt-6 border-t border-gray-100">
+              <Button
+                type="button"
+                onClick={handleSubmitEnrollment}
+                disabled={
+                  isSubmitting || !canProceedToReview || activeTab !== "review"
+                }
+                className="w-full flex items-center justify-center gap-2 bg-brand-primary text-white text-sm py-2.5 font-medium shadow-sm"
+              >
+                <CheckCircleIcon className="w-4 h-4" />
+                {isSubmitting
+                  ? "Enrolling..."
+                  : `Submit Enrollment (${students.length})`}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
