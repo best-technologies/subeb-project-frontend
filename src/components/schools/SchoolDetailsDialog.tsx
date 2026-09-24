@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SchoolDirectoryItem } from "@/services/types/schoolsDirectoryResponse";
-import { formatEducationalText } from "@/utils/formatters";
+import { formatEducationalText, capitalizeWords } from "@/utils/formatters";
 import {
   School,
   MapPin,
@@ -45,12 +45,12 @@ export const SchoolDetailsDialog: React.FC<SchoolDetailsDialogProps> = ({
     school.averageScore >= 75
       ? "bg-emerald-50 text-emerald-700 border-emerald-200"
       : school.averageScore >= 60
-      ? "bg-teal-50 text-teal-700 border-teal-200"
-      : school.averageScore >= 50
-      ? "bg-amber-50 text-amber-700 border-amber-200"
-      : school.averageScore > 0
-      ? "bg-rose-50 text-rose-700 border-rose-200"
-      : "bg-gray-50 text-gray-500 border-gray-200";
+        ? "bg-teal-50 text-teal-700 border-teal-200"
+        : school.averageScore >= 50
+          ? "bg-amber-50 text-amber-700 border-amber-200"
+          : school.averageScore > 0
+            ? "bg-rose-50 text-rose-700 border-rose-200"
+            : "bg-gray-50 text-gray-500 border-gray-200";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -112,7 +112,7 @@ export const SchoolDetailsDialog: React.FC<SchoolDetailsDialogProps> = ({
           {/* School Details List */}
           <div className="space-y-3 pt-2 border-t border-gray-100 text-xs">
             <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider text-gray-400">
-              Institutional Profile
+              School Profile
             </h4>
 
             <div className="grid grid-cols-2 gap-3">
@@ -162,7 +162,9 @@ export const SchoolDetailsDialog: React.FC<SchoolDetailsDialogProps> = ({
                 <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[10px] text-gray-400 block">Campus Address</span>
-                  <span className="font-medium text-gray-900">{school.address}</span>
+                  <span className="font-medium text-gray-900 capitalize">
+                    {capitalizeWords(school.address)}
+                  </span>
                 </div>
               </div>
             )}

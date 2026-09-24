@@ -13,6 +13,8 @@ import {
   Eye,
   Building2,
   Users,
+  MoreVertical,
+  Pencil,
 } from "lucide-react";
 import { SchoolDirectoryItem } from "@/services/types/schoolsDirectoryResponse";
 import { SchoolFilterStage } from "@/services/hooks/useSchoolSearch";
@@ -27,6 +29,12 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/Button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 interface SchoolsTableProps {
   schools: SchoolDirectoryItem[];
@@ -43,6 +51,7 @@ interface SchoolsTableProps {
   isSearching?: boolean;
   onPageChange?: (page: number) => void;
   onViewSchool: (school: SchoolDirectoryItem) => void;
+  onEditSchool?: (school: SchoolDirectoryItem) => void;
 }
 
 export const SchoolsTable: React.FC<SchoolsTableProps> = ({
@@ -60,6 +69,7 @@ export const SchoolsTable: React.FC<SchoolsTableProps> = ({
   isSearching = false,
   onPageChange,
   onViewSchool,
+  onEditSchool,
 }) => {
   const startItem = totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
@@ -233,15 +243,34 @@ export const SchoolsTable: React.FC<SchoolsTableProps> = ({
                         </span>
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onViewSchool(school)}
-                          className="h-8 w-8 p-0 text-gray-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg cursor-pointer"
-                          title="View School Profile"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-gray-500 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors inline-flex items-center justify-center"
+                              title="School Actions"
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-36 bg-white border border-gray-200 shadow-xl rounded-xl p-1 z-50">
+                            <DropdownMenuItem
+                              onClick={() => onViewSchool(school)}
+                              className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-800 rounded-lg cursor-pointer transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>View Profile</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onEditSchool?.(school)}
+                              className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-800 rounded-lg cursor-pointer transition-colors"
+                            >
+                              <Pencil className="w-3.5 h-3.5 text-teal-600" />
+                              <span>Edit School</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   );

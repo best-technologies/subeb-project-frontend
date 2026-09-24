@@ -568,3 +568,12 @@ export const getSchoolsDirectory = async (
 
   return response.json();
 };
+
+export { createSchool, updateSchool, getSchoolById } from "./api/schools";
+export type {
+  CreateSchoolPayload,
+  UpdateSchoolPayload,
+  CreateSchoolResponse,
+  SchoolDetailResponse,
+  SchoolDetailData,
+} from "./api/schools";

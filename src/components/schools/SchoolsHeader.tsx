@@ -19,14 +19,15 @@ const SchoolsHeader: React.FC<SchoolsHeaderProps> = ({ onAddSchool }) => {
             Institutional directory, enrollment statistics, and performance analytics across Abia State
           </p>
         </div>
-        <div>
+        <div className="flex-shrink-0">
           {onAddSchool && (
             <button
+              type="button"
               onClick={onAddSchool}
-              className="bg-white text-brand-primary font-semibold px-6 py-2.5 rounded-lg shadow-md hover:bg-gray-50 transition-colors flex items-center gap-2 cursor-pointer"
+              className="bg-white text-emerald-800 font-semibold px-5 py-2.5 rounded-lg shadow-md hover:bg-emerald-50 hover:shadow-lg transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
             >
-              <Plus className="w-5 h-5 text-brand-primary" />
-              Enrol School
+              <Plus className="w-5 h-5 text-emerald-700" />
+              <span>Add School</span>
             </button>
           )}
         </div>

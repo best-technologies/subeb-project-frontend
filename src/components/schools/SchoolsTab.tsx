@@ -10,6 +10,8 @@ import { SchoolChartsSection } from "./charts/SchoolChartsSection";
 import SchoolsFilters from "./SchoolsFilters";
 import SchoolsTable from "./SchoolsTable";
 import { SchoolDetailsDialog } from "./SchoolDetailsDialog";
+import { AddSchoolDialog } from "./AddSchoolDialog";
+import { EditSchoolSheet } from "./EditSchoolSheet";
 import { formatTermName } from "@/utils/formatters";
 
 interface SchoolsTabProps {
@@ -20,6 +22,9 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
   // Modal state
   const [selectedSchool, setSelectedSchool] = useState<SchoolDirectoryItem | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showAddSchoolDialog, setShowAddSchoolDialog] = useState(false);
+  const [selectedSchoolForEdit, setSelectedSchoolForEdit] = useState<SchoolDirectoryItem | null>(null);
+  const [showEditSheet, setShowEditSheet] = useState(false);
 
   // Progressive search & cascading filter hook
   const {
@@ -39,6 +44,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
     updateSearch,
     changePage,
     clearFilters,
+    refetch,
   } = useSchoolSearch();
 
   // Dynamic session and term data
@@ -95,10 +101,15 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
     setShowDetailsDialog(true);
   };
 
+  const handleEditSchool = (school: SchoolDirectoryItem) => {
+    setSelectedSchoolForEdit(school);
+    setShowEditSheet(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* 1. Page Header Card */}
-      <SchoolsHeader />
+      <SchoolsHeader onAddSchool={() => setShowAddSchoolDialog(true)} />
 
       {/* 2. Visual Demographic & Performance Analytics Suite */}
       <SchoolChartsSection
@@ -143,6 +154,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
         isSearching={isSearching}
         onPageChange={changePage}
         onViewSchool={handleViewSchool}
+        onEditSchool={handleEditSchool}
       />
 
       {/* 5. School Details Modal */}
@@ -155,6 +167,26 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
         }}
         sessionName={selectedSessionName}
         termName={selectedTermName}
+      />
+
+      {/* 6. Add School Modal */}
+      <AddSchoolDialog
+        isOpen={showAddSchoolDialog}
+        onClose={() => setShowAddSchoolDialog(false)}
+        lgas={lgas}
+        onSuccess={() => refetch()}
+      />
+
+      {/* 7. Edit School Slide-in Sheet */}
+      <EditSchoolSheet
+        school={selectedSchoolForEdit}
+        isOpen={showEditSheet}
+        onClose={() => {
+          setShowEditSheet(false);
+          setSelectedSchoolForEdit(null);
+        }}
+        lgas={lgas}
+        onSuccess={() => refetch()}
       />
     </div>
   );
