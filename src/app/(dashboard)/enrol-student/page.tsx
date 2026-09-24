@@ -19,12 +19,18 @@ import {
 import { Label } from "@/components/ui/label";
 import { LoadingModal } from "@/components/ui/LoadingModal";
 import { Dialog } from "@/components/ui/custom-dialog";
+import {
+  SearchableSelect,
+  type SearchableSelectOption,
+} from "@/components/ui/searchable-select";
+import { cn } from "@/lib/utils";
 import { enrollStudents } from "@/services/api/enrollment";
 import {
   useEnrollmentMetadata,
   useEnrollmentLgaSchools,
   useEnrollmentSchoolClasses,
 } from "@/services/hooks/useEnrollment";
+import { useSessions, useTerms } from "@/services/hooks/useAcademic";
 import type { EnrolledStudent } from "@/services/types/enrollment";
 import { uploadApi } from "@/services/api/upload";
 
@@ -67,7 +73,9 @@ const initialStudentState: StudentFormData = {
 };
 
 export default function EnrolStudentPage() {
+  const [sessionId, setSessionId] = useState("");
   const [session, setSession] = useState("2024/2025");
+  const [termId, setTermId] = useState("");
   const [term, setTerm] = useState("First");
   const [school, setSchool] = useState("");
   const [schoolId, setSchoolId] = useState("");
@@ -94,6 +102,14 @@ export default function EnrolStudentPage() {
   const [showEnrollmentSuccess, setShowEnrollmentSuccess] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Warning dialog state for selecting non-current session/term
+  const [showAcademicWarning, setShowAcademicWarning] = useState(false);
+  const [pendingAcademicChange, setPendingAcademicChange] = useState<{
+    type: "session" | "term";
+    id: string;
+    name: string;
+  } | null>(null);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -127,6 +143,54 @@ export default function EnrolStudentPage() {
     error: metadataError,
   } = useEnrollmentMetadata();
 
+  // Fetch available sessions and terms from academic management
+  const { data: sessionsData, isLoading: sessionsLoading } = useSessions();
+  const { data: termsData, isLoading: termsLoading } = useTerms(
+    sessionId || undefined
+  );
+
+  const availableSessions = useMemo(
+    () => sessionsData?.data || [],
+    [sessionsData]
+  );
+
+  const availableTerms = useMemo(
+    () => termsData?.data || [],
+    [termsData]
+  );
+
+  // Identify current active session and term
+  const currentSession = useMemo(() => {
+    return (
+      availableSessions.find((s) => s.isCurrent) ||
+      (enrollmentMetadata?.currentSession
+        ? {
+            id: enrollmentMetadata.currentSession.id,
+            name: enrollmentMetadata.currentSession.name,
+            isCurrent: true,
+            status: "OPEN" as const,
+            createdAt: "",
+          }
+        : null)
+    );
+  }, [availableSessions, enrollmentMetadata]);
+
+  const currentTerm = useMemo(() => {
+    return (
+      availableTerms.find((t) => t.isCurrent) ||
+      (enrollmentMetadata?.currentTerm
+        ? {
+            id: enrollmentMetadata.currentTerm.id,
+            name: enrollmentMetadata.currentTerm.name,
+            sessionId: enrollmentMetadata.currentTerm.sessionId,
+            isCurrent: true,
+            status: "OPEN" as const,
+            createdAt: "",
+          }
+        : null)
+    );
+  }, [availableTerms, enrollmentMetadata]);
+
   const {
     data: lgaSchoolsData,
     loading: schoolsLoading,
@@ -139,15 +203,37 @@ export default function EnrolStudentPage() {
     error: classesError,
   } = useEnrollmentSchoolClasses(schoolId);
 
-  // Auto-populate session and term from metadata
+  // Initialize session and term from current active session/term or metadata
   React.useEffect(() => {
-    if (enrollmentMetadata?.currentSession) {
-      setSession(enrollmentMetadata.currentSession.name);
+    if (currentSession && !sessionId) {
+      setSessionId(currentSession.id);
+      setSession(currentSession.name);
     }
-    if (enrollmentMetadata?.currentTerm) {
-      setTerm(formatTermName(enrollmentMetadata.currentTerm.name));
+  }, [currentSession, sessionId]);
+
+  React.useEffect(() => {
+    if (currentTerm && !termId) {
+      setTermId(currentTerm.id);
+      setTerm(formatTermName(currentTerm.name));
     }
-  }, [enrollmentMetadata]);
+  }, [currentTerm, termId]);
+
+  // When terms load for a selected session, if current term is not in list, auto-select current or first
+  React.useEffect(() => {
+    if (availableTerms.length > 0) {
+      const match = availableTerms.find((t) => t.id === termId);
+      if (!match) {
+        const defaultTerm =
+          availableTerms.find((t) => t.isCurrent) ||
+          availableTerms.find((t) => t.status === "OPEN") ||
+          availableTerms[0];
+        if (defaultTerm) {
+          setTermId(defaultTerm.id);
+          setTerm(formatTermName(defaultTerm.name));
+        }
+      }
+    }
+  }, [availableTerms, termId]);
 
   // Extract data
   const lgas = useMemo(
@@ -163,6 +249,27 @@ export default function EnrolStudentPage() {
   const classes = useMemo(
     () => schoolClassesData?.classes || [],
     [schoolClassesData]
+  );
+
+  // Searchable select options for LGAs and Schools
+  const lgaOptions = useMemo<SearchableSelectOption[]>(
+    () =>
+      lgas.map((lga: { id: string; name: string; totalSchools: number }) => ({
+        value: lga.id,
+        label: lga.name,
+        badge: lga.totalSchools,
+      })),
+    [lgas]
+  );
+
+  const schoolOptions = useMemo<SearchableSelectOption[]>(
+    () =>
+      schools.map((s: { id: string; name: string; totalClasses: number }) => ({
+        value: s.id,
+        label: s.name,
+        badge: s.totalClasses,
+      })),
+    [schools]
   );
 
   // Reset school selection when LGA changes
@@ -218,6 +325,81 @@ export default function EnrolStudentPage() {
       setShowSuccessModal(true);
     }
   }, [schoolClassesData, classesLoading, schoolId]);
+
+  const handleSessionChange = (newSessionId: string) => {
+    if (newSessionId === sessionId) return;
+
+    const selectedSessionObj = availableSessions.find((s) => s.id === newSessionId);
+    if (!selectedSessionObj) return;
+
+    const isCurrent = Boolean(
+      selectedSessionObj.isCurrent ||
+      (currentSession && selectedSessionObj.id === currentSession.id)
+    );
+
+    if (!isCurrent) {
+      setPendingAcademicChange({
+        type: "session",
+        id: selectedSessionObj.id,
+        name: selectedSessionObj.name,
+      });
+      setShowAcademicWarning(true);
+    } else {
+      setSessionId(selectedSessionObj.id);
+      setSession(selectedSessionObj.name);
+      setTermId("");
+      setTerm("");
+    }
+  };
+
+  const handleTermChange = (newTermId: string) => {
+    if (newTermId === termId) return;
+
+    const selectedTermObj = availableTerms.find((t) => t.id === newTermId);
+    const termName = selectedTermObj ? formatTermName(selectedTermObj.name) : newTermId;
+
+    const isSessionCurrent = Boolean(
+      currentSession && sessionId === currentSession.id
+    );
+    const isTermCurrent = Boolean(
+      selectedTermObj?.isCurrent ||
+      (currentTerm && selectedTermObj?.id === currentTerm.id)
+    );
+
+    if (!isSessionCurrent || !isTermCurrent) {
+      setPendingAcademicChange({
+        type: "term",
+        id: newTermId,
+        name: termName,
+      });
+      setShowAcademicWarning(true);
+    } else {
+      setTermId(newTermId);
+      setTerm(termName);
+    }
+  };
+
+  const handleConfirmAcademicChange = () => {
+    if (!pendingAcademicChange) return;
+
+    if (pendingAcademicChange.type === "session") {
+      setSessionId(pendingAcademicChange.id);
+      setSession(pendingAcademicChange.name);
+      setTermId("");
+      setTerm("");
+    } else if (pendingAcademicChange.type === "term") {
+      setTermId(pendingAcademicChange.id);
+      setTerm(pendingAcademicChange.name);
+    }
+
+    setShowAcademicWarning(false);
+    setPendingAcademicChange(null);
+  };
+
+  const handleCancelAcademicChange = () => {
+    setShowAcademicWarning(false);
+    setPendingAcademicChange(null);
+  };
 
   const handleStudentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -475,6 +657,56 @@ export default function EnrolStudentPage() {
         </div>
       </Dialog>
 
+      {/* Non-Current Academic Period Warning Dialog */}
+      <Dialog
+        open={showAcademicWarning}
+        onOpenChange={handleCancelAcademicChange}
+        showCloseButton={false}
+      >
+        <div className="p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-amber-600">
+              <ExclamationCircleIcon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-brand-black mb-1">
+                {pendingAcademicChange?.type === "session"
+                  ? "Non-Current Academic Session Selected"
+                  : "Non-Current Academic Term Selected"}
+              </h3>
+              <p className="text-sm text-gray-600 mb-3">
+                {pendingAcademicChange?.type === "session"
+                  ? `You are selecting the academic session "${pendingAcademicChange.name}", which is not the current active session (${currentSession?.name || "active session"}).`
+                  : `You are selecting "${pendingAcademicChange?.name} Term", which is not the current active term (${currentTerm ? `${formatTermName(currentTerm.name)} Term` : "active term"}).`}
+              </p>
+              <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-lg text-xs text-amber-900 mb-1">
+                <p className="font-semibold mb-1">Confirmation Required:</p>
+                <p>
+                  Enrolling students into a previous or future academic period will record their enrollment under that specific session and term. Once you confirm, you can proceed through the form and submit this batch as usual.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <Button
+              type="button"
+              onClick={handleCancelAcademicChange}
+              variant="outline"
+              className="flex-1 order-2 sm:order-1"
+            >
+              Cancel & Keep Current
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmAcademicChange}
+              className="flex-1 text-white order-1 sm:order-2 bg-amber-600 hover:bg-amber-700"
+            >
+              Confirm & Proceed
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
       {/* Enrollment Success Dialog */}
       <Dialog
         open={showEnrollmentSuccess}
@@ -685,24 +917,60 @@ export default function EnrolStudentPage() {
                 }`}
               >
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-brand-black-accent">
-                    Academic Session
-                  </Label>
-                  <Select value={session} onValueChange={setSession} disabled>
-                    <SelectTrigger className="opacity-50 cursor-not-allowed focus:ring-brand-primary hover:border-brand-primary/40 bg-white">
-                      <SelectValue />
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium text-brand-black-accent">
+                      Academic Session
+                    </Label>
+                    {sessionId && currentSession && sessionId !== currentSession.id && (
+                      <span className="text-[10px] text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                        Non-Current
+                      </span>
+                    )}
+                  </div>
+                  <Select
+                    value={sessionId || undefined}
+                    onValueChange={handleSessionChange}
+                    disabled={sessionsLoading && availableSessions.length === 0}
+                  >
+                    <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40 bg-white">
+                      <SelectValue placeholder="Select session">
+                        {session || "Select session"}
+                      </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="border-brand-primary/20 text-brand-primary">
-                      <SelectItem
-                        value={session}
-                        className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
-                      >
-                        {session}
-                      </SelectItem>
+                    <SelectContent className="border-brand-primary/20 text-brand-primary max-h-60">
+                      {availableSessions.length > 0 ? (
+                        availableSessions.map((s) => (
+                          <SelectItem
+                            key={s.id}
+                            value={s.id}
+                            className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
+                          >
+                            <div className="flex items-center justify-between w-full gap-2">
+                              <span>{s.name}</span>
+                              {s.isCurrent ? (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-semibold">
+                                  Current
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-gray-400">
+                                  {s.status}
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem
+                          value={sessionId || "default"}
+                          className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
+                        >
+                          {session || "Loading sessions..."}
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
-                  {metadataLoading && (
-                    <p className="text-[11px] text-gray-500">Loading session...</p>
+                  {sessionsLoading && (
+                    <p className="text-[11px] text-gray-500">Loading sessions...</p>
                   )}
                   {metadataError && (
                     <p className="text-[11px] text-red-500">{metadataError}</p>
@@ -710,104 +978,106 @@ export default function EnrolStudentPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-brand-black-accent">
-                    Term
-                  </Label>
-                  <Select value={term} onValueChange={setTerm} disabled>
-                    <SelectTrigger className="opacity-50 cursor-not-allowed focus:ring-brand-primary hover:border-brand-primary/40 bg-white">
-                      <SelectValue placeholder="Select term" />
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium text-brand-black-accent">
+                      Term
+                    </Label>
+                    {termId && currentTerm && termId !== currentTerm.id && (
+                      <span className="text-[10px] text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                        Non-Current
+                      </span>
+                    )}
+                  </div>
+                  <Select
+                    value={termId || term || undefined}
+                    onValueChange={handleTermChange}
+                    disabled={!sessionId || (termsLoading && availableTerms.length === 0)}
+                  >
+                    <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40 bg-white">
+                      <SelectValue placeholder="Select term">
+                        {term ? `${term} Term` : "Select term"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
-                      <SelectItem
-                        value={term}
-                        className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
-                      >
-                        {term} Term
-                      </SelectItem>
+                      {availableTerms.length > 0 ? (
+                        availableTerms.map((t) => (
+                          <SelectItem
+                            key={t.id}
+                            value={t.id}
+                            className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
+                          >
+                            <div className="flex items-center justify-between w-full gap-2">
+                              <span>{formatTermName(t.name)} Term</span>
+                              {t.isCurrent && (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-semibold">
+                                  Current
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))
+                      ) : (
+                        ["First", "Second", "Third"].map((tName) => (
+                          <SelectItem
+                            key={tName}
+                            value={tName}
+                            className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
+                          >
+                            {tName} Term
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
+                  {termsLoading && (
+                    <p className="text-[11px] text-gray-500">Loading terms...</p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-brand-black-accent">
                     Local Government Area
                   </Label>
-                  <Select value={lgaId} onValueChange={handleLgaChange}>
-                    <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40 bg-white">
-                      <SelectValue placeholder="Select LGA" />
-                    </SelectTrigger>
-                    <SelectContent className="border-brand-primary/20 text-brand-primary">
-                      {lgas.map(
-                        (lga: {
-                          id: string;
-                          name: string;
-                          totalSchools: number;
-                        }) => (
-                          <SelectItem
-                            key={lga.id}
-                            value={lga.id}
-                            className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
-                          >
-                            <div className="flex items-center justify-between w-full gap-2">
-                              <span className="capitalize">{lga.name}</span>
-                              <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-brand-primary text-white font-medium">
-                                {lga.totalSchools}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    options={lgaOptions}
+                    value={lgaId}
+                    onValueChange={handleLgaChange}
+                    placeholder="Select LGA"
+                    searchPlaceholder="Search LGA by name..."
+                    emptyText="No LGA found."
+                    triggerClassName="focus:ring-brand-primary hover:border-brand-primary/40 bg-white"
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-brand-black-accent">
                     School
                   </Label>
-                  <Select
+                  <SearchableSelect
+                    options={schoolOptions}
                     value={schoolId}
                     onValueChange={handleSchoolChange}
                     disabled={!lgaId || schools.length === 0}
-                  >
-                    <SelectTrigger
-                      className={`focus:ring-brand-primary hover:border-brand-primary/40 bg-white ${
-                        !lgaId ? "opacity-50" : ""
-                      }`}
-                    >
-                      <SelectValue
-                        placeholder={
-                          !lgaId
-                            ? "Select LGA first"
-                            : schools.length === 0
-                            ? "No schools available"
-                            : "Select school"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent className="border-brand-primary/20 text-brand-primary">
-                      {schools.map(
-                        (s: {
-                          id: string;
-                          name: string;
-                          totalClasses: number;
-                        }) => (
-                          <SelectItem
-                            key={s.id}
-                            value={s.id}
-                            className="focus:bg-brand-primary/10 focus:text-brand-primary hover:bg-brand-primary/5 data-[state=checked]:text-brand-primary [&>span>svg]:text-brand-primary"
-                          >
-                            <div className="flex items-center justify-between w-full gap-2">
-                              <span className="capitalize">{s.name}</span>
-                              <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-brand-primary text-white font-medium">
-                                {s.totalClasses}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
+                    placeholder={
+                      !lgaId
+                        ? "Select LGA first"
+                        : schools.length === 0
+                        ? "No schools available"
+                        : "Select school"
+                    }
+                    searchPlaceholder="Search school by name..."
+                    emptyText={
+                      !lgaId
+                        ? "Please select an LGA first"
+                        : schools.length === 0
+                        ? "No schools in this LGA"
+                        : "No matching school found."
+                    }
+                    triggerClassName={cn(
+                      "focus:ring-brand-primary hover:border-brand-primary/40 bg-white",
+                      !lgaId && "opacity-50"
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -1267,14 +1537,24 @@ export default function EnrolStudentPage() {
                 <div className="p-3 bg-emerald-50/50 border border-emerald-200/60 rounded-lg space-y-2 text-xs">
                   <div className="flex justify-between items-center py-0.5 border-b border-emerald-100/60">
                     <span className="text-gray-500">Session:</span>
-                    <span className="font-semibold text-brand-black">
+                    <span className="font-semibold text-brand-black flex items-center gap-1.5">
                       {session || "-"}
+                      {sessionId && currentSession && sessionId !== currentSession.id && (
+                        <span className="text-[10px] text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded font-normal">
+                          Non-Current
+                        </span>
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-0.5 border-b border-emerald-100/60">
                     <span className="text-gray-500">Term:</span>
-                    <span className="font-semibold text-brand-black">
+                    <span className="font-semibold text-brand-black flex items-center gap-1.5">
                       {term ? `${term} Term` : "-"}
+                      {termId && currentTerm && termId !== currentTerm.id && (
+                        <span className="text-[10px] text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded font-normal">
+                          Non-Current
+                        </span>
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-0.5 border-b border-emerald-100/60">
