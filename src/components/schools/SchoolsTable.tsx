@@ -92,7 +92,7 @@ export const SchoolsTable: React.FC<SchoolsTableProps> = ({
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-50/70 border border-emerald-200/60 text-xs text-emerald-900 font-medium">
               <Search className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>
-                <strong>Direct search:</strong> You can also search for a school directly by name, school code, or principal name above.
+                <strong>Direct search:</strong> You can also search for a school directly by name or school code above.
               </span>
             </div>
           </div>
@@ -266,7 +266,7 @@ export const SchoolsTable: React.FC<SchoolsTableProps> = ({
                 size="sm"
                 onClick={() => onPageChange && onPageChange(currentPage - 1)}
                 disabled={currentPage <= 1 || isTableLoading}
-                className="h-8 text-xs gap-1 border-gray-200"
+                className="h-8 text-xs gap-1 border-gray-200 bg-white text-gray-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700 disabled:hover:border-gray-200 transition-colors cursor-pointer shadow-2xs"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 Previous
@@ -281,7 +281,7 @@ export const SchoolsTable: React.FC<SchoolsTableProps> = ({
                 size="sm"
                 onClick={() => onPageChange && onPageChange(currentPage + 1)}
                 disabled={currentPage >= totalPages || isTableLoading}
-                className="h-8 text-xs gap-1 border-gray-200"
+                className="h-8 text-xs gap-1 border-gray-200 bg-white text-gray-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700 disabled:hover:border-gray-200 transition-colors cursor-pointer shadow-2xs"
               >
                 Next
                 <ChevronRight className="w-3.5 h-3.5" />

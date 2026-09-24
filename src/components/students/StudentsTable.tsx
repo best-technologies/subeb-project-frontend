@@ -377,7 +377,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                   type="button"
                   onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
                   disabled={currentPage <= 1 || isTableLoading}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium shadow-2xs cursor-pointer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700 disabled:hover:border-gray-200 text-xs font-medium shadow-2xs cursor-pointer"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
                   Previous
@@ -392,7 +392,7 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
                   type="button"
                   onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage >= totalPages || isTableLoading}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium shadow-2xs cursor-pointer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700 disabled:hover:border-gray-200 text-xs font-medium shadow-2xs cursor-pointer"
                 >
                   Next
                   <ChevronRight className="w-3.5 h-3.5" />

@@ -115,10 +115,10 @@ export const SchoolsFilters: React.FC<SchoolsFiltersProps> = ({
             variant="outline"
             size="sm"
             onClick={onClearFilters}
-            className="text-xs text-gray-600 hover:text-gray-900 gap-1.5 self-start sm:self-auto"
+            className="group text-xs text-gray-700 bg-white hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 border-gray-200 shadow-2xs transition-colors gap-1.5 self-start sm:self-auto cursor-pointer font-medium"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Reset All Filters
+            <RotateCcw className="w-3.5 h-3.5 text-gray-500 group-hover:text-emerald-700 transition-colors" />
+            <span>Reset All Filters</span>
           </Button>
         )}
       </div>
@@ -143,7 +143,7 @@ export const SchoolsFilters: React.FC<SchoolsFiltersProps> = ({
             <Input
               id="school-search"
               type="text"
-              placeholder="Name, Code, or Principal..."
+              placeholder="Search by school name or code..."
               value={localSearch}
               onChange={handleInputChange}
               className="pl-9 pr-8 text-xs h-10 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500"
