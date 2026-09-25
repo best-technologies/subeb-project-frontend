@@ -24,6 +24,7 @@ const roleRoutes = {
     "/dashboard",
     "/profile",
     "/schools",
+    "/classes",
     "/students",
     "/enrol-student",
     "/enrol-officer",

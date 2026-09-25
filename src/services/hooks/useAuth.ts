@@ -125,8 +125,12 @@ export function getRoleBasedRedirect(
       "/dashboard",
       "/profile",
       "/schools",
+      "/classes",
       "/students",
+      "/enrol-student",
       "/enrol-officer",
+      "/academic-settings",
+      "/audit-logs",
     ],
     subeb_officer: ["/enter-grades"],
   };

@@ -12,6 +12,7 @@ import {
   LogOut,
   UserPlus,
   FileText,
+  GraduationCap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -131,6 +132,13 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         label: "Schools",
         icon: <School size={20} />,
         href: "/schools",
+        disabled: false,
+      },
+      {
+        id: "classes",
+        label: "Classes",
+        icon: <GraduationCap size={20} />,
+        href: "/classes",
         disabled: false,
       },
       {

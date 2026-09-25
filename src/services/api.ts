@@ -570,6 +570,15 @@ export const getSchoolsDirectory = async (
 };
 
 export { createSchool, updateSchool, getSchoolById } from "./api/schools";
+export {
+  getClasses,
+  getClassAnalytics,
+  getClassById,
+  createClass,
+  updateClass,
+  deleteClass,
+  getClassStudents,
+} from "./api/classes";
 export type {
   CreateSchoolPayload,
   UpdateSchoolPayload,
@@ -577,3 +586,20 @@ export type {
   SchoolDetailResponse,
   SchoolDetailData,
 } from "./api/schools";
+export type {
+  ClassItem,
+  ClassPagination,
+  ClassesData,
+  ClassesResponse,
+  ClassQueryParams,
+  CreateClassRequest,
+  UpdateClassRequest,
+  GradeClassAnalytics,
+  LgaClassAnalytics,
+  TopSchoolClassAnalytics,
+  ClassAnalyticsSummary,
+  ClassAnalyticsData,
+  ClassAnalyticsResponse,
+  ClassAnalyticsQueryParams,
+} from "./types/classResponse";
+
