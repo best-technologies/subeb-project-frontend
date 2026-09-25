@@ -594,23 +594,19 @@ export default function EnrolStudentPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Loading Dialogs */}
+      {/* Submission Loading & Confirmation Dialogs */}
       <LoadingModal
-        isOpen={metadataLoading}
-        message="Loading academic session and term information..."
+        isOpen={isSubmitting}
+        title="Processing Enrollment..."
+        message="Enrolling students..."
       />
-      <LoadingModal
-        isOpen={schoolsLoading && !!lgaId}
-        message="Loading schools in selected LGA..."
-      />
-      <LoadingModal
-        isOpen={classesLoading && !!schoolId}
-        message="Loading classes in selected school..."
-      />
-      <LoadingModal isOpen={isSubmitting} message="Enrolling students..." />
 
       {/* Success Modal with Auto-Dismiss */}
-      <LoadingModal isOpen={showSuccessModal} message={successMessage} />
+      <LoadingModal
+        isOpen={showSuccessModal}
+        title="Success"
+        message={successMessage}
+      />
 
       {/* Navigation Warning Dialog */}
       <Dialog
@@ -1057,10 +1053,13 @@ export default function EnrolStudentPage() {
                     options={schoolOptions}
                     value={schoolId}
                     onValueChange={handleSchoolChange}
-                    disabled={!lgaId || schools.length === 0}
+                    disabled={!lgaId || schoolsLoading || schools.length === 0}
+                    isLoading={schoolsLoading && !!lgaId}
                     placeholder={
                       !lgaId
                         ? "Select LGA first"
+                        : schoolsLoading
+                        ? "Loading schools..."
                         : schools.length === 0
                         ? "No schools available"
                         : "Select school"
@@ -1069,6 +1068,8 @@ export default function EnrolStudentPage() {
                     emptyText={
                       !lgaId
                         ? "Please select an LGA first"
+                        : schoolsLoading
+                        ? "Loading schools in selected LGA..."
                         : schools.length === 0
                         ? "No schools in this LGA"
                         : "No matching school found."
@@ -1257,9 +1258,18 @@ export default function EnrolStudentPage() {
                   <Select
                     value={student.classId}
                     onValueChange={(val) => handleSelectChange("class", val)}
+                    disabled={classesLoading || classes.length === 0}
                   >
                     <SelectTrigger className="focus:ring-brand-primary hover:border-brand-primary/40 bg-white text-xs h-9">
-                      <SelectValue placeholder="Select class" />
+                      <SelectValue
+                        placeholder={
+                          classesLoading
+                            ? "Loading classes..."
+                            : classes.length === 0
+                            ? "No classes available"
+                            : "Select class"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent className="border-brand-primary/20 text-brand-primary">
                       {classes.map((c) => (
@@ -1280,6 +1290,9 @@ export default function EnrolStudentPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {classesLoading && (
+                    <p className="text-[11px] text-gray-500">Loading classes...</p>
+                  )}
                 </div>
 
                 {/* First Name */}

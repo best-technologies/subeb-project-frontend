@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -33,6 +33,7 @@ export interface SearchableSelectProps {
   searchPlaceholder?: string;
   emptyText?: string;
   disabled?: boolean;
+  isLoading?: boolean;
   className?: string;
   triggerClassName?: string;
   contentClassName?: string;
@@ -58,6 +59,7 @@ export const SearchableSelect = React.forwardRef<
       searchPlaceholder = "Search...",
       emptyText = "No results found.",
       disabled = false,
+      isLoading = false,
       className,
       triggerClassName,
       contentClassName,
@@ -86,7 +88,7 @@ export const SearchableSelect = React.forwardRef<
             type="button"
             role="combobox"
             aria-expanded={open}
-            disabled={disabled}
+            disabled={disabled || isLoading}
             className={cn(
               "flex h-10 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 hover:border-brand-primary/40 transition-all duration-200 text-left",
               triggerClassName,
@@ -99,13 +101,22 @@ export const SearchableSelect = React.forwardRef<
                 !selectedOption && "text-gray-400"
               )}
             >
-              {selectedOption ? (
+              {isLoading ? (
+                <span className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-primary" />
+                  <span>Loading options...</span>
+                </span>
+              ) : selectedOption ? (
                 <span className="capitalize">{selectedOption.label}</span>
               ) : (
                 placeholder
               )}
             </span>
-            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 text-gray-500" />
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 shrink-0 text-brand-primary animate-spin" />
+            ) : (
+              <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 text-gray-500" />
+            )}
           </button>
         </PopoverTrigger>
         <PopoverContent

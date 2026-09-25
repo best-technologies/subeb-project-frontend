@@ -695,17 +695,7 @@ export default function EnterGradesPage() {
     }
   }, [showToast]);
 
-  // Show loading state while validating role
-  if (isValidating) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Verifying access...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

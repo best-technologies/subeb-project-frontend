@@ -535,16 +535,17 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         onOpenChange={setShowAddDialog}
       />
 
-      {/* Loading Modal for progressive filtering and search */}
+      {/* Loading Modal with full-page backdrop for data crunching */}
       <LoadingModal
         isOpen={
           !!(
             loadingStates.lga ||
             loadingStates.school ||
             loadingStates.class ||
-            (loading && hasActiveFilters && students.length === 0 && !isSearching)
+            (searchLoading && Boolean(selectedLgaName || selectedSchoolName) && !isSearching)
           )
         }
+        title="Crunching Data..."
         message={
           loadingStates.lga
             ? `Fetching the schools under ${selectedLgaName}`
@@ -552,9 +553,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
             ? `Fetching the classes under ${selectedSchoolName}`
             : loadingStates.class
             ? "Fetching students in the selected class"
-            : loading && hasActiveFilters
-            ? "Loading students data..."
-            : "Loading..."
+            : "Crunching student performance and directory data..."
         }
       />
     </div>

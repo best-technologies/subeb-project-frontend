@@ -1,22 +1,22 @@
 import React from "react";
 import SchoolsHeaderSkeleton from "./SchoolsHeaderSkeleton";
-import SchoolsTopPerformersSkeleton from "./SchoolsTopPerformersSkeleton";
+import SchoolsChartsSkeleton from "./SchoolsChartsSkeleton";
 import SchoolsFiltersSkeleton from "./SchoolsFiltersSkeleton";
 import SchoolsTableSkeleton from "./SchoolsTableSkeleton";
 
 const SchoolsPageSkeleton: React.FC = () => {
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      {/* Header Section */}
+    <div className="space-y-6">
+      {/* 1. Page Header Card */}
       <SchoolsHeaderSkeleton />
 
-      {/* Top Performers Section */}
-      <SchoolsTopPerformersSkeleton />
+      {/* 2. Visual Demographic & Performance Analytics Suite */}
+      <SchoolsChartsSkeleton />
 
-      {/* Filters Section */}
+      {/* 3. Progressive Cascading Filters & Direct Search */}
       <SchoolsFiltersSkeleton />
 
-      {/* Table Section */}
+      {/* 4. Schools Directory Table */}
       <SchoolsTableSkeleton />
     </div>
   );

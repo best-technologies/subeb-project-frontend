@@ -43,6 +43,7 @@ interface SchoolChartsSectionProps {
   initialTerm?: string;
   availableSessions?: Array<{ id: string; name: string; isCurrent?: boolean }>;
   availableTerms?: Array<{ id: string; name: string; isCurrent?: boolean }>;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
 export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
@@ -50,9 +51,14 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
   initialTerm,
   availableSessions = [],
   availableTerms: initialAvailableTerms = [],
+  onLoadingChange,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    onLoadingChange?.(loading);
+  }, [loading, onLoadingChange]);
   const [analytics, setAnalytics] = useState<SchoolAnalyticsData | null>(null);
 
   // UI state for dropdown selects
@@ -76,7 +82,7 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
     if (!selectedSession || selectedSession === "CURRENT_SESSION") {
       return (
         availableSessions.find((s) => s.isCurrent) ||
-        availableSessions.find((s) => s.status === "OPEN") ||
+        availableSessions.find((s: any) => s.status === "OPEN") ||
         availableSessions[0]
       );
     }
@@ -355,18 +361,6 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
       {/* Main Body */}
       {isExpanded && (
         <div className="p-6 relative">
-          {/* Subtle loading overlay */}
-          {loading && (
-            <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] z-10 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white shadow-lg border border-gray-100">
-                <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
-                <span className="text-xs font-semibold text-gray-700">
-                  Crunching school analytics...
-                </span>
-              </div>
-            </div>
-          )}
-
           {/* Empty-state Alert */}
           {!loading && !hasAssessments && (
             <div className="mb-6 p-4 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-3">

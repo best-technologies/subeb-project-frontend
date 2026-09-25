@@ -13,6 +13,7 @@ import { SchoolDetailsDialog } from "./SchoolDetailsDialog";
 import { AddSchoolDialog } from "./AddSchoolDialog";
 import { EditSchoolSheet } from "./EditSchoolSheet";
 import { formatTermName } from "@/utils/formatters";
+import { LoadingModal } from "@/components/ui/LoadingModal";
 
 interface SchoolsTabProps {
   dashboardData: AdminDashboardData;
@@ -25,6 +26,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
   const [showAddSchoolDialog, setShowAddSchoolDialog] = useState(false);
   const [selectedSchoolForEdit, setSelectedSchoolForEdit] = useState<SchoolDirectoryItem | null>(null);
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [isChartsLoading, setIsChartsLoading] = useState(true);
 
   // Progressive search & cascading filter hook
   const {
@@ -115,6 +117,7 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
       <SchoolChartsSection
         availableSessions={availableSessions}
         availableTerms={availableTerms}
+        onLoadingChange={setIsChartsLoading}
       />
 
       {/* 3. Progressive Cascading Filters & Direct Search */}
@@ -187,6 +190,22 @@ const SchoolsTab: React.FC<SchoolsTabProps> = ({ dashboardData }) => {
         }}
         lgas={lgas}
         onSuccess={() => refetch()}
+      />
+
+      {/* 8. Full-page Loading Modal with backdrop only during active filter changes */}
+      <LoadingModal
+        isOpen={
+          loading &&
+          !isSearching &&
+          Boolean(params.lgaId || (params.session && params.session !== "CURRENT_SESSION") || (params.term && params.term !== "ALL_TERMS")) &&
+          filterStage !== "idle"
+        }
+        title="Crunching Data..."
+        message={
+          params.lgaId
+            ? `Fetching schools directory under ${selectedLgaName || "selected LGA"}...`
+            : "Crunching schools directory data..."
+        }
       />
     </div>
   );

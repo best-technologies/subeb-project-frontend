@@ -342,19 +342,6 @@ export const StudentChartsSection: React.FC<StudentChartsSectionProps> = ({
 
       {isExpanded && (
         <div className="p-5 space-y-5 relative">
-          {/* Active Loading Overlay */}
-          {loading && (
-            <div className="absolute inset-0 bg-white/70 backdrop-blur-[1.5px] z-30 flex flex-col items-center justify-center rounded-b-xl transition-opacity duration-200">
-              <div className="bg-white px-5 py-4 rounded-xl border border-gray-200 shadow-lg flex flex-col items-center gap-2 text-center">
-                <Loader2 className="w-7 h-7 text-emerald-600 animate-spin" />
-                <p className="text-xs font-bold text-gray-900">Loading Assessment Analytics...</p>
-                <p className="text-[11px] text-gray-500 max-w-[240px]">
-                  Fetching student performance, LGA metrics, and demographic distributions
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* User-friendly Master Empty State Banner */}
           {isNoData && (
             <div className="rounded-xl border border-amber-200/90 bg-linear-to-r from-amber-50/90 via-orange-50/40 to-amber-50/70 p-4 shadow-2xs">

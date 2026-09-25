@@ -3,10 +3,12 @@ import React, { useEffect } from "react";
 import SchoolsTab from "@/components/schools/SchoolsTab";
 import SchoolsPageSkeleton from "@/components/schools/SchoolsPageSkeleton";
 import { useData } from "@/context/DataContext";
+import { useAccessStore } from "@/store/accessStore";
 import { TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 const SchoolsPage: React.FC = () => {
+  const { isAccessReady } = useAccessStore();
   const {
     state: { adminDashboard },
     fetchAdminDashboard,
@@ -16,20 +18,21 @@ const SchoolsPage: React.FC = () => {
   useEffect(() => {
     // Only fetch if we should (prevents infinite loops after errors)
     if (shouldFetchAdminDashboard()) {
-      console.log("Fetching admin dashboard data for schools page");
       fetchAdminDashboard();
     }
   }, [shouldFetchAdminDashboard, fetchAdminDashboard]);
 
-  // Determine loading and error states similar to students page
-  const loading = adminDashboard.loading;
-  const error = !adminDashboard.data ? adminDashboard.error : null;
-
-  // Show skeleton while loading or when no data is available yet (but no error)
-  if (loading || (!adminDashboard.data && !error)) {
-    return <SchoolsPageSkeleton />;
+  // 1. While access verification overlay is active, keep page clear so no skeleton flashes before access dialog
+  if (!isAccessReady) {
+    return null;
   }
 
+  // 2. If data arrived fast during verification (e.g. backend cache hit), go straight to displaying the data!
+  if (adminDashboard.data) {
+    return <SchoolsTab dashboardData={adminDashboard.data} />;
+  }
+
+  const error = !adminDashboard.data ? adminDashboard.error : null;
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -53,12 +56,8 @@ const SchoolsPage: React.FC = () => {
     );
   }
 
-  // Guard clause - ensure adminDashboard.data exists before rendering
-  if (!adminDashboard.data) {
-    return <SchoolsPageSkeleton />;
-  }
-
-  return <SchoolsTab dashboardData={adminDashboard.data} />;
+  // 3. Only if access is ready but data hasn't arrived yet, show skeleton
+  return <SchoolsPageSkeleton />;
 };
 
 export default SchoolsPage;

@@ -324,23 +324,40 @@ const StudentsTable: React.FC<StudentsTableProps> = ({
             </TableHeader>
             <TableBody>
               {isSearching || isTableLoading ? (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={9} className="py-16 text-center">
-                    <div className="max-w-md mx-auto">
-                      <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-3">
-                        <Loader2 className="w-6 h-6 text-emerald-600 animate-spin" />
+                Array.from({ length: 8 }).map((_, idx) => (
+                  <TableRow key={idx} className="border-b border-gray-100/70">
+                    <TableCell className="text-center pl-6 pr-3">
+                      <div className="h-4 w-6 bg-gray-200/80 rounded animate-pulse mx-auto" />
+                    </TableCell>
+                    <TableCell className="pr-4">
+                      <div className="space-y-1.5">
+                        <div className="h-4 w-40 bg-gray-200/80 rounded animate-pulse" />
+                        <div className="h-3 w-24 bg-gray-100 rounded animate-pulse" />
                       </div>
-                      <p className="text-base font-semibold text-gray-800 mb-1">
-                        {isSearching ? "(Searching...)" : "Loading Students..."}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {isSearching
-                          ? "Finding student records matching your query..."
-                          : "Fetching student directory records..."}
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-24 bg-gray-200/80 rounded animate-pulse" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-28 bg-gray-200/80 rounded animate-pulse" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-36 bg-gray-200/80 rounded animate-pulse" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-16 bg-gray-200/80 rounded animate-pulse" />
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <div className="h-4 w-14 bg-gray-200/80 rounded animate-pulse ml-auto" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="h-4 w-12 bg-gray-200/80 rounded animate-pulse ml-auto" />
+                    </TableCell>
+                    <TableCell className="text-center pr-6 pl-2">
+                      <div className="h-7 w-14 bg-gray-200/80 rounded-lg animate-pulse mx-auto" />
+                    </TableCell>
+                  </TableRow>
+                ))
               ) : students && students.length > 0 ? (
                 students.map((student, index) => (
                   <StudentRow

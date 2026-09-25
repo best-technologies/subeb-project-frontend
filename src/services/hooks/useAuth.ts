@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { register, login, logout as logoutApi } from "@/services/api/auth";
-import { setTokens, clearTokens } from "@/lib/tokens";
+import { setTokens, clearTokens, getTokens } from "@/lib/tokens";
 import type {
   RegisterRequest,
   LoginRequest,
@@ -215,4 +216,36 @@ export function getAuthErrorMessage(error: unknown): string {
   }
 
   return "Something went wrong. Please try again.";
+}
+
+/**
+ * Hook to silently guard client-side routes by role without blocking initial render.
+ * Server-side middleware (middleware.ts) already handles initial edge validation and redirects.
+ * This hook acts as a client-side safeguard for client transitions.
+ */
+export function useRoleGuard(allowedRoles: string[], fallbackRoute: string): void {
+  const router = useRouter();
+  const { user } = useAuthStore();
+
+  const isRolePermitted = (role?: string | null) => {
+    if (!role) return false;
+    return allowedRoles.map((r) => r.toLowerCase()).includes(role.toLowerCase());
+  };
+
+  useEffect(() => {
+    const currentRole = user?.role;
+    if (currentRole) {
+      if (!isRolePermitted(currentRole)) {
+        router.replace(fallbackRoute);
+        return;
+      }
+    } else {
+      // If store has no user, verify if any token exists
+      const tokens = getTokens();
+      if (!tokens) {
+        router.replace("/login");
+        return;
+      }
+    }
+  }, [user, allowedRoles, fallbackRoute, router]);
 }

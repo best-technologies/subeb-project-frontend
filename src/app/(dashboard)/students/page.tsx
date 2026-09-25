@@ -2,55 +2,45 @@
 import React, { useEffect } from "react";
 import { TriangleAlert } from "lucide-react";
 import { useData } from "@/context/DataContext";
+import { useAccessStore } from "@/store/accessStore";
 import StudentsTab from "@/components/students/StudentsTab";
 import StudentsPageSkeleton from "@/components/students/StudentsPageSkeleton";
 import { Button } from "@/components/ui/Button";
 
 export default function StudentsPage() {
+  const { isAccessReady } = useAccessStore();
   const {
     state: { adminDashboard },
     fetchAdminDashboard,
     shouldFetchAdminDashboard,
     getStudentsDataFromAdmin,
-    // hasAdminDataForStudents, // Unused variable
   } = useData();
 
   // Always try to get students data
   const studentsData = getStudentsDataFromAdmin();
 
-  // Add debugging
-  // console.log("Students Page Debug:", {
-  //   hasAdminDataForStudents: hasAdminDataForStudents(),
-  //   studentsData,
-  //   adminDashboard: adminDashboard.data,
-  //   adminDashboardKeys: adminDashboard.data
-  //     ? Object.keys(adminDashboard.data)
-  //     : [],
-  //   loading: adminDashboard.loading,
-  //   error: adminDashboard.error,
-  //   timestamp: adminDashboard.timestamp,
-  //   hasAttempted: adminDashboard.hasAttempted,
-  // });
-
-  // Determine loading state - if no data and still loading admin
-  const loading = !studentsData && adminDashboard.loading;
-
-  // Determine error state
-  const error = !studentsData ? adminDashboard.error : null;
-
   useEffect(() => {
-    // Only fetch if we should (prevents infinite loops after errors)
     if (shouldFetchAdminDashboard()) {
-      // console.log("Fetching admin dashboard data for students page");
       fetchAdminDashboard();
     }
   }, [shouldFetchAdminDashboard, fetchAdminDashboard]);
 
-  // Show skeleton while loading or when no data is available yet
-  if (loading || (!studentsData && !error)) {
-    return <StudentsPageSkeleton />;
+  // 1. While access verification overlay is active, keep page clear so no skeleton flashes before access dialog
+  if (!isAccessReady) {
+    return null;
   }
 
+  // 2. If data arrived fast during verification (e.g. backend cache hit), go straight to displaying data!
+  if (studentsData) {
+    return (
+      <StudentsTab
+        performanceTable={studentsData.performanceTable}
+        lgas={studentsData.lgas}
+      />
+    );
+  }
+
+  const error = !studentsData ? adminDashboard.error : null;
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -74,15 +64,6 @@ export default function StudentsPage() {
     );
   }
 
-  // Guard clause - ensure studentsData exists before rendering
-  if (!studentsData) {
-    return <StudentsPageSkeleton />;
-  }
-
-  return (
-    <StudentsTab
-      performanceTable={studentsData.performanceTable}
-      lgas={studentsData.lgas}
-    />
-  );
+  // 3. Only if access is ready but data hasn't arrived yet, show skeleton
+  return <StudentsPageSkeleton />;
 }

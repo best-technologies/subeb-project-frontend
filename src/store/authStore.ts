@@ -7,6 +7,7 @@ import {
   clearTokenCookies,
   getTokens,
 } from "@/lib/tokens";
+import { clearAccessCache } from "@/lib/accessCache";
 
 /**
  * Zustand store for authentication state management
@@ -55,6 +56,7 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => {
         clearTokens();
         clearTokenCookies();
+        clearAccessCache();
         set({
           user: null,
           accessToken: null,

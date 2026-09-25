@@ -360,14 +360,6 @@ const Dashboard: React.FC<DashboardProps> = ({
           </CardHeader>
 
           <CardContent className="p-0 relative">
-            {isTableLoading && (
-              <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center">
-                <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white rounded-full border border-gray-200 shadow-sm text-xs font-medium text-gray-700">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
-                  Loading...
-                </div>
-              </div>
-            )}
             {students.length === 0 ? (
               <div className="px-6 py-12 text-center">
                 <Trophy className="w-10 h-10 text-gray-300 mx-auto mb-2" />

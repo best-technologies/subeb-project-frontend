@@ -1,9 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Sidebar from "@/components/shared/Sidebar";
-import { useAuthStore } from "@/store/authStore";
+import { useRoleGuard } from "@/services/hooks/useAuth";
+import AccessVerificationOverlay from "@/components/shared/AccessVerificationOverlay";
+
+const ALLOWED_ROLES = ["super_admin"];
 
 export default function DashboardLayout({
   children,
@@ -11,25 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isValidating, setIsValidating] = useState(true);
-  const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
-
-  // Validate role on mount
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      const normalizedRole = user.role.toLowerCase();
-
-      // Only SUPER_ADMIN can access dashboard routes
-      if (normalizedRole !== "super_admin") {
-        // Redirect SUBEB_OFFICER to their default page
-        router.replace("/enter-grades");
-        return;
-      }
-    }
-
-    setIsValidating(false);
-  }, [isAuthenticated, user, router]);
+  useRoleGuard(ALLOWED_ROLES, "/enter-grades");
 
   // Refresh function to be passed to sidebar
   const handleRefresh = () => {
@@ -42,20 +26,14 @@ export default function DashboardLayout({
     setSidebarOpen(false);
   };
 
-  // Show loading state while validating role
-  if (isValidating) {
-    return (
-      <div className="min-h-screen bg-brand-accent-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Verifying access...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-brand-accent-background">
+    <div className="min-h-screen bg-brand-accent-background relative">
+      {/* Full-Page Access Verification Overlay with Backdrop over entire page & sidebar */}
+      <AccessVerificationOverlay
+        allowedRoles={ALLOWED_ROLES}
+        fallbackRoute="/enter-grades"
+      />
+
       {/* Fixed Sidebar */}
       <div className="hidden lg:block lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64">
         <Sidebar
