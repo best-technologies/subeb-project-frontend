@@ -103,19 +103,53 @@ export interface ClassAnalyticsSummary {
   totalClasses: number;
   totalEnrolledStudents: number;
   averageClassSize: number;
-  totalCapacity: number;
-  capacityUtilization: number;
-  overcrowdedClasses: number;
-  balancedClasses: number;
-  underEnrolledClasses: number;
+  classesWithTeachers?: number;
+  schoolsRepresented?: number;
+  totalAssessedClasses?: number;
+  totalCapacity?: number;
+  capacityUtilization?: number;
+}
+
+export interface GradePerformanceAnalytics {
+  grade: string;
+  schoolLevel?: "PRIMARY" | "SECONDARY" | string;
+  classCount: number;
+  studentCount: number;
+  averageScore: number;
+  passRate: number;
+}
+
+export interface TopPerformingClassItem {
+  rank: number;
+  classId: string;
+  className: string;
+  grade: string;
+  schoolName: string;
+  schoolLevel?: "PRIMARY" | "SECONDARY" | string;
+  lgaName: string;
+  studentCount: number;
+  averageScore: number;
+  passRate: number;
+}
+
+export interface PerformanceBandItem {
+  name: string;
+  count: number;
+  percentage: number;
+  color?: string;
 }
 
 export interface ClassAnalyticsData {
   summary: ClassAnalyticsSummary;
-  byGrade: GradeClassAnalytics[];
-  byLga: LgaClassAnalytics[];
-  topSchools: TopSchoolClassAnalytics[];
-  utilizationBands: Array<{
+  byGrade?: GradeClassAnalytics[];
+  byLga?: LgaClassAnalytics[];
+  topSchools?: TopSchoolClassAnalytics[];
+  performanceByGrade?: GradePerformanceAnalytics[];
+  topPerformingClasses?: TopPerformingClassItem[];
+  performanceBands?: PerformanceBandItem[];
+  primaryPerformanceBands?: PerformanceBandItem[];
+  secondaryPerformanceBands?: PerformanceBandItem[];
+  utilizationBands?: Array<{
     name: string;
     count: number;
     percentage: number;

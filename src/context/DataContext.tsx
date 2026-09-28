@@ -71,6 +71,7 @@ function dataReducer(state: DataState, action: DataAction): DataState {
           ...state.adminDashboard,
           loading: false,
           error: action.payload,
+          timestamp: Date.now(),
           hasAttempted: true,
         },
       };
@@ -203,16 +204,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Don't retry if we have an error and not forcing refresh (prevent infinite loops)
+      // Don't retry if we recently encountered an error without forceRefresh or new params (prevents infinite render loops)
       if (
         state.adminDashboard.hasAttempted &&
         state.adminDashboard.error &&
-        !forceRefresh
+        !forceRefresh &&
+        !hasSearchParams &&
+        Date.now() - state.adminDashboard.timestamp < 5000
       ) {
-        console.log(
-          "Skipping request due to previous error (use forceRefresh to retry):",
-          state.adminDashboard.error
-        );
         return;
       }
 

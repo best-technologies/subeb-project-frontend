@@ -21,8 +21,8 @@ export const useGlobalAdminDashboard = () => {
   const lastFetchedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // STOP THE INFINITE LOOP - Don't make API calls if there's an error
-    if (adminDashboard.error) {
+    // If currently loading, wait for completion
+    if (adminDashboard.loading) {
       return;
     }
 
@@ -34,21 +34,28 @@ export const useGlobalAdminDashboard = () => {
       return;
     }
 
-    // Only fetch if session/term key changed or if initial fetch hasn't occurred
-    if (lastFetchedKeyRef.current !== currentKey) {
+    // Don't make automatic retry calls if there's an active error for the exact same key
+    if (adminDashboard.error && lastFetchedKeyRef.current === currentKey) {
+      return;
+    }
+
+    // Fetch if session/term key changed or if initial fetch hasn't completed
+    if (lastFetchedKeyRef.current !== currentKey || !adminDashboard.data) {
       lastFetchedKeyRef.current = currentKey;
       fetchAdminDashboard(searchParams);
     }
   }, [
     searchParams.session,
     searchParams.term,
+    adminDashboard.data,
+    adminDashboard.loading,
     adminDashboard.error,
     isAdminDashboardCached,
     fetchAdminDashboard,
   ]);
 
   const refetch = useCallback(() => {
-    lastFetchedKeyRef.current = `${searchParams.session || ""}_${searchParams.term || ""}`;
+    lastFetchedKeyRef.current = null;
     fetchAdminDashboard(searchParams, true); // Force refresh
   }, [fetchAdminDashboard, searchParams]);
 

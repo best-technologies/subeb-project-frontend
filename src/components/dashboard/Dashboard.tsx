@@ -1,10 +1,8 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import StatsCards from "./StatsCards";
 import StatsCardsSkeleton from "./StatsCardsSkeleton";
 import DashboardTableSkeleton from "./DashboardTableSkeleton";
-import CollapsibleCharts from "./CollapsibleCharts";
-import { useGlobalSearchFilter } from "@/services";
 import { getAdminDashboardPerformanceTable } from "@/services/api";
 import { AdminDashboardData, TopStudent, Pagination } from "@/services/types/adminDashboardResponse";
 import { capitalizeInitials, formatEducationalText } from "@/utils/formatters";
@@ -24,7 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trophy, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Trophy, ChevronLeft, ChevronRight, Loader2, LayoutDashboard, Calendar, RefreshCw } from "lucide-react";
+import { useSessions } from "@/services/hooks/useAcademic";
 import StudentPerformanceSheet from "./StudentPerformanceSheet";
 
 interface DashboardProps {
@@ -46,12 +45,14 @@ interface DashboardProps {
     includeStats?: boolean;
     includePerformance?: boolean;
   }) => void;
+  onRefresh?: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
   dashboardData,
   loading = false,
   onSearchParamsChange,
+  onRefresh,
 }) => {
   const [lgaFilter] = useState("");
   const [schoolFilter] = useState("");
@@ -68,6 +69,42 @@ const Dashboard: React.FC<DashboardProps> = ({
   });
   const [isTableLoading, setIsTableLoading] = useState(false);
 
+  // Sessions from query or dashboardData
+  const { data: sessionsQueryData } = useSessions();
+  const availableSessions = useMemo(() => {
+    if (sessionsQueryData?.data && sessionsQueryData.data.length > 0) {
+      return sessionsQueryData.data;
+    }
+    return dashboardData?.availableSessions || [];
+  }, [sessionsQueryData, dashboardData?.availableSessions]);
+
+  const [selectedSessionName, setSelectedSessionName] = useState<string>("");
+
+  useEffect(() => {
+    if (!selectedSessionName) {
+      const activeName =
+        dashboardData?.currentSession?.name ||
+        availableSessions.find((s: any) => s.isCurrent)?.name ||
+        (availableSessions[0]?.name ?? "");
+      if (activeName) {
+        setSelectedSessionName(activeName);
+      }
+    }
+  }, [dashboardData?.currentSession?.name, availableSessions, selectedSessionName]);
+
+  const handleSessionSelect = (sessionName: string) => {
+    setSelectedSessionName(sessionName);
+    setTableTermFilter("");
+    if (onSearchParamsChange) {
+      onSearchParamsChange({
+        session: sessionName,
+        term: undefined,
+        includeStats: true,
+        includePerformance: true,
+      });
+    }
+  };
+
   // State for slide-in sheet showing student's subject breakdown
   const [selectedStudentForSheet, setSelectedStudentForSheet] = useState<TopStudent | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -76,11 +113,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     setSelectedStudentForSheet(student);
     setIsSheetOpen(true);
   };
-
-  const { searchTerm, selectedSession, selectedTerm } = useGlobalSearchFilter({
-    availableSessions: dashboardData?.availableSessions || [],
-    availableTerms: dashboardData?.availableTerms || [],
-  });
 
   // Sync table state whenever dashboardData.performance arrives (initial load or session/term change)
   useEffect(() => {
@@ -117,30 +149,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     return formatEducationalText(termVal.replace(/_/g, " "));
   };
 
-  // Handle global academic session / term dropdown changes (refreshes entire dashboard including cards)
-  const lastSessionTermRef = useRef<{ session?: string; term?: string }>({});
-  useEffect(() => {
-    const sessionVal = selectedSession?.id;
-    const termVal = selectedTerm?.id;
-
-    if (!sessionVal && !termVal) return;
-
-    if (
-      (sessionVal && sessionVal !== lastSessionTermRef.current.session) ||
-      (termVal && termVal !== lastSessionTermRef.current.term)
-    ) {
-      lastSessionTermRef.current = { session: sessionVal, term: termVal };
-      setTableTermFilter("");
-      if (onSearchParamsChange) {
-        onSearchParamsChange({
-          session: sessionVal,
-          term: termVal,
-          includeStats: true,
-          includePerformance: true,
-        });
-      }
-    }
-  }, [selectedSession?.id, selectedTerm?.id, onSearchParamsChange]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Debounce search term
   useEffect(() => {
@@ -155,7 +164,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const fetchTablePage = async (page: number, search?: string, termOverride?: string) => {
     setIsTableLoading(true);
     try {
-      const activeSession = selectedSession?.id || dashboardData?.currentSession?.id;
+      const activeSession = selectedSessionName || dashboardData?.currentSession?.name || dashboardData?.currentSession?.id;
       const termToUse = termOverride !== undefined ? termOverride : activeTermFilter;
       const res = await getAdminDashboardPerformanceTable({
         session: activeSession,
@@ -266,16 +275,64 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {/* Dashboard Page Header */}
+      <div className="bg-brand-primary-2 rounded-xl p-6 sm:p-8 shadow-lg transition-all duration-300">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-brand-primary-2-contrast mb-2 flex items-center gap-3">
+              <LayoutDashboard className="w-8 h-8 opacity-90" />
+              State Educational Dashboard
+            </h1>
+            <p className="text-brand-primary-2-contrast/80 text-sm sm:text-base max-w-3xl">
+              Comprehensive state-wide enrollment overview, academic progress benchmarks, and institutional performance analytics across Abia State
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto">
+            {/* Session Selector */}
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-white/20">
+              <Calendar className="w-4 h-4 text-brand-primary-2-contrast" />
+              <span className="text-xs text-brand-primary-2-contrast/90 font-medium">Session:</span>
+              <Select
+                value={selectedSessionName}
+                onValueChange={handleSessionSelect}
+                disabled={loading}
+              >
+                <SelectTrigger className="h-8 px-2.5 py-0 text-xs bg-white text-gray-900 border-none rounded-md font-semibold cursor-pointer shadow-xs focus:ring-2 focus:ring-emerald-400">
+                  <SelectValue placeholder="Select session" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200 shadow-lg">
+                  {availableSessions.map((sess: any) => (
+                    <SelectItem key={sess.id || sess.name} value={sess.name} className="text-xs cursor-pointer font-medium">
+                      {sess.name} {sess.isCurrent ? "(Current)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Refresh Button */}
+            {onRefresh && (
+              <button
+                type="button"
+                onClick={onRefresh}
+                disabled={loading}
+                className="bg-white text-emerald-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-emerald-50 hover:shadow-lg transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95 text-xs h-8 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-emerald-700 ${loading ? "animate-spin" : ""}`} />
+                <span>Refresh</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       {loading && !dashboardData ? (
         <StatsCardsSkeleton />
       ) : (
         <StatsCards dashboardData={dashboardData} />
       )}
-
-      {/* Collapsible Performance Charts */}
-      <CollapsibleCharts dashboardData={dashboardData} />
 
       {/* Top Students Ranking Table */}
       {!dashboardData && loading ? (

@@ -22,8 +22,6 @@ export const TopSchoolsClassesChart: React.FC<TopSchoolsClassesChartProps> = ({
     return (data || []).slice(0, 5);
   }, [data]);
 
-  const medals = ["🥇", "🥈", "🥉"];
-
   return (
     <Card className="border border-gray-200/90 shadow-xs hover:shadow-sm transition-all duration-200 bg-white flex flex-col h-full">
       <CardHeader className="pb-3">
@@ -54,13 +52,9 @@ export const TopSchoolsClassesChart: React.FC<TopSchoolsClassesChartProps> = ({
                 className="p-2.5 rounded-lg border border-gray-100 hover:border-gray-200 bg-white flex items-center justify-between text-xs transition-colors"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-sm w-4 text-center shrink-0">
-                    {medals[idx] || (
-                      <span className="text-xs font-semibold text-gray-400">
-                        #{idx + 1}
-                      </span>
-                    )}
-                  </span>
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center justify-center shrink-0">
+                    {idx + 1}
+                  </div>
                   <div className="min-w-0 truncate">
                     <p className="font-semibold text-gray-900 truncate capitalize">
                       {item.schoolName}

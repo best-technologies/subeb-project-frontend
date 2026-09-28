@@ -129,3 +129,28 @@ export const formatTermName = (termName?: string | null): string => {
 import { cn } from "@/lib/utils";
 export { cn };
 
+/**
+ * Checks if a grade corresponds to a secondary school level
+ */
+export const isSecondaryGrade = (grade?: string): boolean => {
+  if (!grade) return false;
+  const upper = grade.toUpperCase().trim();
+  return (
+    upper.startsWith("JSS") ||
+    upper.startsWith("SSS") ||
+    upper.startsWith("JS") ||
+    upper.startsWith("SS") ||
+    upper.startsWith("BASIC 7") ||
+    upper.startsWith("BASIC 8") ||
+    upper.startsWith("BASIC 9") ||
+    upper.includes("SECONDARY")
+  );
+};
+
+/**
+ * Checks if a grade corresponds to a primary/pre-primary school level
+ */
+export const isPrimaryGrade = (grade?: string): boolean => {
+  return !isSecondaryGrade(grade);
+};
+

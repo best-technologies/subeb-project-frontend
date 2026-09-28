@@ -53,28 +53,6 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
   const startItem = total === 0 ? 0 : (page - 1) * limit + 1;
   const endItem = Math.min(page * limit, total);
 
-  const getUtilizationBadge = (utilization: number) => {
-    if (utilization > 100) {
-      return (
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
-          Overcrowded ({utilization}%)
-        </span>
-      );
-    }
-    if (utilization >= 70) {
-      return (
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-          Optimal ({utilization}%)
-        </span>
-      );
-    }
-    return (
-      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-        Under Capacity ({utilization}%)
-      </span>
-    );
-  };
-
   return (
     <Card className="border border-gray-200/90 shadow-xs bg-white overflow-hidden">
       <CardHeader className="py-4 px-4 sm:px-6 border-b border-gray-100 flex flex-row items-center justify-between">
@@ -115,7 +93,10 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
                   Grade / Level
                 </TableHead>
                 <TableHead className="text-xs font-semibold text-gray-500">
-                  Capacity & Occupancy
+                  Class Teacher
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-gray-500">
+                  Enrolled Pupils
                 </TableHead>
                 <TableHead className="text-xs font-semibold text-gray-500">
                   Academic Year
@@ -128,7 +109,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
             <TableBody>
               {loading && classes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-64 text-center">
+                  <TableCell colSpan={8} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-gray-400">
                       <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
                       <span className="text-xs">Loading classes...</span>
@@ -137,7 +118,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
                 </TableRow>
               ) : classes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-64 text-center">
+                  <TableCell colSpan={8} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-gray-400">
                       <GraduationCap className="w-8 h-8 opacity-40" />
                       <p className="text-sm font-semibold text-gray-600">
@@ -152,10 +133,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
               ) : (
                 classes.map((cls, index) => {
                   const rowNumber = (page - 1) * limit + index + 1;
-                  const capacity = cls.capacity || 35;
                   const studentCount = cls.studentCount || cls.currentEnrollment || 0;
-                  const utilization = Math.round((studentCount / capacity) * 100);
-                  const widthPct = Math.min(utilization, 100);
 
                   return (
                     <TableRow
@@ -196,28 +174,19 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
                         </span>
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1.5 min-w-[140px]">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-semibold text-gray-900">
-                              {studentCount}{" "}
-                              <span className="text-gray-400 font-normal">
-                                / {capacity}
-                              </span>
-                            </span>
-                            {getUtilizationBadge(utilization)}
-                          </div>
-                          <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                            <div
-                              className={`h-1.5 rounded-full transition-all duration-500 ${
-                                utilization > 100
-                                  ? "bg-rose-500"
-                                  : utilization >= 70
-                                  ? "bg-emerald-500"
-                                  : "bg-amber-400"
-                              }`}
-                              style={{ width: `${Math.max(widthPct, 4)}%` }}
-                            />
-                          </div>
+                        <div className="flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                          <span className="text-xs text-gray-700 font-medium truncate max-w-[130px]">
+                            {cls.teacher?.name || "Unassigned"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-gray-900 text-xs">
+                            {studentCount.toLocaleString()}{" "}
+                            <span className="font-normal text-gray-500">pupils</span>
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
