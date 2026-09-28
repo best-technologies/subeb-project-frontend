@@ -120,11 +120,8 @@ export const ClassesChartsSection: React.FC<ClassesChartsSectionProps> = ({
               <BarChart3 className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-gray-900">
                 Performance across Class Levels
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  Performance Analytics
-                </span>
               </h3>
               <p className="text-[11px] text-gray-500">
                 Grade-level academic averages, pass rate benchmarks, and cohort rankings

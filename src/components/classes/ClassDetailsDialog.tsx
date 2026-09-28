@@ -22,6 +22,7 @@ import {
   User,
   CheckCircle,
 } from "lucide-react";
+import { formatEducationalText, capitalizeWords } from "@/utils/formatters";
 
 interface ClassDetailsDialogProps {
   cls: ClassItem | null;
@@ -71,17 +72,14 @@ export const ClassDetailsDialog: React.FC<ClassDetailsDialogProps> = ({
               </div>
               <div>
                 <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
-                  {cls.name}
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/20 text-white">
-                    {cls.grade}
-                  </span>
+                  {formatEducationalText(cls.name)}
                 </DialogTitle>
                 <DialogDescription className="text-emerald-100 text-xs mt-0.5 flex items-center gap-2">
-                  <span>{cls.school?.name}</span>
+                  <span>{cls.school?.name ? capitalizeWords(cls.school.name) : ""}</span>
                   {cls.school?.lga && (
                     <>
                       <span>•</span>
-                      <span>{cls.school.lga.name} LGA</span>
+                      <span>{capitalizeWords(cls.school.lga.name)} LGA</span>
                     </>
                   )}
                 </DialogDescription>
@@ -92,14 +90,10 @@ export const ClassDetailsDialog: React.FC<ClassDetailsDialogProps> = ({
 
         <div className="p-6 space-y-6">
           {/* Quick Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="p-3 rounded-lg border border-gray-100 bg-gray-50/60">
               <span className="text-[11px] text-gray-500 font-medium">Enrolled Students</span>
               <p className="text-lg font-bold text-gray-900 mt-0.5">{studentCount}</p>
-            </div>
-            <div className="p-3 rounded-lg border border-gray-100 bg-gray-50/60">
-              <span className="text-[11px] text-gray-500 font-medium">Total Capacity</span>
-              <p className="text-lg font-bold text-gray-900 mt-0.5">{capacity}</p>
             </div>
             <div className="p-3 rounded-lg border border-gray-100 bg-gray-50/60">
               <span className="text-[11px] text-gray-500 font-medium">Utilization</span>
@@ -145,7 +139,9 @@ export const ClassDetailsDialog: React.FC<ClassDetailsDialogProps> = ({
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">
-                          {student.lastName} {student.firstName}
+                          {capitalizeWords(
+                            `${student.lastName || ""} ${student.firstName || ""}`.trim()
+                          )}
                         </p>
                         <p className="text-[10px] text-gray-400 font-mono">
                           ID: {student.studentId || "N/A"}
@@ -165,7 +161,11 @@ export const ClassDetailsDialog: React.FC<ClassDetailsDialogProps> = ({
         </div>
 
         <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
-          <Button variant="outline" size="sm" onClick={onClose} className="text-xs">
+          <Button
+            size="sm"
+            onClick={onClose}
+            className="bg-brand-primary hover:bg-brand-primary-2 text-white text-xs px-5 h-8.5 font-medium rounded-lg shadow-xs transition-colors"
+          >
             Close
           </Button>
         </div>
