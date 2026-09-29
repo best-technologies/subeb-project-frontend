@@ -10,6 +10,7 @@ interface DatePickerProps {
   onChange: (value: string) => void;
   min?: string; // Format: "YYYY-MM-DD"
   max?: string; // Format: "YYYY-MM-DD"
+  defaultViewDate?: string; // Format: "YYYY-MM-DD"
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -35,6 +36,7 @@ export function DatePicker({
   onChange,
   min,
   max,
+  defaultViewDate,
   placeholder = "Select date...",
   disabled = false,
   className,
@@ -49,6 +51,14 @@ export function DatePicker({
     const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
     return isValidDate(d) ? toStartOfDay(d) : null;
   }, [value]);
+
+  const defaultViewDateParsed = useMemo(() => {
+    if (!defaultViewDate) return null;
+    const parts = defaultViewDate.split("-");
+    if (parts.length !== 3) return null;
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    return isValidDate(d) ? toStartOfDay(d) : null;
+  }, [defaultViewDate]);
 
   const minDate = useMemo(() => {
     if (!min) return null;
@@ -69,8 +79,11 @@ export function DatePicker({
   // View state for navigating calendar months
   const [viewDate, setViewDate] = useState<Date>(() => {
     if (parsedValue) return parsedValue;
-    if (minDate) return minDate;
-    return toStartOfDay(new Date());
+    if (defaultViewDateParsed) return defaultViewDateParsed;
+    const today = toStartOfDay(new Date());
+    if (maxDate && today.getTime() > maxDate.getTime()) return maxDate;
+    if (minDate && today.getTime() < minDate.getTime()) return minDate;
+    return today;
   });
 
   // When value or min changes and popover opens, sync view date
@@ -78,10 +91,17 @@ export function DatePicker({
     if (open) {
       if (parsedValue) {
         setViewDate(parsedValue);
-      } else if (minDate && viewDate.getTime() < minDate.getTime()) {
-        setViewDate(minDate);
-      } else if (maxDate && viewDate.getTime() > maxDate.getTime()) {
-        setViewDate(maxDate);
+      } else if (defaultViewDateParsed) {
+        setViewDate(defaultViewDateParsed);
+      } else {
+        const today = toStartOfDay(new Date());
+        if (maxDate && today.getTime() > maxDate.getTime()) {
+          setViewDate(maxDate);
+        } else if (minDate && today.getTime() < minDate.getTime()) {
+          setViewDate(minDate);
+        } else {
+          setViewDate(today);
+        }
       }
     }
     setIsOpen(open);
@@ -92,8 +112,8 @@ export function DatePicker({
 
   // Generate years list based on min/max or around current view
   const availableYears = useMemo(() => {
-    const startYear = minDate ? minDate.getFullYear() : currentYear - 5;
-    const endYear = maxDate ? maxDate.getFullYear() : currentYear + 5;
+    const startYear = minDate ? minDate.getFullYear() : currentYear - 10;
+    const endYear = maxDate ? maxDate.getFullYear() : currentYear + 10;
     const years: number[] = [];
     for (let y = startYear; y <= endYear; y++) {
       years.push(y);

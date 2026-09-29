@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 import { LoadingModal } from "@/components/ui/LoadingModal";
 import { Dialog } from "@/components/ui/custom-dialog";
 import {
@@ -93,8 +94,20 @@ export default function EnrolStudentPage() {
   const [pendingTab, setPendingTab] = useState<
     "session" | "student" | "review" | null
   >(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [dataFetchModal, setDataFetchModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "loading" | "success" | "error";
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "loading",
+  });
+  const prevSchoolsLoadingRef = useRef(false);
+  const prevClassesLoadingRef = useRef(false);
+  const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>(
     []
@@ -295,36 +308,70 @@ export default function EnrolStudentPage() {
     }
   }, [metadataError, schoolsError, classesError]);
 
-  // Auto-dismiss success modal after 5 seconds
+  // Manage schools loading & success modal
   React.useEffect(() => {
-    if (showSuccessModal) {
-      const timer = setTimeout(() => {
-        setShowSuccessModal(false);
-        setSuccessMessage("");
-      }, 5000);
-      return () => clearTimeout(timer);
+    if (schoolsLoading && !prevSchoolsLoadingRef.current && lgaId) {
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+      setDataFetchModal({
+        isOpen: true,
+        title: "Loading Schools...",
+        message: "Fetching schools for selected LGA...",
+        type: "loading",
+      });
+    } else if (!schoolsLoading && prevSchoolsLoadingRef.current && lgaId) {
+      if (lgaSchoolsData?.schools) {
+        setDataFetchModal({
+          isOpen: true,
+          title: "Success",
+          message: `Successfully loaded ${lgaSchoolsData.schools.length} schools`,
+          type: "success",
+        });
+        if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+        dismissTimerRef.current = setTimeout(() => {
+          setDataFetchModal((prev) => ({ ...prev, isOpen: false }));
+        }, 700);
+      } else if (schoolsError) {
+        setDataFetchModal((prev) => ({ ...prev, isOpen: false }));
+      }
     }
-  }, [showSuccessModal]);
+    prevSchoolsLoadingRef.current = schoolsLoading;
+  }, [schoolsLoading, lgaSchoolsData, lgaId, schoolsError]);
 
-  // Show success modal when schools are loaded
+  // Manage classes loading & success modal
   React.useEffect(() => {
-    if (lgaSchoolsData && !schoolsLoading && lgaId) {
-      setSuccessMessage(
-        `Successfully loaded ${lgaSchoolsData.schools.length} schools`
-      );
-      setShowSuccessModal(true);
+    if (classesLoading && !prevClassesLoadingRef.current && schoolId) {
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+      setDataFetchModal({
+        isOpen: true,
+        title: "Loading Classes...",
+        message: "Fetching classes for selected school...",
+        type: "loading",
+      });
+    } else if (!classesLoading && prevClassesLoadingRef.current && schoolId) {
+      if (schoolClassesData?.classes) {
+        setDataFetchModal({
+          isOpen: true,
+          title: "Success",
+          message: `Successfully loaded ${schoolClassesData.classes.length} classes`,
+          type: "success",
+        });
+        if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+        dismissTimerRef.current = setTimeout(() => {
+          setDataFetchModal((prev) => ({ ...prev, isOpen: false }));
+        }, 700);
+      } else if (classesError) {
+        setDataFetchModal((prev) => ({ ...prev, isOpen: false }));
+      }
     }
-  }, [lgaSchoolsData, schoolsLoading, lgaId]);
+    prevClassesLoadingRef.current = classesLoading;
+  }, [classesLoading, schoolClassesData, schoolId, classesError]);
 
-  // Show success modal when classes are loaded
+  // Cleanup dismiss timer on unmount
   React.useEffect(() => {
-    if (schoolClassesData && !classesLoading && schoolId) {
-      setSuccessMessage(
-        `Successfully loaded ${schoolClassesData.classes.length} classes`
-      );
-      setShowSuccessModal(true);
-    }
-  }, [schoolClassesData, classesLoading, schoolId]);
+    return () => {
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+    };
+  }, []);
 
   const handleSessionChange = (newSessionId: string) => {
     if (newSessionId === sessionId) return;
@@ -503,8 +550,6 @@ export default function EnrolStudentPage() {
       schoolId: schoolId,
     });
     setError(null);
-    setSuccess("Student added successfully!");
-    setShowToast(true);
   };
 
   const handleEditStudent = (index: number) => {
@@ -601,11 +646,16 @@ export default function EnrolStudentPage() {
         message="Enrolling students..."
       />
 
-      {/* Success Modal with Auto-Dismiss */}
+      {/* Schools & Classes Loading / Success Modal */}
       <LoadingModal
-        isOpen={showSuccessModal}
-        title="Success"
-        message={successMessage}
+        isOpen={dataFetchModal.isOpen}
+        title={dataFetchModal.title}
+        message={dataFetchModal.message}
+        type={dataFetchModal.type}
+        onClose={() => {
+          if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+          setDataFetchModal((prev) => ({ ...prev, isOpen: false }));
+        }}
       />
 
       {/* Navigation Warning Dialog */}
@@ -1328,12 +1378,39 @@ export default function EnrolStudentPage() {
                   <Label className="text-xs font-medium text-brand-black-accent">
                     Date of Birth *
                   </Label>
-                  <Input
-                    type="date"
-                    name="dateOfBirth"
+                  <DatePicker
                     value={student.dateOfBirth}
-                    onChange={handleStudentChange}
-                    max={new Date().toISOString().split("T")[0]}
+                    onChange={(val) =>
+                      setStudent((prev) => ({ ...prev, dateOfBirth: val }))
+                    }
+                    min={
+                      new Date(
+                        new Date().getFullYear() - 25,
+                        new Date().getMonth(),
+                        new Date().getDate()
+                      )
+                        .toISOString()
+                        .split("T")[0]
+                    }
+                    max={
+                      new Date(
+                        new Date().getFullYear() - 3,
+                        new Date().getMonth(),
+                        new Date().getDate()
+                      )
+                        .toISOString()
+                        .split("T")[0]
+                    }
+                    defaultViewDate={
+                      new Date(
+                        new Date().getFullYear() - 10,
+                        new Date().getMonth(),
+                        new Date().getDate()
+                      )
+                        .toISOString()
+                        .split("T")[0]
+                    }
+                    placeholder="Select date of birth"
                     className="text-xs h-9 bg-white"
                   />
                 </div>
