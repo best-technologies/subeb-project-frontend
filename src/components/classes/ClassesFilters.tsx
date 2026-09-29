@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/select";
 
 export const GRADE_OPTIONS = [
+  "ECCDE 1",
+  "ECCDE 2",
+  "ECCDE 3",
   "Primary 1",
   "Primary 2",
   "Primary 3",

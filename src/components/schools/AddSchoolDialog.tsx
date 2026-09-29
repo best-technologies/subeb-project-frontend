@@ -44,7 +44,12 @@ import {
   Loader2,
   GraduationCap,
   Sparkles,
+  Check,
 } from "lucide-react";
+import {
+  SearchableSelect,
+  SearchableSelectOption,
+} from "@/components/ui/searchable-select";
 
 // Strict schema matching DB fields and NestJS CreateSchoolDto
 const formSchema = z.object({
@@ -55,6 +60,9 @@ const formSchema = z.object({
   }),
   lgaId: z.string().min(1, "Please select a Local Government Area"),
   address: z.string().trim().min(5, "Address must be at least 5 characters"),
+  classes: z
+    .array(z.string())
+    .min(1, "Please select at least one class for this school"),
 
   // Optional fields
   phone: z.string().trim().optional(),
@@ -182,6 +190,14 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
     return metadataData?.localGovernments || [];
   }, [lgas, metadataData]);
 
+  const lgaOptions: SearchableSelectOption[] = useMemo(() => {
+    return availableLgas.map((lga) => ({
+      value: lga.id,
+      label: capitalizeInitials(lga.name),
+      description: "Abia State LGA",
+    }));
+  }, [availableLgas]);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -189,6 +205,14 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
       level: "PRIMARY",
       lgaId: "",
       address: "",
+      classes: [
+        "Primary 1",
+        "Primary 2",
+        "Primary 3",
+        "Primary 4",
+        "Primary 5",
+        "Primary 6",
+      ],
       phone: "",
       email: "",
       website: "",
@@ -211,6 +235,7 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
       queryClient.invalidateQueries({ queryKey: ["schools"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["enrollment"] });
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
       form.reset();
       setActiveTab("basic");
       onClose();
@@ -233,6 +258,7 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
       level: values.level,
       lgaId: values.lgaId,
       address: values.address.trim(),
+      classes: values.classes,
     };
 
     if (values.phone?.trim()) payload.phone = values.phone.trim();
@@ -258,9 +284,15 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
 
   // Switch to the tab that contains validation errors
   const onError = (errors: FieldErrors<FormValues>) => {
-    if (errors.name || errors.level || errors.lgaId || errors.address) {
+    if (
+      errors.name ||
+      errors.level ||
+      errors.lgaId ||
+      errors.address ||
+      errors.classes
+    ) {
       setActiveTab("basic");
-      toast.error("Please fill in all required school details.");
+      toast.error("Please fill in all required school details including class selections.");
     } else if (
       errors.phone ||
       errors.email ||
@@ -273,6 +305,9 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
       toast.error("Please review the contact & leadership fields.");
     } else {
       setActiveTab("facility");
+      toast.error("Please review the capacity & metrics fields.");
+    }
+  };
       toast.error("Please review the capacity & metrics fields.");
     }
   };
@@ -408,7 +443,28 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
                           School Level <span className="text-rose-500">*</span>
                         </FormLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(val: "PRIMARY" | "SECONDARY") => {
+                            field.onChange(val);
+                            if (val === "PRIMARY") {
+                              form.setValue("classes", [
+                                "Primary 1",
+                                "Primary 2",
+                                "Primary 3",
+                                "Primary 4",
+                                "Primary 5",
+                                "Primary 6",
+                              ]);
+                            } else {
+                              form.setValue("classes", [
+                                "JSS 1",
+                                "JSS 2",
+                                "JSS 3",
+                                "SSS 1",
+                                "SSS 2",
+                                "SSS 3",
+                              ]);
+                            }
+                          }}
                           value={field.value || undefined}
                         >
                           <FormControl>
@@ -430,7 +486,7 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
                     )}
                   />
 
-                  {/* Local Government Area */}
+                  {/* Local Government Area (Searchable, scrollable, descriptive loading) */}
                   <FormField
                     control={form.control}
                     name="lgaId"
@@ -440,29 +496,20 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
                           <span>
                             Local Government Area <span className="text-rose-500">*</span>
                           </span>
-                          {loadingMetadata && (
-                            <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                              <Loader2 className="w-2.5 h-2.5 animate-spin" /> Loading
-                            </span>
-                          )}
                         </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || undefined}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-10 text-sm">
-                              <SelectValue placeholder="Select LGA" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="max-h-56">
-                            {availableLgas.map((lga) => (
-                              <SelectItem key={lga.id} value={lga.id}>
-                                {capitalizeInitials(lga.name)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <SearchableSelect
+                            options={lgaOptions}
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder={loadingMetadata ? "Loading LGAs..." : "Select LGA"}
+                            loadingText="Loading LGAs..."
+                            searchPlaceholder="Search LGA by name..."
+                            emptyText="No matching LGA found"
+                            triggerClassName="h-10 text-sm"
+                            isLoading={loadingMetadata}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -488,6 +535,244 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+
+                {/* Class Selection - Required on First Step */}
+                <FormField
+                  control={form.control}
+                  name="classes"
+                  render={({ field }) => {
+                    const selectedClasses = field.value || [];
+                    const currentLevel = form.watch("level");
+
+                    const prePrimaryClasses = ["ECCDE 1", "ECCDE 2", "ECCDE 3"];
+                    const primaryClasses = [
+                      "Primary 1",
+                      "Primary 2",
+                      "Primary 3",
+                      "Primary 4",
+                      "Primary 5",
+                      "Primary 6",
+                    ];
+                    const jssClasses = ["JSS 1", "JSS 2", "JSS 3"];
+                    const sssClasses = ["SSS 1", "SSS 2", "SSS 3"];
+
+                    const toggleClass = (className: string) => {
+                      if (selectedClasses.includes(className)) {
+                        field.onChange(selectedClasses.filter((c) => c !== className));
+                      } else {
+                        field.onChange([...selectedClasses, className]);
+                      }
+                    };
+
+                    const selectMultiple = (classesToAdd: string[]) => {
+                      const merged = Array.from(
+                        new Set([...selectedClasses, ...classesToAdd])
+                      );
+                      field.onChange(merged);
+                    };
+
+                    return (
+                      <FormItem className="space-y-2.5 pt-1">
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                            <GraduationCap className="w-4 h-4 text-brand-primary" />
+                            <span>Select Classes for School</span>
+                            <span className="text-rose-500">*</span>
+                          </FormLabel>
+                          <span className="text-[11px] font-semibold text-brand-primary px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                            {selectedClasses.length} class{selectedClasses.length !== 1 ? "es" : ""} selected
+                          </span>
+                        </div>
+
+                        {/* Quick Selection Buttons */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {currentLevel === "PRIMARY" ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple(primaryClasses)}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors cursor-pointer"
+                              >
+                                + Primary 1–6
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple(prePrimaryClasses)}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors cursor-pointer"
+                              >
+                                + ECCDE 1–3
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  selectMultiple([...prePrimaryClasses, ...primaryClasses])
+                                }
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-brand-primary font-semibold transition-colors cursor-pointer"
+                              >
+                                Select All (ECCDE + Primary)
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple(jssClasses)}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors cursor-pointer"
+                              >
+                                + JSS 1–3
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple(sssClasses)}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors cursor-pointer"
+                              >
+                                + SSS 1–3
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple([...jssClasses, ...sssClasses])}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-brand-primary font-semibold transition-colors cursor-pointer"
+                              >
+                                Select All Secondary
+                              </button>
+                            </>
+                          )}
+                          {selectedClasses.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => field.onChange([])}
+                              className="text-[11px] px-2 py-1 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 font-medium transition-colors cursor-pointer ml-auto"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Interactive Class Selection Pills */}
+                        <div className="p-3 bg-gray-50/80 border border-gray-200 rounded-xl space-y-3">
+                          {currentLevel === "PRIMARY" ? (
+                            <>
+                              <div>
+                                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1.5">
+                                  Early Childhood Education (ECCDE)
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {prePrimaryClasses.map((clsName) => {
+                                    const isSelected = selectedClasses.includes(clsName);
+                                    return (
+                                      <button
+                                        key={clsName}
+                                        type="button"
+                                        onClick={() => toggleClass(clsName)}
+                                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                                          isSelected
+                                            ? "bg-brand-primary border-brand-primary text-white shadow-xs"
+                                            : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                                        )}
+                                        <span>{clsName}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              <div>
+                                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1.5">
+                                  Primary Classes (1 – 6)
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {primaryClasses.map((clsName) => {
+                                    const isSelected = selectedClasses.includes(clsName);
+                                    return (
+                                      <button
+                                        key={clsName}
+                                        type="button"
+                                        onClick={() => toggleClass(clsName)}
+                                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                                          isSelected
+                                            ? "bg-brand-primary border-brand-primary text-white shadow-xs"
+                                            : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                                        )}
+                                        <span>{clsName}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div>
+                                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1.5">
+                                  Junior Secondary (JSS 1 – 3)
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {jssClasses.map((clsName) => {
+                                    const isSelected = selectedClasses.includes(clsName);
+                                    return (
+                                      <button
+                                        key={clsName}
+                                        type="button"
+                                        onClick={() => toggleClass(clsName)}
+                                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                                          isSelected
+                                            ? "bg-brand-primary border-brand-primary text-white shadow-xs"
+                                            : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                                        )}
+                                        <span>{clsName}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              <div>
+                                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1.5">
+                                  Senior Secondary (SSS 1 – 3)
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {sssClasses.map((clsName) => {
+                                    const isSelected = selectedClasses.includes(clsName);
+                                    return (
+                                      <button
+                                        key={clsName}
+                                        type="button"
+                                        onClick={() => toggleClass(clsName)}
+                                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                                          isSelected
+                                            ? "bg-brand-primary border-brand-primary text-white shadow-xs"
+                                            : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                                        )}
+                                        <span>{clsName}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
 
@@ -780,9 +1065,26 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() =>
-                      setActiveTab(activeTab === "basic" ? "contact" : "facility")
-                    }
+                    onClick={async () => {
+                      if (activeTab === "basic") {
+                        const valid = await form.trigger([
+                          "name",
+                          "level",
+                          "lgaId",
+                          "address",
+                          "classes",
+                        ]);
+                        if (!valid) {
+                          toast.error(
+                            "Please complete all required fields including class selections."
+                          );
+                          return;
+                        }
+                        setActiveTab("contact");
+                      } else {
+                        setActiveTab("facility");
+                      }
+                    }}
                     className="text-xs h-9 px-3 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
                   >
                     Next Section →

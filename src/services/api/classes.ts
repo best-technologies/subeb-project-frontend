@@ -25,6 +25,8 @@ export async function getClasses(
   if (params.lgaId) query.append("lgaId", params.lgaId);
   if (params.grade) query.append("grade", params.grade);
   if (params.academicYear) query.append("academicYear", params.academicYear);
+  if (params.statewide !== undefined)
+    query.append("statewide", String(params.statewide));
 
   const queryString = query.toString();
   const url = `/admin/classes${queryString ? `?${queryString}` : ""}`;

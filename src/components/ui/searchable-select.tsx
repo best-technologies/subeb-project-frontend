@@ -32,6 +32,7 @@ export interface SearchableSelectProps {
   placeholder?: string;
   searchPlaceholder?: string;
   emptyText?: string;
+  loadingText?: string;
   disabled?: boolean;
   isLoading?: boolean;
   className?: string;
@@ -58,6 +59,7 @@ export const SearchableSelect = React.forwardRef<
       placeholder = "Select an option...",
       searchPlaceholder = "Search...",
       emptyText = "No results found.",
+      loadingText = "Loading options...",
       disabled = false,
       isLoading = false,
       className,
@@ -102,9 +104,9 @@ export const SearchableSelect = React.forwardRef<
               )}
             >
               {isLoading ? (
-                <span className="flex items-center gap-2 text-gray-400 text-sm">
+                <span className="flex items-center gap-2 text-gray-400 text-xs">
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-primary" />
-                  <span>Loading options...</span>
+                  <span>{loadingText}</span>
                 </span>
               ) : selectedOption ? (
                 <span className="capitalize">{selectedOption.label}</span>
@@ -122,6 +124,7 @@ export const SearchableSelect = React.forwardRef<
         <PopoverContent
           align="start"
           sideOffset={4}
+          onWheel={(e) => e.stopPropagation()}
           className={cn(
             "w-[var(--radix-popover-trigger-width)] min-w-[220px] p-0 border border-brand-primary/20 bg-white shadow-lg rounded-lg overflow-hidden z-50",
             contentClassName
@@ -140,7 +143,10 @@ export const SearchableSelect = React.forwardRef<
               placeholder={searchPlaceholder}
               className="h-9 text-xs"
             />
-            <CommandList className="max-h-60 overflow-y-auto p-1">
+            <CommandList
+              className="max-h-60 overflow-y-auto overscroll-contain p-1"
+              onWheel={(e) => e.stopPropagation()}
+            >
               <CommandEmpty className="py-4 text-center text-xs text-gray-500">
                 {emptyText}
               </CommandEmpty>

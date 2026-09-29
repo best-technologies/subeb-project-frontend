@@ -12,23 +12,13 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { updateClass } from "@/services/api/classes";
 import { ClassItem } from "@/services/types/classResponse";
-import { GRADE_OPTIONS } from "./ClassesFilters";
 import { toast } from "react-hot-toast";
 import {
   Pencil,
   Loader2,
-  Users,
-  Calendar,
-  Layers,
+  GraduationCap,
 } from "lucide-react";
 
 interface EditClassModalProps {
@@ -45,18 +35,12 @@ export const EditClassModal: React.FC<EditClassModalProps> = ({
   onSuccess,
 }) => {
   const [name, setName] = useState("");
-  const [grade, setGrade] = useState("");
-  const [section, setSection] = useState("");
-  const [capacity, setCapacity] = useState("35");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (cls && isOpen) {
       setName(cls.name || "");
-      setGrade(cls.grade || "Primary 1");
-      setSection(cls.section || "A");
-      setCapacity(String(cls.capacity || 35));
       setError(null);
     }
   }, [cls, isOpen]);
@@ -67,23 +51,21 @@ export const EditClassModal: React.FC<EditClassModalProps> = ({
     e.preventDefault();
     setError(null);
 
-    const capNum = parseInt(capacity, 10);
-    if (isNaN(capNum) || capNum < 1) {
-      setError("Please enter a valid capacity.");
+    const trimmed = name.trim();
+    if (!trimmed) {
+      setError("Please enter a class name.");
       return;
     }
 
     setIsSubmitting(true);
     try {
       const res = await updateClass(cls.id, {
-        name: name.trim(),
-        grade: grade.trim(),
-        section: section.trim(),
-        capacity: capNum,
+        name: trimmed,
+        grade: trimmed,
       });
 
       if (res.success) {
-        toast.success(`Class "${name.trim()}" updated successfully!`);
+        toast.success(`Class updated to "${trimmed}" successfully!`);
         onSuccess?.();
         onClose();
       } else {
@@ -105,6 +87,7 @@ export const EditClassModal: React.FC<EditClassModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !isSubmitting && !open && onClose()}>
       <DialogContent className="max-w-md p-0 border-gray-200">
         <form onSubmit={handleSubmit}>
+          {/* Header - No School */}
           <div className="bg-linear-to-r from-emerald-600 to-teal-700 p-6 text-white">
             <DialogHeader>
               <div className="flex items-center gap-3">
@@ -113,10 +96,10 @@ export const EditClassModal: React.FC<EditClassModalProps> = ({
                 </div>
                 <div>
                   <DialogTitle className="text-lg font-bold text-white">
-                    Edit Class Details
+                    Edit Class
                   </DialogTitle>
                   <DialogDescription className="text-emerald-100 text-xs mt-0.5">
-                    {cls.school?.name}
+                    Update state-wide class name
                   </DialogDescription>
                 </div>
               </div>
@@ -131,63 +114,22 @@ export const EditClassModal: React.FC<EditClassModalProps> = ({
             )}
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-gray-700">Class Name</Label>
+              <Label className="text-xs font-semibold text-gray-700">Class Name *</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Primary 1A"
-                className="h-9 text-xs bg-white"
+                placeholder="e.g. Primary 1"
+                className="h-9.5 text-xs bg-white"
+                autoFocus
                 required
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-gray-700">Grade Level</Label>
-                <Select value={grade} onValueChange={setGrade}>
-                  <SelectTrigger className="h-9 text-xs bg-white">
-                    <SelectValue placeholder="Grade" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60 text-xs">
-                    {GRADE_OPTIONS.map((g) => (
-                      <SelectItem key={g} value={g}>
-                        {g}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-gray-700">Section</Label>
-                <Input
-                  value={section}
-                  onChange={(e) => setSection(e.target.value)}
-                  placeholder="e.g. A"
-                  className="h-9 text-xs bg-white"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
-                <Users className="w-3.5 h-3.5 text-brand-primary" />
-                <span>Class Capacity</span>
-              </Label>
-              <Input
-                type="number"
-                min={1}
-                max={200}
-                value={capacity}
-                onChange={(e) => setCapacity(e.target.value)}
-                placeholder="35"
-                className="h-9 text-xs bg-white"
-                required
-              />
+              <p className="text-[11px] text-gray-500">
+                Renaming this class updates the curriculum grade designation across the state.
+              </p>
             </div>
           </div>
 
-          <DialogFooter className="p-4 sm:p-6 bg-gray-50/80 border-t border-gray-100 flex gap-2">
+          <DialogFooter className="p-4 sm:p-5 bg-gray-50/80 border-t border-gray-100 flex gap-2">
             <Button
               type="button"
               variant="outline"
@@ -200,7 +142,7 @@ export const EditClassModal: React.FC<EditClassModalProps> = ({
             <Button
               type="submit"
               disabled={isSubmitting || !name.trim()}
-              className="bg-brand-primary hover:bg-brand-primary-2 text-white text-xs h-9 gap-1.5"
+              className="bg-brand-primary hover:bg-brand-primary-2 text-white text-xs h-9 px-4 font-medium gap-1.5"
             >
               {isSubmitting ? (
                 <>
@@ -217,3 +159,4 @@ export const EditClassModal: React.FC<EditClassModalProps> = ({
     </Dialog>
   );
 };
+

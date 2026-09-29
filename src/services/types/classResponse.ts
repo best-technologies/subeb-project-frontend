@@ -1,16 +1,27 @@
+export interface ClassRegisteredSchool {
+  id: string;
+  name: string;
+  code?: string;
+  lgaName?: string;
+  studentCount?: number;
+}
+
 export interface ClassItem {
   id: string;
   name: string;
   grade: string;
-  section: string;
-  capacity: number;
-  currentEnrollment: number;
+  section?: string;
+  capacity?: number;
+  currentEnrollment?: number;
   studentCount: number;
-  utilization: number;
+  schoolsCount?: number;
+  schools?: ClassRegisteredSchool[];
+  students?: any[];
+  utilization?: number;
   academicYear: string;
   createdAt?: string;
   updatedAt?: string;
-  school: {
+  school?: {
     id: string;
     name: string;
     code?: string;
@@ -19,7 +30,7 @@ export interface ClassItem {
       id: string;
       name: string;
     } | null;
-  };
+  } | null;
   teacher?: {
     id: string;
     name: string;
@@ -53,13 +64,14 @@ export interface ClassQueryParams {
   lgaId?: string;
   grade?: string;
   academicYear?: string;
+  statewide?: boolean;
 }
 
 export interface CreateClassRequest {
   name: string;
-  grade: string;
+  grade?: string;
   section?: string;
-  schoolId: string;
+  schoolId?: string;
   capacity?: number;
   academicYear?: string;
   teacherId?: string;

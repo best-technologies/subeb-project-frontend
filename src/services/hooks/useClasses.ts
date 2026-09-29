@@ -24,23 +24,25 @@ export interface ClassFilterParams {
   schoolId?: string;
   grade?: string;
   academicYear?: string;
+  statewide?: boolean;
 }
 
 export const useClasses = () => {
   const [params, setParams] = useState<ClassFilterParams>({
     page: 1,
-    limit: 10,
+    limit: 15,
     search: undefined,
     lgaId: undefined,
     schoolId: undefined,
     grade: undefined,
     academicYear: undefined,
+    statewide: true,
   });
 
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [pagination, setPagination] = useState<ClassPagination>({
     page: 1,
-    limit: 10,
+    limit: 15,
     total: 0,
     totalPages: 1,
   });
@@ -69,6 +71,7 @@ export const useClasses = () => {
           schoolId: currentParams.schoolId,
           grade: currentParams.grade,
           academicYear: currentParams.academicYear,
+          statewide: currentParams.statewide ?? true,
         };
 
         const response = await getClasses(queryParams);

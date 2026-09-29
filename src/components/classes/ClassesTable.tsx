@@ -9,7 +9,6 @@ import {
   Users,
   Eye,
   School,
-  MapPin,
   Pencil,
   MoreVertical,
   Layers,
@@ -31,7 +30,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { formatEducationalText, capitalizeWords } from "@/utils/formatters";
+import { formatEducationalText } from "@/utils/formatters";
 
 interface ClassesTableProps {
   classes: ClassItem[];
@@ -50,7 +49,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
   onViewClass,
   onEditClass,
 }) => {
-  const { page = 1, limit = 10, total = 0, totalPages = 1 } = pagination;
+  const { page = 1, limit = 15, total = 0, totalPages = 1 } = pagination;
   const startItem = total === 0 ? 0 : (page - 1) * limit + 1;
   const endItem = Math.min(page * limit, total);
 
@@ -63,10 +62,10 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
           </div>
           <div>
             <CardTitle className="text-base font-bold text-gray-900">
-              Classes Directory
+              Classes
             </CardTitle>
             <p className="text-xs text-gray-500">
-              Showing {total.toLocaleString()} registered classes in Abia State
+              Showing {total.toLocaleString()} state-wide classes across Abia State
             </p>
           </div>
         </div>
@@ -88,10 +87,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
                   Class Name
                 </TableHead>
                 <TableHead className="text-xs font-semibold text-gray-500">
-                  School
-                </TableHead>
-                <TableHead className="text-xs font-semibold text-gray-500">
-                  LGA
+                  Registered Schools
                 </TableHead>
                 <TableHead className="text-xs font-semibold text-gray-500">
                   Enrolled Pupils
@@ -107,7 +103,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
             <TableBody>
               {loading && classes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-64 text-center">
+                  <TableCell colSpan={6} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-gray-400">
                       <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
                       <span className="text-xs">Loading classes...</span>
@@ -116,7 +112,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
                 </TableRow>
               ) : classes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-64 text-center">
+                  <TableCell colSpan={6} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-gray-400">
                       <GraduationCap className="w-8 h-8 opacity-40" />
                       <p className="text-sm font-semibold text-gray-600">
@@ -131,11 +127,14 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
               ) : (
                 classes.map((cls, index) => {
                   const rowNumber = (page - 1) * limit + index + 1;
-                  const studentCount = cls.studentCount || cls.currentEnrollment || 0;
+                  const studentCount =
+                    cls.studentCount || cls.currentEnrollment || 0;
+                  const schoolsCount =
+                    cls.schoolsCount ?? cls.schools?.length ?? 0;
 
                   return (
                     <TableRow
-                      key={cls.id}
+                      key={cls.id || cls.grade || index}
                       className="border-gray-100 hover:bg-emerald-50/20 transition-colors"
                     >
                       <TableCell className="text-center text-xs text-gray-400 font-mono">
@@ -143,21 +142,20 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
                       </TableCell>
                       <TableCell>
                         <span className="font-bold text-gray-900 text-sm">
-                          {formatEducationalText(cls.name)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <p className="text-xs font-semibold text-gray-800 truncate max-w-[220px]">
-                          {cls.school?.name ? capitalizeWords(cls.school.name) : "Unassigned"}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-xs text-gray-600">
-                          {cls.school?.lga?.name ? capitalizeWords(cls.school.lga.name) : "N/A"}
+                          {formatEducationalText(cls.name || cls.grade)}
                         </span>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">
+                          <School className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span className="font-semibold text-gray-800 text-xs">
+                            {schoolsCount.toLocaleString()} schools
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                           <span className="font-bold text-gray-900 text-xs">
                             {studentCount.toLocaleString()}{" "}
                             <span className="font-normal text-gray-500">pupils</span>
@@ -186,7 +184,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
                               className="cursor-pointer gap-2"
                             >
                               <Eye className="w-3.5 h-3.5 text-brand-primary" />
-                              <span>View Students</span>
+                              <span>View Details</span>
                             </DropdownMenuItem>
                             {onEditClass && (
                               <DropdownMenuItem

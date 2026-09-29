@@ -15,6 +15,7 @@ export interface CreateSchoolPayload {
   capacity?: number;
   totalStudents?: number;
   totalTeachers?: number;
+  classes?: string[];
 }
 
 export type UpdateSchoolPayload = Partial<CreateSchoolPayload>;
