@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useClasses } from "@/services/hooks/useClasses";
-import { useEnrollmentMetadata, useEnrollmentLgaSchools } from "@/services/hooks/useEnrollment";
 import { ClassesHeader } from "./ClassesHeader";
 import { ClassesChartsSection } from "./charts/ClassesChartsSection";
-import { ClassesFilters } from "./ClassesFilters";
 import { ClassesTable } from "./ClassesTable";
 import { CreateClassDialog } from "./CreateClassDialog";
 import { ClassDetailsDialog } from "./ClassDetailsDialog";
@@ -19,29 +17,14 @@ export const ClassesTab: React.FC = () => {
   const [selectedClassForEdit, setSelectedClassForEdit] = useState<ClassItem | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Classes listing & search hook
+  // Classes listing hook
   const {
     classes,
     pagination,
-    params,
     loading,
-    isSearching,
-    selectLga,
-    selectSchool,
-    selectGrade,
-    updateSearch,
     changePage,
-    clearFilters,
     refetch,
   } = useClasses();
-
-  // LGAs metadata
-  const { data: enrollmentMetadata } = useEnrollmentMetadata();
-  const lgas = useMemo(() => enrollmentMetadata?.localGovernments || [], [enrollmentMetadata]);
-
-  // Schools for current LGA filter
-  const { data: lgaSchoolsData } = useEnrollmentLgaSchools(params.lgaId || "");
-  const schools = useMemo(() => lgaSchoolsData?.schools || [], [lgaSchoolsData]);
 
   const handleViewClass = (cls: ClassItem) => {
     setSelectedClassForDetails(cls);
@@ -61,24 +44,7 @@ export const ClassesTab: React.FC = () => {
       {/* Analytics Section with KPIs, Grade Distribution, LGA Distribution, and Capacity Utilization */}
       <ClassesChartsSection />
 
-      {/* Filters & Search */}
-      <ClassesFilters
-        lgas={lgas}
-        schools={schools}
-        selectedLgaId={params.lgaId}
-        selectedSchoolId={params.schoolId}
-        selectedGrade={params.grade}
-        searchTerm={params.search || ""}
-        isSearching={isSearching}
-        onSearchChange={updateSearch}
-        onClearSearch={() => updateSearch("")}
-        onLgaChange={(lgaId, lgaName) => selectLga(lgaId, lgaName)}
-        onSchoolChange={(schoolId, schoolName) => selectSchool(schoolId, schoolName)}
-        onGradeChange={selectGrade}
-        onClearFilters={clearFilters}
-      />
-
-      {/* Classes Directory Table */}
+      {/* Classes Table */}
       <ClassesTable
         classes={classes}
         pagination={pagination}
@@ -95,8 +61,6 @@ export const ClassesTab: React.FC = () => {
         onSuccess={() => {
           refetch();
         }}
-        initialLgaId={params.lgaId}
-        initialSchoolId={params.schoolId}
       />
 
       {/* Class Details Dialog */}

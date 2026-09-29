@@ -308,9 +308,6 @@ export const AddSchoolDialog: React.FC<AddSchoolDialogProps> = ({
       toast.error("Please review the capacity & metrics fields.");
     }
   };
-      toast.error("Please review the capacity & metrics fields.");
-    }
-  };
 
   const handleClose = () => {
     if (!createMutation.isPending) {

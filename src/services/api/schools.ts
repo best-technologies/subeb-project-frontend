@@ -46,6 +46,14 @@ export interface SchoolDetailData {
     name: string;
     code?: string;
   };
+  classes?: Array<{
+    id: string;
+    name: string;
+    grade: string;
+    section?: string;
+    capacity?: number;
+    currentEnrollment?: number;
+  }>;
 }
 
 export interface CreateSchoolResponse {

@@ -50,7 +50,12 @@ import {
   Sparkles,
   Save,
   Pencil,
+  Check,
 } from "lucide-react";
+import {
+  SearchableSelect,
+  SearchableSelectOption,
+} from "@/components/ui/searchable-select";
 
 const formSchema = z.object({
   name: z.string().trim().min(3, "School name must be at least 3 characters"),
@@ -59,6 +64,9 @@ const formSchema = z.object({
   }),
   lgaId: z.string().min(1, "Please select a Local Government Area"),
   address: z.string().trim().min(5, "Address must be at least 5 characters"),
+  classes: z
+    .array(z.string())
+    .min(1, "Please select at least one class for this school"),
   phone: z.string().trim().optional(),
   email: z
     .string()
@@ -185,6 +193,14 @@ export const EditSchoolSheet: React.FC<EditSchoolSheetProps> = ({
     return metadataData?.localGovernments || [];
   }, [lgas, metadataData]);
 
+  const lgaOptions: SearchableSelectOption[] = useMemo(() => {
+    return availableLgas.map((lga) => ({
+      value: lga.id,
+      label: capitalizeInitials(lga.name),
+      description: "Abia State LGA",
+    }));
+  }, [availableLgas]);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -192,6 +208,7 @@ export const EditSchoolSheet: React.FC<EditSchoolSheetProps> = ({
       level: "PRIMARY",
       lgaId: "",
       address: "",
+      classes: [],
       phone: "",
       email: "",
       website: "",
@@ -210,11 +227,24 @@ export const EditSchoolSheet: React.FC<EditSchoolSheetProps> = ({
   // When school changes or sheet opens, populate initial values
   useEffect(() => {
     if (isOpen && school) {
+      const initialClasses =
+        school.level === "SECONDARY"
+          ? ["JSS 1", "JSS 2", "JSS 3", "SSS 1", "SSS 2", "SSS 3"]
+          : [
+              "Primary 1",
+              "Primary 2",
+              "Primary 3",
+              "Primary 4",
+              "Primary 5",
+              "Primary 6",
+            ];
+
       form.reset({
         name: school.name || "",
         level: (school.level as "PRIMARY" | "SECONDARY") || "PRIMARY",
         lgaId: school.lga?.id || "",
         address: school.address || "",
+        classes: initialClasses,
         phone: school.phone || "",
         email: school.email || "",
         website: "",
@@ -228,17 +258,23 @@ export const EditSchoolSheet: React.FC<EditSchoolSheetProps> = ({
       });
       setActiveTab("basic");
 
-      // Fetch fresh details from backend to ensure website, principal phone/email are populated
+      // Fetch fresh details from backend to ensure website, principal phone/email and classes are populated
       setIsLoadingDetails(true);
       getSchoolById(school.id)
         .then((res) => {
           if (res?.data) {
             const d = res.data;
+            const serverClasses =
+              Array.isArray(d.classes) && d.classes.length > 0
+                ? d.classes.map((c: any) => c.grade || c.name)
+                : initialClasses;
+
             form.reset({
               name: d.name || "",
               level: d.level || "PRIMARY",
               lgaId: d.lgaId || d.lga?.id || "",
               address: d.address || "",
+              classes: serverClasses,
               phone: d.phone || "",
               email: d.email || "",
               website: d.website || "",
@@ -270,6 +306,7 @@ export const EditSchoolSheet: React.FC<EditSchoolSheetProps> = ({
       toast.success(res?.message || "School updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["schools"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
       onClose();
       if (onSuccess) onSuccess();
     },
@@ -289,6 +326,7 @@ export const EditSchoolSheet: React.FC<EditSchoolSheetProps> = ({
       level: values.level,
       lgaId: values.lgaId,
       address: values.address.trim(),
+      classes: values.classes,
     };
 
     if (values.phone?.trim()) payload.phone = values.phone.trim();
@@ -313,9 +351,15 @@ export const EditSchoolSheet: React.FC<EditSchoolSheetProps> = ({
   };
 
   const onError = (errors: FieldErrors<FormValues>) => {
-    if (errors.name || errors.level || errors.lgaId || errors.address) {
+    if (
+      errors.name ||
+      errors.level ||
+      errors.lgaId ||
+      errors.address ||
+      errors.classes
+    ) {
       setActiveTab("basic");
-      toast.error("Please fill in all required school details.");
+      toast.error("Please fill in all required school details including class selections.");
     } else if (
       errors.phone ||
       errors.email ||
@@ -490,26 +534,23 @@ export const EditSchoolSheet: React.FC<EditSchoolSheetProps> = ({
                     name="lgaId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-gray-700">
-                          Local Government Area <span className="text-rose-500">*</span>
+                        <FormLabel className="text-xs font-semibold text-gray-700 flex items-center justify-between">
+                          <span>
+                            Local Government Area <span className="text-rose-500">*</span>
+                          </span>
                         </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || undefined}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-10 text-sm">
-                              <SelectValue placeholder="Select LGA" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="max-h-56">
-                            {availableLgas.map((lga) => (
-                              <SelectItem key={lga.id} value={lga.id}>
-                                {capitalizeInitials(lga.name)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <SearchableSelect
+                            options={lgaOptions}
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select LGA"
+                            loadingText="Loading LGAs..."
+                            searchPlaceholder="Search LGA by name..."
+                            emptyText="No matching LGA found"
+                            triggerClassName="h-10 text-sm"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -535,6 +576,247 @@ export const EditSchoolSheet: React.FC<EditSchoolSheetProps> = ({
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+
+                {/* Class Selection - Adding or Removing Classes from School */}
+                <FormField
+                  control={form.control}
+                  name="classes"
+                  render={({ field }) => {
+                    const selectedClasses = field.value || [];
+                    const currentLevel = form.watch("level");
+
+                    const prePrimaryClasses = ["ECCDE 1", "ECCDE 2", "ECCDE 3"];
+                    const primaryClasses = [
+                      "Primary 1",
+                      "Primary 2",
+                      "Primary 3",
+                      "Primary 4",
+                      "Primary 5",
+                      "Primary 6",
+                    ];
+                    const jssClasses = ["JSS 1", "JSS 2", "JSS 3"];
+                    const sssClasses = ["SSS 1", "SSS 2", "SSS 3"];
+
+                    const toggleClass = (className: string) => {
+                      if (selectedClasses.includes(className)) {
+                        field.onChange(selectedClasses.filter((c) => c !== className));
+                      } else {
+                        field.onChange([...selectedClasses, className]);
+                      }
+                    };
+
+                    const selectMultiple = (classesToAdd: string[]) => {
+                      const merged = Array.from(
+                        new Set([...selectedClasses, ...classesToAdd])
+                      );
+                      field.onChange(merged);
+                    };
+
+                    return (
+                      <FormItem className="space-y-2.5 pt-1">
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                            <GraduationCap className="w-4 h-4 text-brand-primary" />
+                            <span>Classes Assigned to School</span>
+                            <span className="text-rose-500">*</span>
+                          </FormLabel>
+                          <span className="text-[11px] font-semibold text-brand-primary px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                            {selectedClasses.length} class{selectedClasses.length !== 1 ? "es" : ""} assigned
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-gray-500">
+                          Click on any class pill to add or remove it from this school.
+                        </p>
+
+                        {/* Quick Selection Buttons */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {currentLevel === "PRIMARY" ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple(primaryClasses)}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors cursor-pointer"
+                              >
+                                + Primary 1–6
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple(prePrimaryClasses)}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors cursor-pointer"
+                              >
+                                + ECCDE 1–3
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  selectMultiple([...prePrimaryClasses, ...primaryClasses])
+                                }
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-brand-primary font-semibold transition-colors cursor-pointer"
+                              >
+                                Select All (ECCDE + Primary)
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple(jssClasses)}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors cursor-pointer"
+                              >
+                                + JSS 1–3
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple(sssClasses)}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors cursor-pointer"
+                              >
+                                + SSS 1–3
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => selectMultiple([...jssClasses, ...sssClasses])}
+                                className="text-[11px] px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-brand-primary font-semibold transition-colors cursor-pointer"
+                              >
+                                Select All Secondary
+                              </button>
+                            </>
+                          )}
+                          {selectedClasses.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => field.onChange([])}
+                              className="text-[11px] px-2 py-1 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 font-medium transition-colors cursor-pointer ml-auto"
+                            >
+                              Clear All
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Interactive Class Selection Pills */}
+                        <div className="p-3 bg-gray-50/80 border border-gray-200 rounded-xl space-y-3">
+                          {currentLevel === "PRIMARY" ? (
+                            <>
+                              <div>
+                                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1.5">
+                                  Early Childhood Education (ECCDE)
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {prePrimaryClasses.map((clsName) => {
+                                    const isSelected = selectedClasses.includes(clsName);
+                                    return (
+                                      <button
+                                        key={clsName}
+                                        type="button"
+                                        onClick={() => toggleClass(clsName)}
+                                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                                          isSelected
+                                            ? "bg-brand-primary border-brand-primary text-white shadow-xs"
+                                            : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                                        )}
+                                        <span>{clsName}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              <div>
+                                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1.5">
+                                  Primary Classes (1 – 6)
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {primaryClasses.map((clsName) => {
+                                    const isSelected = selectedClasses.includes(clsName);
+                                    return (
+                                      <button
+                                        key={clsName}
+                                        type="button"
+                                        onClick={() => toggleClass(clsName)}
+                                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                                          isSelected
+                                            ? "bg-brand-primary border-brand-primary text-white shadow-xs"
+                                            : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                                        )}
+                                        <span>{clsName}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div>
+                                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1.5">
+                                  Junior Secondary (JSS 1 – 3)
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {jssClasses.map((clsName) => {
+                                    const isSelected = selectedClasses.includes(clsName);
+                                    return (
+                                      <button
+                                        key={clsName}
+                                        type="button"
+                                        onClick={() => toggleClass(clsName)}
+                                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                                          isSelected
+                                            ? "bg-brand-primary border-brand-primary text-white shadow-xs"
+                                            : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                                        )}
+                                        <span>{clsName}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              <div>
+                                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1.5">
+                                  Senior Secondary (SSS 1 – 3)
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {sssClasses.map((clsName) => {
+                                    const isSelected = selectedClasses.includes(clsName);
+                                    return (
+                                      <button
+                                        key={clsName}
+                                        type="button"
+                                        onClick={() => toggleClass(clsName)}
+                                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                                          isSelected
+                                            ? "bg-brand-primary border-brand-primary text-white shadow-xs"
+                                            : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300"
+                                        }`}
+                                      >
+                                        {isSelected && (
+                                          <Check className="w-3.5 h-3.5 text-white shrink-0" />
+                                        )}
+                                        <span>{clsName}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
 
