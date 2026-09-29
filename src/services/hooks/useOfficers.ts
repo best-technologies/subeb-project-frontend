@@ -13,10 +13,10 @@ export const officerKeys = {
 /**
  * Hook for fetching officers
  */
-export function useOfficers(page: number = 1, limit: number = 10) {
+export function useOfficers(page: number = 1, limit: number = 10, search?: string) {
   return useQuery({
-    queryKey: officerKeys.list(`page=${page}&limit=${limit}`),
-    queryFn: () => getOfficers(page, limit),
+    queryKey: officerKeys.list(`page=${page}&limit=${limit}&search=${search || ""}`),
+    queryFn: () => getOfficers(page, limit, search),
   });
 }
 

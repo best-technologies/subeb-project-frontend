@@ -16,7 +16,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/Input";
 import { LoadingModal } from "@/components/ui/LoadingModal";
-import { Dialog } from "@/components/ui/custom-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useEnrollmentMetadata } from "@/services/hooks/useEnrollment";
 import {
   Select,
@@ -144,38 +150,44 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <div className="p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+        <DialogContent className="max-w-md p-6 text-center">
+          <DialogHeader className="items-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-2 mx-auto">
               <CheckCircleIcon className="w-10 h-10 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
               Officer Enrolled Successfully!
-            </h3>
-            <p className="text-gray-600 mb-6">
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 text-center">
               The SUBEB officer has been enrolled successfully.
-            </p>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
             <Button
               onClick={() => setShowSuccessDialog(false)}
-              className="w-full"
+              className="w-full bg-brand-primary text-white"
             >
               Close
             </Button>
           </div>
-        </div>
+        </DialogContent>
       </Dialog>
 
       {/* Error Dialog */}
       <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <div className="p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+        <DialogContent className="max-w-md p-6 text-center">
+          <DialogHeader className="items-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-2 mx-auto">
               <ExclamationCircleIcon className="w-10 h-10 text-red-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
               Enrollment Failed
-            </h3>
-            <p className="text-gray-600 mb-6">{errorMessage}</p>
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 text-center">
+              {errorMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
             <Button
               onClick={() => setShowErrorDialog(false)}
               variant="outline"
@@ -184,11 +196,10 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
               Try Again
             </Button>
           </div>
-        </div>
+        </DialogContent>
       </Dialog>
 
       <div className="w-full bg-background text-foreground rounded-xl">
-        <h2 className="text-xl font-bold mb-4 text-center">Enrol Officer</h2>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}

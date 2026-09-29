@@ -16,8 +16,13 @@ export async function enrollOfficer(data: OfficerData): Promise<ApiResponse> {
   return response.data;
 }
 
-export async function getOfficers(page: number = 1, limit: number = 10): Promise<ApiResponse> {
-  const response = await api.get(`/admin/subeb-officers?page=${page}&limit=${limit}`);
+export async function getOfficers(
+  page: number = 1,
+  limit: number = 10,
+  search?: string
+): Promise<ApiResponse> {
+  const query = search ? `&search=${encodeURIComponent(search)}` : "";
+  const response = await api.get(`/admin/subeb-officers?page=${page}&limit=${limit}${query}`);
   return response.data;
 }
 

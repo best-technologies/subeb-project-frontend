@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useOfficers } from "@/services/hooks/useOfficers";
 import { Button } from "@/components/ui/Button";
 import { Plus, Search, MoreVertical, Edit2 } from "lucide-react";
 import AddOfficerForm from "@/components/officers/AddOfficerForm";
 import EditOfficerModal from "@/components/officers/EditOfficerModal";
-import { Dialog } from "@/components/ui/custom-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { capitalizeWords } from "@/utils/formatters";
 import {
   DropdownMenu,
@@ -15,26 +21,76 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+interface OfficerAvatarProps {
+  user?: {
+    firstName?: string;
+    lastName?: string;
+    profilePicture?: string;
+  };
+}
+
+function OfficerAvatar({ user }: OfficerAvatarProps) {
+  const [imgError, setImgError] = useState(false);
+  const initials = `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`.toUpperCase() || "O";
+  const hasPicture = Boolean(user?.profilePicture && user.profilePicture.trim() !== "" && !imgError);
+
+  if (hasPicture) {
+    return (
+      <img
+        className="h-10 w-10 rounded-full object-cover border border-gray-100 shadow-xs"
+        src={user!.profilePicture}
+        alt={`${user?.firstName || ""} ${user?.lastName || ""}`}
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className="h-10 w-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-sm">
+      {initials}
+    </div>
+  );
+}
+
 export default function OfficersPage() {
   const [page, setPage] = useState(1);
-  const { data, isLoading, error } = useOfficers(page, 10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data, isLoading, error } = useOfficers(page, 10, searchQuery);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOfficer, setSelectedOfficer] = useState<any>(null);
 
   const officers = (data?.meta as { id: string; user: { firstName: string; lastName: string; email: string; profilePicture?: string }; phone: string; lgaId?: string; lga?: { name: string } }[]) || [];
   const pagination = (data?.data as { pagination?: { total?: number; totalPages?: number } })?.pagination;
-  const total = pagination?.total || 0;
+  const total = pagination?.total || officers.length;
   const totalPages = pagination?.totalPages || 1;
+
+  // Filter officers client-side as well for instant feedback
+  const filteredOfficers = useMemo(() => {
+    if (!searchQuery.trim()) return officers;
+    const q = searchQuery.toLowerCase().trim();
+    return officers.filter((o: any) => {
+      const fullName = `${o.user?.firstName || ""} ${o.user?.lastName || ""}`.toLowerCase();
+      const email = (o.user?.email || "").toLowerCase();
+      const phone = (o.phone || "").toLowerCase();
+      const lgaName = (o.lga?.name || "").toLowerCase();
+      return (
+        fullName.includes(q) ||
+        email.includes(q) ||
+        phone.includes(q) ||
+        lgaName.includes(q)
+      );
+    });
+  }, [officers, searchQuery]);
 
   const handleEditClick = (officer: any) => {
     setSelectedOfficer({
       id: officer.id,
-      firstName: officer.user.firstName,
-      lastName: officer.user.lastName,
-      email: officer.user.email,
+      firstName: officer.user?.firstName || "",
+      lastName: officer.user?.lastName || "",
+      email: officer.user?.email || "",
       lgaId: officer.lgaId || "",
-      profilePicture: officer.user.profilePicture || "",
+      profilePicture: officer.user?.profilePicture || "",
     });
     setIsEditModalOpen(true);
   };
@@ -48,24 +104,29 @@ export default function OfficersPage() {
         </div>
         <Button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 bg-brand-primary text-white"
+          className="flex items-center gap-2 bg-brand-primary text-white hover:bg-brand-primary/90 font-medium px-4 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer"
         >
-          <Plus size={20} />
+          <Plus size={18} />
           <span>Add Officer</span>
         </Button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-          <div className="relative w-64">
+        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="relative w-full sm:w-72">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
               size={18}
             />
             <input
               type="text"
-              placeholder="Search officers..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-brand-primary"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search by name, email, or LGA..."
+              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-brand-primary transition-colors bg-white text-gray-900 placeholder:text-gray-400"
             />
           </div>
           <div className="text-sm text-gray-500">
@@ -110,36 +171,30 @@ export default function OfficersPage() {
                     Failed to load officers
                   </td>
                 </tr>
-              ) : officers.length === 0 ? (
+              ) : filteredOfficers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
-                    No officers found
+                    {searchQuery ? "No matching officers found" : "No officers found"}
                   </td>
                 </tr>
               ) : (
-                officers.map((officer: any) => (
+                filteredOfficers.map((officer: any) => (
                   <tr key={officer.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0 h-10 w-10">
-                          {officer.user.profilePicture ? (
-                            <img className="h-10 w-10 rounded-full object-cover" src={officer.user.profilePicture} alt="" />
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold">
-                              {officer.user.firstName?.[0]}{officer.user.lastName?.[0]}
-                            </div>
-                          )}
+                          <OfficerAvatar user={officer.user} />
                         </div>
-                        <div className="font-medium text-gray-900">
-                          {officer.user.firstName} {officer.user.lastName}
+                        <div className="font-medium text-gray-900 capitalize">
+                          {officer.user?.firstName} {officer.user?.lastName}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                      {officer.user.email}
+                      {officer.user?.email || officer.email || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                      {officer.phone}
+                      {officer.phone || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                       {officer.lga ? capitalizeWords(officer.lga.name) : "Unassigned"}
@@ -196,13 +251,19 @@ export default function OfficersPage() {
         )}
       </div>
 
+      {/* Add Officer Dialog (ShadCN-based) */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <div className="p-6">
-          <h2 className="sr-only">Enrol New Officer</h2>
-          <div className="mt-4">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">Enrol New Officer</DialogTitle>
+            <DialogDescription className="text-sm text-gray-500">
+              Fill in the details below to enrol a new SUBEB exam officer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2">
             <AddOfficerForm onSuccess={() => setIsAddModalOpen(false)} />
           </div>
-        </div>
+        </DialogContent>
       </Dialog>
 
       <EditOfficerModal

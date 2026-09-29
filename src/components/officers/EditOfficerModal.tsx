@@ -16,7 +16,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/Input";
 import { LoadingModal } from "@/components/ui/LoadingModal";
-import { Dialog } from "@/components/ui/custom-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useEnrollmentMetadata } from "@/services/hooks/useEnrollment";
 import {
   Select,
@@ -140,22 +146,16 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Edit Officer</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <span className="sr-only">Close</span>
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">Edit Officer</DialogTitle>
+            <DialogDescription className="text-sm text-gray-500">
+              Update details for {officer?.firstName} {officer?.lastName}.
+            </DialogDescription>
+          </DialogHeader>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
               <div className="flex justify-center mb-4">
                 <div className="relative">
                   <div className="w-24 h-24 rounded-full border-2 border-brand-primary/20 bg-brand-primary/5 flex items-center justify-center overflow-hidden">
@@ -266,7 +266,7 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
               </div>
             </form>
           </Form>
-        </div>
+        </DialogContent>
       </Dialog>
 
       {/* Loading Modal */}
@@ -277,40 +277,46 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <div className="p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+        <DialogContent className="max-w-md p-6 text-center">
+          <DialogHeader className="items-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-2 mx-auto">
               <CheckCircleIcon className="w-10 h-10 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
               Officer Updated Successfully!
-            </h3>
-            <p className="text-gray-600 mb-6">
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 text-center">
               The SUBEB officer details have been updated.
-            </p>
-            <Button onClick={handleCloseSuccess} className="w-full">
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <Button onClick={handleCloseSuccess} className="w-full bg-brand-primary text-white">
               Close
             </Button>
           </div>
-        </div>
+        </DialogContent>
       </Dialog>
 
       {/* Error Dialog */}
       <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <div className="p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+        <DialogContent className="max-w-md p-6 text-center">
+          <DialogHeader className="items-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-2 mx-auto">
               <ExclamationCircleIcon className="w-10 h-10 text-red-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
               Update Failed
-            </h3>
-            <p className="text-gray-600 mb-6">{errorMessage}</p>
-            <Button onClick={() => setShowErrorDialog(false)} className="w-full">
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 text-center">
+              {errorMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <Button onClick={() => setShowErrorDialog(false)} variant="outline" className="w-full">
               Try Again
             </Button>
           </div>
-        </div>
+        </DialogContent>
       </Dialog>
     </>
   );
