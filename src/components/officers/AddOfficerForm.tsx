@@ -46,10 +46,16 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 const formSchema = z.object({
   firstName: z.string().min(1, "First Name is required"),
   lastName: z.string().min(1, "Last Name is required"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().min(1, "Phone Number is required"),
+  email: z
+    .string()
+    .min(1, "Email address is required")
+    .email("Please enter a valid email address"),
+  phone: z
+    .string()
+    .min(1, "Phone Number is required")
+    .regex(/^[0-9+\s-]{7,15}$/, "Please enter a valid phone number"),
   address: z.string().min(1, "Address is required"),
-  lgaId: z.string().min(1, "Please select an LGA"),
+  lgaId: z.string().min(1, "Please select a Local Government Area"),
   profilePicture: z.string().optional(),
 });
 
@@ -107,24 +113,20 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
   };
 
   function onSubmit(values: FormValues) {
-    console.log("Form submitted with values:", values);
-
     // Add designation field for the API
     const submissionData = {
       ...values,
       designation: "Education Officer",
     };
 
-    // Call the API through our new hook
+    // Call the API through hook
     enrollOfficerMutation.mutate(submissionData, {
       onSuccess: () => {
-        console.log("Enrollment successful, resetting form");
         form.reset();
         setShowSuccessDialog(true);
         if (onSuccess) onSuccess();
       },
       onError: (error: unknown) => {
-        console.error("Enrollment failed:", error);
         const message =
           (
             error as {
@@ -150,22 +152,23 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="max-w-md p-6 text-center">
-          <DialogHeader className="items-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-2 mx-auto">
-              <CheckCircleIcon className="w-10 h-10 text-green-600" />
+        <DialogContent className="sm:max-w-sm p-6 text-center">
+          <div className="flex flex-col items-center justify-center text-center space-y-3">
+            <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center">
+              <CheckCircleIcon className="w-7 h-7 text-emerald-600" />
             </div>
-            <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
-              Officer Enrolled Successfully!
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 text-center">
-              The SUBEB officer has been enrolled successfully.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4">
+            <div>
+              <DialogTitle className="text-lg font-bold text-gray-900 text-center">
+                Officer Enrolled Successfully!
+              </DialogTitle>
+              <DialogDescription className="text-xs text-gray-500 text-center mt-1">
+                The SUBEB officer has been enrolled successfully.
+              </DialogDescription>
+            </div>
             <Button
+              type="button"
               onClick={() => setShowSuccessDialog(false)}
-              className="w-full bg-brand-primary text-white"
+              className="w-full max-w-[140px] bg-brand-primary text-white hover:bg-brand-primary/90 text-xs py-2 mt-2"
             >
               Close
             </Button>
@@ -175,23 +178,24 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
 
       {/* Error Dialog */}
       <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <DialogContent className="max-w-md p-6 text-center">
-          <DialogHeader className="items-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-2 mx-auto">
-              <ExclamationCircleIcon className="w-10 h-10 text-red-600" />
+        <DialogContent className="sm:max-w-sm p-6 text-center">
+          <div className="flex flex-col items-center justify-center text-center space-y-3">
+            <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
+              <ExclamationCircleIcon className="w-7 h-7 text-red-600" />
             </div>
-            <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
-              Enrollment Failed
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 text-center">
-              {errorMessage}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4">
+            <div>
+              <DialogTitle className="text-lg font-bold text-gray-900 text-center">
+                Enrollment Failed
+              </DialogTitle>
+              <DialogDescription className="text-xs text-gray-500 text-center mt-1">
+                {errorMessage}
+              </DialogDescription>
+            </div>
             <Button
+              type="button"
               onClick={() => setShowErrorDialog(false)}
               variant="outline"
-              className="w-full"
+              className="w-full max-w-[140px] text-xs py-2 mt-2"
             >
               Try Again
             </Button>
@@ -199,28 +203,28 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
         </DialogContent>
       </Dialog>
 
-      <div className="w-full bg-background text-foreground rounded-xl">
+      <div className="w-full bg-background text-foreground">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 w-full"
           >
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-2">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full border-2 border-brand-primary/20 bg-brand-primary/5 flex items-center justify-center overflow-hidden">
+                <div className="w-20 h-20 rounded-full border-2 border-brand-primary/20 bg-brand-primary/5 flex items-center justify-center overflow-hidden">
                   {form.watch("profilePicture") ? (
                     <img src={form.watch("profilePicture")} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
-                    <Camera className="w-8 h-8 text-brand-primary/40" />
+                    <Camera className="w-7 h-7 text-brand-primary/40" />
                   )}
                 </div>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingImage}
-                  className="absolute bottom-0 right-0 bg-brand-primary text-white p-1.5 rounded-full shadow-lg hover:bg-brand-primary/90 disabled:opacity-50"
+                  className="absolute bottom-0 right-0 bg-brand-primary text-white p-1.5 rounded-full shadow-md hover:bg-brand-primary/90 disabled:opacity-50"
                 >
-                  {isUploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusIcon className="w-4 h-4" />}
+                  {isUploadingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlusIcon className="w-3.5 h-3.5" />}
                 </button>
                 <input
                   type="file"
@@ -232,125 +236,118 @@ export default function AddOfficerForm({ onSuccess }: AddOfficerFormProps) {
               </div>
             </div>
             
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter first name"
-                      autoFocus
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter last name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Enter email address"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="tel"
-                      placeholder="Enter phone number"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lgaId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Local Government Area</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={loadingMetadata}
-                  >
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select LGA" />
-                      </SelectTrigger>
+                      <Input placeholder="Enter first name" autoFocus {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>LGAs</SelectLabel>
-                        {lgas.map((lga) => (
-                          <SelectItem key={lga.id} value={lga.id}>
-                            {capitalizeWords(lga.name)}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="pt-2">
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter last name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="Enter email address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Input type="tel" placeholder="Enter phone number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lgaId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Local Government Area <span className="text-red-500">*</span></FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={loadingMetadata}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={loadingMetadata ? "Loading LGAs..." : "Select LGA"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>LGAs</SelectLabel>
+                          {lgas.map((lga) => (
+                            <SelectItem key={lga.id} value={lga.id}>
+                              {capitalizeWords(lga.name)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="pt-3 border-t border-gray-100 flex justify-end gap-3 mt-4">
               <Button
                 type="submit"
-                variant="default"
-                size="default"
-                className="w-full"
+                className="w-full sm:w-auto bg-brand-primary text-white hover:bg-brand-primary/90 px-6"
                 disabled={enrollOfficerMutation.isPending}
               >
-                {enrollOfficerMutation.isPending
-                  ? "Enrolling..."
-                  : "Enroll Officer"}
+                {enrollOfficerMutation.isPending ? "Enrolling..." : "Enroll Officer"}
               </Button>
             </div>
           </form>

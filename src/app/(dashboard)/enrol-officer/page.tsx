@@ -60,10 +60,21 @@ export default function OfficersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOfficer, setSelectedOfficer] = useState<any>(null);
 
-  const officers = (data?.meta as { id: string; user: { firstName: string; lastName: string; email: string; profilePicture?: string }; phone: string; lgaId?: string; lga?: { name: string } }[]) || [];
-  const pagination = (data?.data as { pagination?: { total?: number; totalPages?: number } })?.pagination;
-  const total = pagination?.total || officers.length;
-  const totalPages = pagination?.totalPages || 1;
+  const officers = Array.isArray(data?.data)
+    ? data.data
+    : Array.isArray(data?.meta)
+    ? data.meta
+    : Array.isArray((data as any)?.officers)
+    ? (data as any).officers
+    : [];
+
+  const rawPagination =
+    (data?.meta as any)?.pagination ||
+    (data?.data as any)?.pagination ||
+    (data as any)?.pagination;
+
+  const total = rawPagination?.total ?? officers.length;
+  const totalPages = rawPagination?.totalPages ?? Math.ceil(total / 10) ?? 1;
 
   // Filter officers client-side as well for instant feedback
   const filteredOfficers = useMemo(() => {
@@ -89,6 +100,7 @@ export default function OfficersPage() {
       firstName: officer.user?.firstName || "",
       lastName: officer.user?.lastName || "",
       email: officer.user?.email || "",
+      phone: officer.phone || "",
       lgaId: officer.lgaId || "",
       profilePicture: officer.user?.profilePicture || "",
     });
@@ -227,33 +239,56 @@ export default function OfficersPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-4 border-t border-gray-100 flex items-center justify-between">
-            <Button
-              variant="outline"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-gray-600">
-              Page {page} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
-              Next
-            </Button>
-          </div>
-        )}
+        {/* Pagination Footer */}
+        <div className="p-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-gray-500">
+            Showing <span className="font-semibold text-gray-900">{total > 0 ? (page - 1) * 10 + 1 : 0}</span> to{" "}
+            <span className="font-semibold text-gray-900">{Math.min(page * 10, total)}</span> of{" "}
+            <span className="font-semibold text-gray-900">{total}</span> officers
+          </p>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="text-xs"
+              >
+                Previous
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pNum) => (
+                  <button
+                    key={pNum}
+                    onClick={() => setPage(pNum)}
+                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
+                      page === pNum
+                        ? "bg-brand-primary text-white"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {pNum}
+                  </button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="text-xs"
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Add Officer Dialog (ShadCN-based) */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">Enrol New Officer</DialogTitle>
             <DialogDescription className="text-sm text-gray-500">

@@ -43,6 +43,12 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 const formSchema = z.object({
   firstName: z.string().min(1, "First Name is required"),
   lastName: z.string().min(1, "Last Name is required"),
+  phone: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^[0-9+\s-]{7,15}$/.test(val), {
+      message: "Please enter a valid phone number",
+    }),
   lgaId: z.string().optional(),
   profilePicture: z.string().optional(),
 });
@@ -57,6 +63,7 @@ export interface EditOfficerModalProps {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string;
     lgaId?: string;
     profilePicture?: string;
   } | null;
@@ -77,6 +84,7 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
     defaultValues: {
       firstName: "",
       lastName: "",
+      phone: "",
       lgaId: "",
       profilePicture: "",
     },
@@ -113,6 +121,7 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
       form.reset({
         firstName: officer.firstName || "",
         lastName: officer.lastName || "",
+        phone: officer.phone || "",
         lgaId: officer.lgaId || "",
         profilePicture: officer.profilePicture || "",
       });
@@ -183,7 +192,7 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="firstName"
@@ -213,13 +222,29 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
                 />
               </div>
 
-              <FormItem>
-                <FormLabel>Email Address</FormLabel>
-                <FormControl>
-                  <Input value={officer?.email || ""} disabled className="bg-gray-50" />
-                </FormControl>
-                <p className="text-xs text-gray-500 mt-1">Email cannot be changed.</p>
-              </FormItem>
+              <div className="grid grid-cols-2 gap-4">
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input value={officer?.email || ""} disabled className="bg-gray-50 text-gray-500" />
+                  </FormControl>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Email cannot be changed.</p>
+                </FormItem>
+
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input type="tel" placeholder="Enter phone number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
@@ -258,7 +283,7 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
                 </Button>
                 <Button 
                   type="submit" 
-                  className="bg-brand-primary text-white"
+                  className="bg-brand-primary text-white hover:bg-brand-primary/90"
                   disabled={updateOfficerMutation.isPending}
                 >
                   {updateOfficerMutation.isPending ? "Saving..." : "Save Changes"}
@@ -277,20 +302,24 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="max-w-md p-6 text-center">
-          <DialogHeader className="items-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-2 mx-auto">
-              <CheckCircleIcon className="w-10 h-10 text-green-600" />
+        <DialogContent className="sm:max-w-sm p-6 text-center">
+          <div className="flex flex-col items-center justify-center text-center space-y-3">
+            <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center">
+              <CheckCircleIcon className="w-7 h-7 text-emerald-600" />
             </div>
-            <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
-              Officer Updated Successfully!
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 text-center">
-              The SUBEB officer details have been updated.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4">
-            <Button onClick={handleCloseSuccess} className="w-full bg-brand-primary text-white">
+            <div>
+              <DialogTitle className="text-lg font-bold text-gray-900 text-center">
+                Officer Updated Successfully!
+              </DialogTitle>
+              <DialogDescription className="text-xs text-gray-500 text-center mt-1">
+                The SUBEB officer details have been updated.
+              </DialogDescription>
+            </div>
+            <Button
+              type="button"
+              onClick={handleCloseSuccess}
+              className="w-full max-w-[140px] bg-brand-primary text-white hover:bg-brand-primary/90 text-xs py-2 mt-2"
+            >
               Close
             </Button>
           </div>
@@ -299,20 +328,25 @@ export default function EditOfficerModal({ isOpen, onClose, officer, onSuccess }
 
       {/* Error Dialog */}
       <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <DialogContent className="max-w-md p-6 text-center">
-          <DialogHeader className="items-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-2 mx-auto">
-              <ExclamationCircleIcon className="w-10 h-10 text-red-600" />
+        <DialogContent className="sm:max-w-sm p-6 text-center">
+          <div className="flex flex-col items-center justify-center text-center space-y-3">
+            <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
+              <ExclamationCircleIcon className="w-7 h-7 text-red-600" />
             </div>
-            <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
-              Update Failed
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 text-center">
-              {errorMessage}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4">
-            <Button onClick={() => setShowErrorDialog(false)} variant="outline" className="w-full">
+            <div>
+              <DialogTitle className="text-lg font-bold text-gray-900 text-center">
+                Update Failed
+              </DialogTitle>
+              <DialogDescription className="text-xs text-gray-500 text-center mt-1">
+                {errorMessage}
+              </DialogDescription>
+            </div>
+            <Button
+              type="button"
+              onClick={() => setShowErrorDialog(false)}
+              variant="outline"
+              className="w-full max-w-[140px] text-xs py-2 mt-2"
+            >
               Try Again
             </Button>
           </div>
