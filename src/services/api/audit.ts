@@ -1,9 +1,9 @@
 import api from "@/lib/axios";
-import { ApiResponse } from "./types";
 
 export interface AuditLogData {
   id: string;
   userId: string;
+  userName?: string;
   action: string;
   details: string; // JSON string or text
   entity: string;
@@ -11,7 +11,17 @@ export interface AuditLogData {
   createdAt: string;
 }
 
-export async function getAuditLogs(page = 1, limit = 20): Promise<ApiResponse<AuditLogData[]>> {
+export interface AuditLogsResponse {
+  data: AuditLogData[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export async function getAuditLogs(page = 1, limit = 20): Promise<AuditLogsResponse> {
   const response = await api.get(`/admin/audit-logs?page=${page}&limit=${limit}`);
   return response.data;
 }

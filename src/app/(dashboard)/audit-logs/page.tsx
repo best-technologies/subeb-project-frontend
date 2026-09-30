@@ -14,12 +14,31 @@ function formatAction(action: string) {
   if (action === "UPLOADED_RESULTS" || (action.includes("school-it/results/upload"))) return "Uploaded Results";
   if (action === "SUBMITTED_RESULTS" || (action.includes("school-it/results/submit"))) return "Submitted Results";
   if (action === "ENROLLED_STUDENT" || (action.includes("school-it/students") && action.startsWith("POST"))) return "Enrolled Student";
-  if (action === "UPDATED_STUDENT" || (action.includes("school-it/students") && action.startsWith("PUT"))) return "Updated Student";
+  if (action === "UPDATED_STUDENT" || (action.includes("school-it/students") && (action.startsWith("PUT") || action.startsWith("PATCH")))) return "Updated Student";
   
-  if (action.includes("subeb-officers/enroll")) return "Enrolled SUBEB Officer";
-  if (action.includes("students/enrollsingleorbulkstudents")) return "Enrolled Student(s)";
+  if (action.includes("subeb-officers/enroll") || action.includes("subeb-officers")) return "Enrolled SUBEB Officer";
+  if (action.includes("students/enrollsingleorbulkstudents") || action.includes("enrollment/students") || action.includes("admin/enrollment")) return "Enrolled Student(s)";
+  
+  if (action.includes("academic/classes") && action.startsWith("POST")) return "Created Class";
+  if (action.includes("academic/classes") && (action.startsWith("PATCH") || action.startsWith("PUT"))) return "Updated Class";
+  if (action.includes("academic/classes") && action.startsWith("DELETE")) return "Deleted Class";
+  
+  if (action.includes("academic/sessions") && action.startsWith("POST")) return "Created Session";
+  if (action.includes("academic/sessions") && (action.startsWith("PATCH") || action.startsWith("PUT"))) return "Updated Session";
+  if (action.includes("academic/sessions") && action.startsWith("DELETE")) return "Deleted Session";
+
+  if (action.includes("academic/terms") && action.startsWith("POST")) return "Created Term";
+  if (action.includes("academic/terms") && (action.startsWith("PATCH") || action.startsWith("PUT"))) return "Updated Term";
+  if (action.includes("academic/terms") && action.startsWith("DELETE")) return "Deleted Term";
+
+  if (action.includes("admin/schools") && action.startsWith("POST")) return "Added School";
+  if (action.includes("admin/schools") && (action.startsWith("PATCH") || action.startsWith("PUT"))) return "Updated School";
+  if (action.includes("admin/schools") && action.startsWith("DELETE")) return "Deleted School";
+
+  if (action.includes("auth/profile")) return "Updated Profile";
+
   if (action.startsWith("POST ")) return "Created Record";
-  if (action.startsWith("PUT ")) return "Updated Record";
+  if (action.startsWith("PUT ") || action.startsWith("PATCH ")) return "Updated Record";
   if (action.startsWith("DELETE ")) return "Deleted Record";
   return action;
 }
@@ -68,8 +87,29 @@ function formatDetails(action: string, details: string) {
       }
     }
     
-    if (formattedAction === "Enrolled SUBEB Officer" || parsed.firstName) {
+    if (formattedAction === "Enrolled SUBEB Officer") {
       return `Name: ${parsed.firstName || 'Unknown'} ${parsed.lastName || ''}, Email: ${parsed.email || "N/A"}`;
+    }
+
+    if (formattedAction === "Created Class" || formattedAction === "Updated Class" || formattedAction === "Deleted Class") {
+      if (parsed.name) return `Class Name: ${parsed.name}${parsed.code ? ` (${parsed.code})` : ""}`;
+    }
+
+    if (formattedAction === "Created Session" || formattedAction === "Updated Session" || formattedAction === "Deleted Session") {
+      if (parsed.name || parsed.status) return `Session: ${parsed.name || "N/A"}${parsed.status ? `, Status: ${parsed.status}` : ""}`;
+    }
+
+    if (formattedAction === "Created Term" || formattedAction === "Updated Term" || formattedAction === "Deleted Term") {
+      if (parsed.name || parsed.status) return `Term: ${parsed.name || "N/A"}${parsed.status ? `, Status: ${parsed.status}` : ""}`;
+    }
+
+    if (formattedAction === "Added School" || formattedAction === "Updated School" || formattedAction === "Deleted School") {
+      if (parsed.name) return `School Name: ${parsed.name}${parsed.code ? ` (${parsed.code})` : ""}`;
+    }
+
+    if (formattedAction === "Updated Profile") {
+      const name = parsed.firstName || parsed.lastName ? `${parsed.firstName || ''} ${parsed.lastName || ''}`.trim() : "";
+      return `Updated profile information${name ? `: ${name}` : ""}`;
     }
     
     // Generic fallback for JSON
