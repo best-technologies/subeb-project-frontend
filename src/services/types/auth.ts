@@ -10,6 +10,9 @@ export interface User {
   createdAt?: string;
   updatedAt?: string;
   schoolName?: string | null;
+  phone?: string;
+  department?: string;
+  location?: string;
 }
 
 export interface RegisterRequest {

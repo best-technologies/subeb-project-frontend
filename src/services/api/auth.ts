@@ -117,3 +117,31 @@ export async function logout(): Promise<{ success: boolean; message: string }> {
     };
   }
 }
+
+/**
+ * Get current user profile
+ * GET /auth/profile
+ */
+export async function getProfile(): Promise<any> {
+  try {
+    const response = await api.get("/auth/profile");
+    return response.data;
+  } catch (error: unknown) {
+    console.error("Get profile error:", error);
+    return null;
+  }
+}
+
+/**
+ * Update current user profile
+ * PATCH /auth/profile
+ */
+export async function updateProfile(data: { firstName?: string; lastName?: string }): Promise<any> {
+  try {
+    const response = await api.patch("/auth/profile", data);
+    return response.data;
+  } catch (error: unknown) {
+    console.error("Update profile error:", error);
+    return null;
+  }
+}

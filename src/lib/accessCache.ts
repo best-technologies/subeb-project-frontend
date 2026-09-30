@@ -87,6 +87,7 @@ export function setupHardRefreshDetector(onHardRefresh?: () => void): () => void
   if (typeof window === "undefined") return () => {};
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    if (!e || !e.key) return;
     const isCtrlOrMeta = e.ctrlKey || e.metaKey;
     const isShift = e.shiftKey;
     const key = e.key.toLowerCase();
