@@ -10,7 +10,6 @@ import StudentsFilters from "./StudentsFilters";
 import StudentsTable from "./StudentsTable";
 import { StudentChartsSection } from "./charts/StudentChartsSection";
 import EditStudentDialog from "./EditStudentDialog";
-import AddStudentDialog from "./AddStudentDialog";
 import { buildFilterContextMessage } from "./FilterContextMessage";
 import { Button } from "@/components/ui/Button";
 import { LoadingModal } from "@/components/ui/LoadingModal";
@@ -36,7 +35,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
   lgas,
 }) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showAddDialog, setShowAddDialog] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState<PerformanceStudent | null>(
     null
   );
@@ -443,7 +441,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         totalStudents={total}
         averageScore={averageScore}
         getScoreColor={getScoreColor}
-        onAddStudent={() => setShowAddDialog(true)}
       />
 
       {/* Analytics Overview Suite directly below page header card and above table filters card */}
@@ -527,12 +524,6 @@ const StudentsTab: React.FC<StudentsTabProps> = ({
         student={studentToEdit}
         onOpenChange={handleCloseEditDialog}
         onSave={handleSaveStudent}
-      />
-
-      {/* Add Student Dialog */}
-      <AddStudentDialog
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
       />
 
       {/* Loading Modal with full-page backdrop for data crunching */}
