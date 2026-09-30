@@ -169,10 +169,10 @@ export function CreateSessionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg rounded-2xl p-6">
         {isSuccess ? (
           <div className="py-6 text-center space-y-4">
-            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
               <CheckCircle2 className="w-8 h-8 text-emerald-600" />
             </div>
             <DialogHeader className="space-y-1">
@@ -188,7 +188,7 @@ export function CreateSessionModal({
             <div className="pt-4">
               <Button
                 onClick={handleClose}
-                className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-medium"
+                className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-medium rounded-xl py-2.5"
               >
                 Continue
               </Button>
@@ -196,9 +196,9 @@ export function CreateSessionModal({
           </div>
         ) : (
           <>
-            <DialogHeader>
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
+            <DialogHeader className="space-y-1">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
                   <Calendar className="w-5 h-5" />
                 </div>
                 <div>
@@ -213,19 +213,19 @@ export function CreateSessionModal({
             </DialogHeader>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-3">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-semibold text-gray-700">
-                        Session Name
+                        Session Name <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="e.g. 2025/2026"
-                          className="h-10 text-sm"
+                          className="h-10 text-sm rounded-xl"
                           {...field}
                           onChange={(e) => {
                             field.onChange(e);
@@ -237,9 +237,9 @@ export function CreateSessionModal({
                       </FormControl>
                       <FormMessage />
                       {minDate && maxDate ? (
-                        <p className="text-[11px] text-emerald-700 font-medium">
-                          Session Boundaries: {minDate} to {maxDate}
-                        </p>
+                        <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 text-[11px] text-emerald-800 font-medium">
+                          Session Boundaries: <strong>{minDate}</strong> to <strong>{maxDate}</strong>
+                        </div>
                       ) : (
                         <p className="text-[11px] text-gray-400">
                           Format: YYYY/YYYY (e.g. 2025/2026)
@@ -256,7 +256,7 @@ export function CreateSessionModal({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs font-semibold text-gray-700">
-                          Start Date
+                          Start Date <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <DatePicker
@@ -279,7 +279,7 @@ export function CreateSessionModal({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs font-semibold text-gray-700">
-                          End Date
+                          End Date <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <DatePicker
@@ -307,7 +307,7 @@ export function CreateSessionModal({
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="h-10 text-sm">
+                          <SelectTrigger className="h-10 text-sm rounded-xl">
                             <SelectValue placeholder="Select Status" />
                           </SelectTrigger>
                         </FormControl>
@@ -321,18 +321,19 @@ export function CreateSessionModal({
                   )}
                 />
 
-                <DialogFooter className="pt-3 gap-2 sm:gap-0">
+                <DialogFooter className="pt-4 gap-2 sm:gap-0">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleClose}
                     disabled={createSessionMutation.isPending}
+                    className="rounded-xl"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-brand-primary hover:bg-brand-primary/90 text-white font-medium"
+                    className="bg-brand-primary hover:bg-brand-primary/90 text-white font-medium rounded-xl px-5"
                     disabled={createSessionMutation.isPending}
                   >
                     {createSessionMutation.isPending ? (

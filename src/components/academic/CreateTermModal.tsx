@@ -195,10 +195,10 @@ export function CreateTermModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg rounded-2xl p-6">
         {isSuccess ? (
           <div className="py-6 text-center space-y-4">
-            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
               <CheckCircle2 className="w-8 h-8 text-emerald-600" />
             </div>
             <DialogHeader className="space-y-1">
@@ -218,7 +218,7 @@ export function CreateTermModal({
             <div className="pt-4">
               <Button
                 onClick={handleClose}
-                className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-medium"
+                className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-medium rounded-xl py-2.5"
               >
                 Continue
               </Button>
@@ -226,9 +226,9 @@ export function CreateTermModal({
           </div>
         ) : (
           <>
-            <DialogHeader>
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
+            <DialogHeader className="space-y-1">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
                   <Calendar className="w-5 h-5" />
                 </div>
                 <div>
@@ -243,14 +243,14 @@ export function CreateTermModal({
             </DialogHeader>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-3">
                 <FormField
                   control={form.control}
                   name="sessionId"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-semibold text-gray-700">
-                        Academic Session
+                        Academic Session <span className="text-red-500">*</span>
                       </FormLabel>
                       <Select
                         onValueChange={(val) => {
@@ -264,7 +264,7 @@ export function CreateTermModal({
                         disabled={loadingSessions}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-10 text-sm">
+                          <SelectTrigger className="h-10 text-sm rounded-xl">
                             <SelectValue placeholder="Select Session" />
                           </SelectTrigger>
                         </FormControl>
@@ -287,11 +287,11 @@ export function CreateTermModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-semibold text-gray-700">
-                        Term Name
+                        Term Name <span className="text-red-500">*</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="h-10 text-sm">
+                          <SelectTrigger className="h-10 text-sm rounded-xl">
                             <SelectValue placeholder="Select Term" />
                           </SelectTrigger>
                         </FormControl>
@@ -307,7 +307,7 @@ export function CreateTermModal({
                 />
 
                 {selectedSession && minTermDate && maxTermDate && (
-                  <div className="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200/80 text-[11px] text-emerald-800 flex items-center gap-1.5 font-medium">
+                  <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 text-[11px] text-emerald-800 flex items-center gap-1.5 font-medium">
                     <span>
                       Allowed dates for {selectedSession.name}: <strong>{minTermDate}</strong> to{" "}
                       <strong>{maxTermDate}</strong>
@@ -322,7 +322,7 @@ export function CreateTermModal({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs font-semibold text-gray-700">
-                          Start Date
+                          Start Date <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <DatePicker
@@ -345,7 +345,7 @@ export function CreateTermModal({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs font-semibold text-gray-700">
-                          End Date
+                          End Date <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <DatePicker
@@ -373,7 +373,7 @@ export function CreateTermModal({
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="h-10 text-sm">
+                          <SelectTrigger className="h-10 text-sm rounded-xl">
                             <SelectValue placeholder="Select Status" />
                           </SelectTrigger>
                         </FormControl>
@@ -387,18 +387,19 @@ export function CreateTermModal({
                   )}
                 />
 
-                <DialogFooter className="pt-3 gap-2 sm:gap-0">
+                <DialogFooter className="pt-4 gap-2 sm:gap-0">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleClose}
                     disabled={createTermMutation.isPending}
+                    className="rounded-xl"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-brand-primary hover:bg-brand-primary/90 text-white font-medium"
+                    className="bg-brand-primary hover:bg-brand-primary/90 text-white font-medium rounded-xl px-5"
                     disabled={createTermMutation.isPending}
                   >
                     {createTermMutation.isPending ? (
