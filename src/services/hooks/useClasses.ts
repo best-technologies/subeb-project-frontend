@@ -27,7 +27,7 @@ export interface ClassFilterParams {
   statewide?: boolean;
 }
 
-export const useClasses = () => {
+export const useClasses = (initialParams: Partial<ClassFilterParams> = {}) => {
   const [params, setParams] = useState<ClassFilterParams>({
     page: 1,
     limit: 15,
@@ -35,7 +35,7 @@ export const useClasses = () => {
     lgaId: undefined,
     schoolId: undefined,
     grade: undefined,
-    academicYear: undefined,
+    academicYear: initialParams.academicYear || undefined,
     statewide: true,
   });
 
@@ -61,6 +61,7 @@ export const useClasses = () => {
     async (currentParams: ClassFilterParams) => {
       setLoading(true);
       setError(null);
+      setClasses([]);
 
       try {
         const queryParams: ClassQueryParams = {
@@ -101,6 +102,22 @@ export const useClasses = () => {
     },
     []
   );
+
+  // Keep internal params.academicYear in sync with initialParams.academicYear
+  useEffect(() => {
+    if (initialParams.academicYear !== undefined) {
+      setParams((prev) => {
+        if (prev.academicYear !== initialParams.academicYear) {
+          return {
+            ...prev,
+            academicYear: initialParams.academicYear,
+            page: 1,
+          };
+        }
+        return prev;
+      });
+    }
+  }, [initialParams.academicYear]);
 
   useEffect(() => {
     fetchClassesData(params);
@@ -231,17 +248,20 @@ export const useClassAnalytics = (params: ClassAnalyticsQueryParams = {}) => {
       if (response.success && response.data) {
         setData(response.data);
       } else {
+        setData(null);
         setError(response.message || "Failed to load class analytics");
       }
     } catch (err: any) {
       console.error("Class analytics hook error:", err);
       setError(err.message || "Error loading class analytics");
+      setData(null);
     } finally {
       setLoading(false);
     }
   }, [params.session, params.term, params.lgaId, params.schoolId]);
 
   useEffect(() => {
+    setData(null);
     fetchAnalytics();
   }, [fetchAnalytics]);
 

@@ -290,7 +290,13 @@ export default function AcademicSettingsPage() {
           </div>
           <div className="mt-4">
             <div className="text-2xl font-bold tracking-tight">
-              {activeSession ? activeSession.name : "No Active Session"}
+              {loadingSessions ? (
+                <Skeleton className="h-8 w-40 bg-white/20 rounded-md" />
+              ) : activeSession ? (
+                activeSession.name
+              ) : (
+                "No Active Session"
+              )}
             </div>
           </div>
         </div>
@@ -307,7 +313,13 @@ export default function AcademicSettingsPage() {
           </div>
           <div className="mt-4">
             <div className="text-2xl font-bold text-gray-900 tracking-tight">
-              {activeTerm ? formatTermName(activeTerm.name) : "No Active Term"}
+              {loadingSessions || loadingTerms ? (
+                <Skeleton className="h-8 w-36 rounded-md" />
+              ) : activeTerm ? (
+                formatTermName(activeTerm.name)
+              ) : (
+                "No Active Term"
+              )}
             </div>
           </div>
         </div>
@@ -324,7 +336,11 @@ export default function AcademicSettingsPage() {
           </div>
           <div className="mt-4">
             <div className="text-2xl font-bold text-gray-900 tracking-tight">
-              {sessions.length} {sessions.length === 1 ? "Session" : "Sessions"}
+              {loadingSessions ? (
+                <Skeleton className="h-8 w-24 rounded-md" />
+              ) : (
+                `${sessions.length} ${sessions.length === 1 ? "Session" : "Sessions"}`
+              )}
             </div>
           </div>
         </div>
@@ -349,9 +365,13 @@ export default function AcademicSettingsPage() {
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full border border-gray-200/60">
-                {sessions.length} {sessions.length === 1 ? "Session" : "Sessions"}
-              </span>
+              {loadingSessions ? (
+                <Skeleton className="h-6 w-20 rounded-full" />
+              ) : (
+                <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full border border-gray-200/60">
+                  {sessions.length} {sessions.length === 1 ? "Session" : "Sessions"}
+                </span>
+              )}
             </div>
           </CardHeader>
           <CardContent className="p-0 overflow-x-auto">

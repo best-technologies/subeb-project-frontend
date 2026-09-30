@@ -36,6 +36,7 @@ import {
   ArrowRight,
   Building2,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatEducationalText, formatTermName } from "@/utils/formatters";
 
 interface SchoolChartsSectionProps {
@@ -133,6 +134,7 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
+        setAnalytics(null);
         const res: SchoolAnalyticsResponse = await getSchoolAnalytics({
           session: activeQuery.session || undefined,
           term: activeQuery.term === "ALL_TERMS" ? "ALL_TERMS" : (activeQuery.term || undefined),
@@ -389,11 +391,15 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
             <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-200/60 flex items-center justify-between">
               <div>
                 <span className="text-xs text-gray-500 block mb-1">Total Schools</span>
-                <span className="text-2xl font-bold text-gray-900">
-                  {(summary?.totalSchools || 443).toLocaleString()}
-                </span>
+                {loading ? (
+                  <Skeleton className="h-7 w-20 rounded-md my-1" />
+                ) : (
+                  <span className="text-2xl font-bold text-gray-900">
+                    {(summary?.totalSchools || 0).toLocaleString()}
+                  </span>
+                )}
                 <span className="text-[11px] text-emerald-700 font-medium block mt-0.5">
-                  {schoolLevelSubtext}
+                  {loading ? <Skeleton className="h-3 w-28 rounded-md mt-1" /> : schoolLevelSubtext}
                 </span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
@@ -405,9 +411,13 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
             <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-200/60 flex items-center justify-between">
               <div>
                 <span className="text-xs text-gray-500 block mb-1">Statewide School Average</span>
-                <span className="text-2xl font-bold text-gray-900">
-                  {summary?.statewideSchoolAverage ? `${summary.statewideSchoolAverage}%` : "—"}
-                </span>
+                {loading ? (
+                  <Skeleton className="h-7 w-20 rounded-md my-1" />
+                ) : (
+                  <span className="text-2xl font-bold text-gray-900">
+                    {summary?.statewideSchoolAverage ? `${summary.statewideSchoolAverage}%` : "—"}
+                  </span>
+                )}
                 <span className="text-[11px] text-blue-700 font-medium block mt-0.5">
                   Across all schools
                 </span>
@@ -421,9 +431,13 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
             <div className="p-4 rounded-xl bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-200/60 flex items-center justify-between">
               <div>
                 <span className="text-xs text-gray-500 block mb-1">Average School Size</span>
-                <span className="text-2xl font-bold text-gray-900">
-                  {(summary?.averageSchoolSize || 101).toLocaleString()}
-                </span>
+                {loading ? (
+                  <Skeleton className="h-7 w-20 rounded-md my-1" />
+                ) : (
+                  <span className="text-2xl font-bold text-gray-900">
+                    {(summary?.averageSchoolSize || 0).toLocaleString()}
+                  </span>
+                )}
                 <span className="text-[11px] text-teal-700 font-medium block mt-0.5">
                   Students per school
                 </span>
@@ -437,13 +451,17 @@ export const SchoolChartsSection: React.FC<SchoolChartsSectionProps> = ({
             <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-200/60 flex items-center justify-between">
               <div className="truncate pr-2">
                 <span className="text-xs text-gray-500 block mb-1">Top Performing LGA</span>
-                <span className="text-base font-bold text-gray-900 block truncate">
-                  {summary?.topPerformingLga
-                    ? formatEducationalText(summary.topPerformingLga)
-                    : "—"}
-                </span>
+                {loading ? (
+                  <Skeleton className="h-6 w-24 rounded-md my-1" />
+                ) : (
+                  <span className="text-base font-bold text-gray-900 block truncate">
+                    {summary?.topPerformingLga
+                      ? formatEducationalText(summary.topPerformingLga)
+                      : "—"}
+                  </span>
+                )}
                 <span className="text-[11px] text-amber-700 font-medium block mt-0.5 truncate">
-                  Top School: {summary?.topPerformingSchool ? formatEducationalText(summary.topPerformingSchool) : "—"}
+                  Top School: {loading ? "..." : summary?.topPerformingSchool ? formatEducationalText(summary.topPerformingSchool) : "—"}
                 </span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">

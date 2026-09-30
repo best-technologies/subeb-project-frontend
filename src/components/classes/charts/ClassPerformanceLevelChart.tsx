@@ -245,7 +245,7 @@ export const ClassPerformanceLevelChart: React.FC<ClassPerformanceLevelChartProp
       </CardHeader>
 
       <CardContent className="pt-2">
-        {chartData.length === 0 ? (
+        {!chartData.some((item) => (item.studentCount || 0) > 0 || (item.averageScore || 0) > 0 || (item.classCount || 0) > 0) ? (
           <div className="h-72 flex flex-col items-center justify-center text-gray-400 gap-2 p-6 text-center">
             <BookOpen className="w-8 h-8 opacity-40 text-emerald-600" />
             <p className="text-sm font-medium text-gray-700">

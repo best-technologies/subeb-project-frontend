@@ -80,6 +80,17 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const [selectedSessionName, setSelectedSessionName] = useState<string>("");
 
+  const selectedSession = useMemo(() => {
+    if (!selectedSessionName) return dashboardData?.currentSession || null;
+    return (
+      availableSessions.find(
+        (s: any) => s.name === selectedSessionName || s.id === selectedSessionName
+      ) ||
+      dashboardData?.currentSession ||
+      null
+    );
+  }, [availableSessions, selectedSessionName, dashboardData?.currentSession]);
+
   useEffect(() => {
     if (!selectedSessionName) {
       const activeName =

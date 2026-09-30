@@ -119,6 +119,7 @@ export const StudentChartsSection: React.FC<StudentChartsSectionProps> = ({
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
+        setAnalytics(null);
         const res: StudentAnalyticsResponse = await getStudentAnalytics({
           session: activeQuery.session || undefined,
           term: activeQuery.term === "ALL_TERMS" ? "ALL_TERMS" : (activeQuery.term || undefined),

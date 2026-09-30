@@ -36,6 +36,7 @@ interface ClassesTableProps {
   classes: ClassItem[];
   pagination: ClassPagination;
   loading?: boolean;
+  selectedSession?: string;
   onPageChange?: (page: number) => void;
   onViewClass: (cls: ClassItem) => void;
   onEditClass?: (cls: ClassItem) => void;
@@ -45,6 +46,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
   classes,
   pagination,
   loading = false,
+  selectedSession,
   onPageChange,
   onViewClass,
   onEditClass,
@@ -93,7 +95,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
                   Enrolled Pupils
                 </TableHead>
                 <TableHead className="text-xs font-semibold text-gray-500">
-                  Academic Year
+                  Year Established
                 </TableHead>
                 <TableHead className="text-xs font-semibold text-gray-500 text-right pr-6">
                   Actions
@@ -101,7 +103,7 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading && classes.length === 0 ? (
+              {loading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-gray-400">
@@ -113,9 +115,9 @@ export const ClassesTable: React.FC<ClassesTableProps> = ({
               ) : classes.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-64 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2 text-gray-400">
-                      <GraduationCap className="w-8 h-8 opacity-40" />
-                      <p className="text-sm font-semibold text-gray-600">
+                    <div className="flex flex-col items-center justify-center gap-2 text-gray-400 py-6">
+                      <GraduationCap className="w-8 h-8 opacity-40 text-emerald-600" />
+                      <p className="text-sm font-semibold text-gray-700">
                         No classes found
                       </p>
                       <p className="text-xs text-gray-400 max-w-sm">
