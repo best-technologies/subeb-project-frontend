@@ -41,6 +41,7 @@ const roleRoutes = {
     "/school-it/dashboard",
     "/school-it/students",
     "/school-it/results",
+    "/school-it/audit-logs",
   ],
 } as const;
 

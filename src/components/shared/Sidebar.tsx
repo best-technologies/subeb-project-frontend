@@ -18,6 +18,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
+import { logout as logoutApi } from "@/services/api/auth";
 import { SchoolNameText } from "@/utils/truncateText";
 
 interface BaseSidebarProps {
@@ -54,7 +55,12 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
 
   const variant = props.variant || "admin";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (e) {
+      console.error("Logout API error:", e);
+    }
     logout();
     router.push("/login");
   };
@@ -108,6 +114,12 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         label: "Results",
         icon: <ClipboardList size={20} />,
         href: "/school-it/results",
+      },
+      {
+        id: "audit-logs",
+        label: "Audit Logs",
+        icon: <FileText size={20} />,
+        href: "/school-it/audit-logs",
       },
     ];
   } else {

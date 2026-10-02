@@ -1,30 +1,30 @@
 "use client";
 
 import React, { useState } from "react";
-import { useExamOfficerAuditLogs } from "@/services/hooks/useExamOfficer";
+import { useSchoolItAuditLogs } from "@/services/hooks/useSchoolIt";
 import { AuditLogsTable } from "@/components/audit-logs/AuditLogsTable";
 
-export default function ExamOfficerAuditLogs() {
-  const [currentPage, setCurrentPage] = useState(1);
+export default function SchoolItAuditLogsPage() {
+  const [page, setPage] = useState(1);
   const limit = 20;
 
-  const { data: response, isLoading } = useExamOfficerAuditLogs({ page: currentPage, limit });
+  const { data: response, isLoading } = useSchoolItAuditLogs({ page, limit });
   const logs = response?.data || [];
   const pagination = response?.pagination;
   const totalPages = pagination?.totalPages || 1;
   const total = pagination?.total || 0;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
       <AuditLogsTable
         title="Audit Logs"
-        subtitle="Track your past approval, rejection, and officer activities."
+        subtitle="Track your student enrollments, result uploads, and school IT activities."
         logs={logs}
         isLoading={isLoading}
         total={total}
-        page={currentPage}
+        page={page}
         totalPages={totalPages}
-        onPageChange={setCurrentPage}
+        onPageChange={setPage}
       />
     </div>
   );

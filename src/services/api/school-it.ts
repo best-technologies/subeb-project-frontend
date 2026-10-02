@@ -24,4 +24,7 @@ export const schoolItApi = {
   submitResultsForApproval: () => api.post('/school-it/results/submit'),
   
   uploadResultsAtomic: (data: any) => api.post('/school-it/results/upload', data),
+
+  getAuditLogs: (params?: { page?: number; limit?: number }) =>
+    api.get('/school-it/audit-logs', { params }),
 };

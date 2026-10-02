@@ -10,6 +10,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { logout as logoutApi } from "@/services/api/auth";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -26,9 +27,14 @@ export default function PageHeader() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
     setIsMobileMenuOpen(false);
+    try {
+      await logoutApi();
+    } catch (e) {
+      console.error("Logout API error:", e);
+    }
+    logout();
     router.push("/login");
   };
 

@@ -10,5 +10,7 @@ export function useAuditLogs(page = 1, limit = 20) {
   return useQuery({
     queryKey: auditKeys.logs(page, limit),
     queryFn: () => getAuditLogs(page, limit),
+    staleTime: 0,
+    refetchOnMount: true,
   });
 }

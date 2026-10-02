@@ -71,9 +71,22 @@ const LoginContent = () => {
         // Clear form for security
         form.reset();
 
-        // Redirect all users to homepage after login
-        // Users can then navigate to their role-specific pages from the header
-        router.push("/");
+        // Redirect based on user role or redirectTo param
+        const role = response.data?.user?.role;
+        const normalizedRole = role?.toLowerCase();
+        let target = "/dashboard";
+
+        if (redirectTo && redirectTo !== "/" && redirectTo !== "/dashboard") {
+          target = redirectTo;
+        } else if (normalizedRole === "subeb_officer") {
+          target = "/officer/dashboard";
+        } else if (normalizedRole === "school_it") {
+          target = "/school-it/dashboard";
+        } else {
+          target = "/dashboard";
+        }
+
+        router.push(target);
       } else {
         setErrorMessage(getAuthErrorMessage(response));
         setShowErrorDialog(true);

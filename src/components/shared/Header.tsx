@@ -1,6 +1,6 @@
-"use client";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Youtube,
   Menu,
@@ -11,19 +11,32 @@ import {
   ChevronDown,
   ClipboardList,
   User,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
+import { logout as logoutApi } from "@/services/api/auth";
 import VideoModal from "@/components/shared/VideoModal";
 
 export default function Header() {
-  const { user, isAuthenticated } = useAuthStore();
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuthStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (e) {
+      console.error("Logout API error:", e);
+    }
+    logout();
+    router.push("/login");
+  };
 
   // Wait for auth store to hydrate to prevent flickering
   useEffect(() => {
@@ -38,12 +51,21 @@ export default function Header() {
     if (!user) return [];
 
     const normalizedRole = user.role.toLowerCase();
-    if (normalizedRole === "super_admin") {
+    if (
+      normalizedRole === "super_admin" ||
+      normalizedRole === "admin" ||
+      normalizedRole === "subeb_admin"
+    ) {
       return [
         {
           label: "Dashboard",
           href: "/dashboard",
           icon: <LayoutDashboard className="w-4 h-4" />,
+        },
+        {
+          label: "Audit Logs",
+          href: "/audit-logs",
+          icon: <ClipboardList className="w-4 h-4" />,
         },
         {
           label: "Profile",
@@ -53,6 +75,11 @@ export default function Header() {
       ];
     } else if (normalizedRole === "subeb_officer") {
       return [
+        {
+          label: "Officer Dashboard",
+          href: "/officer/dashboard",
+          icon: <LayoutDashboard className="w-4 h-4" />,
+        },
         {
           label: "Enter Grades",
           href: "/enter-grades",
@@ -67,6 +94,24 @@ export default function Header() {
           label: "Grade Record",
           href: `/${user.id}/grade-record`,
           icon: <ClipboardList className="w-4 h-4" />,
+        },
+        {
+          label: "Audit Logs",
+          href: "/officer/audit-logs",
+          icon: <FileText className="w-4 h-4" />,
+        },
+      ];
+    } else if (normalizedRole === "school_it") {
+      return [
+        {
+          label: "School IT Dashboard",
+          href: "/school-it/dashboard",
+          icon: <LayoutDashboard className="w-4 h-4" />,
+        },
+        {
+          label: "Audit Logs",
+          href: "/school-it/audit-logs",
+          icon: <FileText className="w-4 h-4" />,
         },
       ];
     }
@@ -201,6 +246,17 @@ export default function Header() {
                         </span>
                       </Link>
                     ))}
+                    <div className="border-t border-gray-100 my-1" />
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors text-left font-medium text-sm cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign Out</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -289,6 +345,17 @@ export default function Header() {
                     </span>
                   </Link>
                 ))}
+                <div className="border-t border-gray-100 my-2" />
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full flex items-center space-x-3 px-4 py-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
               </div>
             </>
           )}

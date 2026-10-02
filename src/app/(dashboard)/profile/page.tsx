@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { getProfile, updateProfile } from "@/services/api/auth";
+import { getProfile, updateProfile, logout as logoutApi } from "@/services/api/auth";
 import {
   User as UserIcon,
   Mail,
@@ -244,8 +244,13 @@ export default function ProfilePage() {
     setIsEditModalOpen(false);
   };
 
-  const handleSignOutAndChangePassword = () => {
+  const handleSignOutAndChangePassword = async () => {
     toast.success("Signing out... Redirecting to Forgot Password page.");
+    try {
+      await logoutApi();
+    } catch (e) {
+      console.error("Logout API error:", e);
+    }
     logout();
     router.push("/forgot-password");
   };

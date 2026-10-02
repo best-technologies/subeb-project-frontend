@@ -9,6 +9,7 @@ export const schoolItKeys = {
   subjects: () => [...schoolItKeys.all, 'subjects'] as const,
   results: (params?: any) => params ? [...schoolItKeys.all, 'results', params] as const : [...schoolItKeys.all, 'results'] as const,
   studentResults: (id: string) => [...schoolItKeys.all, 'student-results', id] as const,
+  auditLogs: (params?: any) => params ? [...schoolItKeys.all, 'audit-logs', params] as const : [...schoolItKeys.all, 'audit-logs'] as const,
 };
 
 export function useSchoolItDashboard() {
@@ -107,3 +108,11 @@ export function useSubmitSchoolItResults() {
     },
   });
 }
+
+export function useSchoolItAuditLogs(params?: { page?: number; limit?: number }) {
+  return useQuery({
+    queryKey: schoolItKeys.auditLogs(params),
+    queryFn: () => schoolItApi.getAuditLogs(params).then((res) => res.data.data),
+  });
+}
+
