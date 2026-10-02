@@ -15,17 +15,15 @@ export default function ExamOfficerAuditLogs() {
   const total = pagination?.total || 0;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <AuditLogsTable
-        title="Audit Logs"
-        subtitle="Track your past approval, rejection, and officer activities."
-        logs={logs}
-        isLoading={isLoading}
-        total={total}
-        page={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
-    </div>
+    <AuditLogsTable
+      title="Audit Logs"
+      subtitle="Track your past approval, rejection, and officer activities."
+      logs={logs}
+      isLoading={isLoading}
+      total={total}
+      page={currentPage}
+      totalPages={totalPages}
+      onPageChange={setCurrentPage}
+    />
   );
 }

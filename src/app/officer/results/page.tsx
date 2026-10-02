@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/Button";
 import { CheckCircle, XCircle, Search, Clock, ShieldCheck, MoreVertical, Eye } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
 import { useRouter } from "next/navigation";
 
 type StatusTab = "ALL" | "AWAITING_APPROVAL" | "APPROVED";
@@ -54,17 +53,18 @@ export default function ExamOfficerResults() {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Manage Results</h1>
-          <p className="text-gray-500 mt-1">Review and approve results submitted by schools in your LGA.</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Manage Results</h1>
+          <p className="text-sm text-gray-500 mt-1">Review and approve results submitted by schools in your LGA.</p>
         </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row justify-between gap-4">
+        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row justify-between gap-4 bg-gray-50/50">
           
           {/* Pill Tabs */}
           <div className="flex bg-gray-100 p-1 rounded-lg space-x-1">
@@ -103,7 +103,7 @@ export default function ExamOfficerResults() {
         {/* Table */}
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-gray-50">
+            <TableHeader className="bg-brand-accent-background">
               <TableRow>
                 <TableHead>School Name</TableHead>
                 <TableHead>School Code</TableHead>
@@ -116,7 +116,7 @@ export default function ExamOfficerResults() {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-primary mx-auto"></div>
+                    <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
                   </TableCell>
                 </TableRow>
               ) : filteredSchools?.length === 0 ? (

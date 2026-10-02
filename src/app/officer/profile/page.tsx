@@ -5,7 +5,7 @@ import { useExamOfficerProfile, useUpdateExamOfficerProfile } from "@/services/h
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { User, Mail, Phone, MapPin, Building, Upload, Camera, Loader2 } from "lucide-react";
+import { User, Mail, Phone, MapPin, Camera, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { uploadApi } from "@/services/api/upload";
 
@@ -66,7 +66,7 @@ export default function ExamOfficerProfile() {
 
       updateMutation.mutate({
         ...data,
-        profilePicture: pictureUrl
+        profilePicture: pictureUrl,
       });
     } catch (error) {
       console.error(error);
@@ -75,44 +75,47 @@ export default function ExamOfficerProfile() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-        <p className="text-gray-500 mt-1">Manage your personal information and account settings.</p>
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">My Profile</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage your personal information and account settings.</p>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 sm:p-10">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <div className="p-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             
             {/* Profile Picture Section */}
-            <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-gray-100">
+            <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-100">
               <div className="relative group">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
+                <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center">
                   {isUploading ? (
-                    <Loader2 className="w-10 h-10 text-brand-primary animate-spin" />
+                    <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
                   ) : previewUrl ? (
                     <img src={previewUrl} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
-                    <User className="w-16 h-16 text-gray-400" />
+                    <User className="w-14 h-14 text-gray-400" />
                   )}
                 </div>
-                <label className="absolute bottom-1 right-1 bg-brand-primary text-white p-2.5 rounded-full shadow-lg cursor-pointer hover:bg-brand-secondary transition-colors" title="Upload new picture">
-                  <Camera size={18} />
+                <label className="absolute bottom-0 right-0 bg-brand-primary text-white p-2 rounded-full shadow-md cursor-pointer hover:bg-brand-primary-2 transition-colors" title="Upload new picture">
+                  <Camera size={16} />
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} disabled={isUploading || updateMutation.isPending} />
                 </label>
               </div>
               <div className="text-center sm:text-left">
                 <h3 className="text-lg font-bold text-gray-900">{profile?.firstName} {profile?.lastName}</h3>
-                <p className="text-brand-primary font-medium">{profile?.designation || 'LGA Exam Officer'}</p>
-                <p className="text-sm text-gray-500 mt-1">{profile?.lga?.name} LGA, {profile?.stateRef?.name} State</p>
+                <p className="text-brand-primary font-medium text-sm">{profile?.designation || 'LGA Exam Officer'}</p>
+                <p className="text-xs text-gray-500 mt-1">{profile?.lga?.name} LGA, {profile?.stateRef?.name} State</p>
               </div>
             </div>
 

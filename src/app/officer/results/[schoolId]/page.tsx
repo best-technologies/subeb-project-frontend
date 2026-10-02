@@ -45,16 +45,18 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (!details) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
-        <div className="bg-red-50 text-red-500 p-4 rounded-lg">Failed to load school details.</div>
+      <div className="space-y-6">
+        <div className="bg-red-50 text-red-600 p-6 rounded-2xl border border-red-200">
+          Failed to load school details.
+        </div>
       </div>
     );
   }
@@ -65,23 +67,23 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
   const hasAwaiting = students.some((s: any) => s.status === 'AWAITING_APPROVAL');
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => router.push('/officer/results')} className="p-2">
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <Button variant="ghost" onClick={() => router.push('/officer/results')} className="p-2 h-auto hover:bg-gray-100 rounded-lg">
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{school.name} - Results</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{school.name} - Results</h1>
+          <p className="text-sm text-gray-500 mt-1">
             Session: {term.session.name} | Term: {term.name.replace("_", " ")}
           </p>
         </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        
         {/* Toolbar */}
-        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50">
+        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50/50">
           <div>
             <h2 className="font-semibold text-gray-900">Submitted Students ({students.length})</h2>
             <p className="text-sm text-gray-500">List of students who have results submitted.</p>
@@ -113,7 +115,7 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
         {/* Table */}
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-gray-100">
+            <TableHeader className="bg-brand-accent-background">
               <TableRow>
                 <TableHead>Student Name</TableHead>
                 <TableHead>Admission No</TableHead>

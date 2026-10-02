@@ -12,6 +12,7 @@ import {
   ClipboardList,
   User,
   LogOut,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
@@ -81,24 +82,19 @@ export default function Header() {
           icon: <LayoutDashboard className="w-4 h-4" />,
         },
         {
-          label: "Enter Grades",
-          href: "/enter-grades",
-          icon: <PenSquare className="w-4 h-4" />,
-        },
-        {
-          label: "Profile",
-          href: `/${user.id}/profile`,
-          icon: <User className="w-4 h-4" />,
-        },
-        {
-          label: "Grade Record",
-          href: `/${user.id}/grade-record`,
+          label: "Manage Results",
+          href: "/officer/results",
           icon: <ClipboardList className="w-4 h-4" />,
         },
         {
           label: "Audit Logs",
           href: "/officer/audit-logs",
           icon: <FileText className="w-4 h-4" />,
+        },
+        {
+          label: "My Profile",
+          href: "/officer/profile",
+          icon: <User className="w-4 h-4" />,
         },
       ];
     } else if (normalizedRole === "school_it") {
