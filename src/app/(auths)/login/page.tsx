@@ -89,7 +89,8 @@ const LoginContent = () => {
       {/* Loading Modal */}
       <LoadingModal
         isOpen={loginMutation.isPending}
-        message="Signing you in..."
+        title="Signing In..."
+        message="Please wait while we verify your credentials."
       />
 
       {/* Error Dialog */}
@@ -234,7 +235,7 @@ const Login = () => {
     <Suspense
       fallback={
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <LoadingModal isOpen={true} message="Loading..." />
+          <LoadingModal isOpen={true} title="Please wait..." message="Loading..." />
         </div>
       }
     >

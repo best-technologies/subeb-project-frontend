@@ -13,7 +13,7 @@ import type { NextRequest } from "next/server";
  */
 
 // Routes that don't require authentication
-const publicRoutes = ["/", "/forgot-password"];
+const publicRoutes = ["/", "/forgot-password", "/reset-password"];
 
 // Auth routes that should redirect based on role if already logged in
 const authRoutes = ["/login", "/register"];

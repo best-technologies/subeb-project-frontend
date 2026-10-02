@@ -1,11 +1,13 @@
 import * as React from "react";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
   showCloseButton?: boolean;
+  className?: string;
 }
 
 export function Dialog({
@@ -13,6 +15,7 @@ export function Dialog({
   onOpenChange,
   children,
   showCloseButton = true,
+  className,
 }: DialogProps) {
   React.useEffect(() => {
     if (!open) return;
@@ -32,7 +35,10 @@ export function Dialog({
         aria-label="Close dialog"
       />
       <div
-        className="relative z-10 w-full max-w-lg mx-4 bg-background text-foreground rounded-xl shadow-xl overflow-hidden"
+        className={cn(
+          "relative z-10 w-full max-w-lg mx-4 bg-background text-foreground rounded-xl shadow-xl overflow-hidden",
+          className
+        )}
         style={{
           maxHeight: "calc(100dvh - 2rem)",
           marginTop: "1rem",

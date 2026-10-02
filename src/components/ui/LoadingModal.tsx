@@ -13,7 +13,7 @@ interface LoadingModalProps {
 export const LoadingModal: React.FC<LoadingModalProps> = ({
   isOpen,
   message,
-  title = "Crunching Data...",
+  title = "Please wait...",
   type,
   onClose,
 }) => {

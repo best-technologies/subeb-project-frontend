@@ -2,12 +2,21 @@ import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { register, login, logout as logoutApi } from "@/services/api/auth";
+import {
+  register,
+  login,
+  logout as logoutApi,
+  forgotPassword,
+  resetPassword,
+} from "@/services/api/auth";
 import { setTokens, clearTokens, getTokens } from "@/lib/tokens";
 import type {
   RegisterRequest,
   LoginRequest,
   AuthResponse,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  GenericAuthResponse,
 } from "@/services/types/auth";
 
 /**
@@ -106,6 +115,36 @@ export function useLogout() {
 
       // Redirect to login
       router.push("/login");
+    },
+  });
+}
+
+/**
+ * Hook for requesting password reset recovery code
+ */
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (data: ForgotPasswordRequest) => forgotPassword(data),
+    onSuccess: (response: GenericAuthResponse) => {
+      console.log("Forgot password OTP dispatched:", response);
+    },
+    onError: (error: unknown) => {
+      console.error("Forgot password request failed:", error);
+    },
+  });
+}
+
+/**
+ * Hook for resetting password using verification OTP
+ */
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (data: ResetPasswordRequest) => resetPassword(data),
+    onSuccess: (response: GenericAuthResponse) => {
+      console.log("Password reset successful:", response);
+    },
+    onError: (error: unknown) => {
+      console.error("Password reset failed:", error);
     },
   });
 }

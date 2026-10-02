@@ -55,6 +55,24 @@ export interface RefreshTokenResponse {
   statusCode?: number;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
+export interface GenericAuthResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+  error?: string | string[];
+  statusCode?: number;
+}
+
 export interface AuthState {
   user: User | null;
   accessToken: string | null;

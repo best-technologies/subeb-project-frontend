@@ -4,6 +4,9 @@ import type {
   LoginRequest,
   AuthResponse,
   RefreshTokenResponse,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  GenericAuthResponse,
 } from "@/services/types/auth";
 import { getRefreshToken } from "@/lib/tokens";
 
@@ -143,5 +146,67 @@ export async function updateProfile(data: { firstName?: string; lastName?: strin
   } catch (error: unknown) {
     console.error("Update profile error:", error);
     return null;
+  }
+}
+
+/**
+ * Request password recovery code
+ * POST /auth/forgot-password
+ */
+export async function forgotPassword(
+  data: ForgotPasswordRequest
+): Promise<GenericAuthResponse> {
+  try {
+    const response = await api.post<GenericAuthResponse>(
+      "/auth/forgot-password",
+      data
+    );
+    return response.data;
+  } catch (error: unknown) {
+    const err = error as {
+      response?: { data?: unknown; status?: number };
+      message?: string;
+    };
+    console.error("Forgot password error:", err);
+    if (err.response?.data) {
+      throw err.response.data;
+    }
+    throw {
+      success: false,
+      message:
+        "Unable to send recovery email. Please check your network and try again.",
+      statusCode: err.response?.status || 500,
+    };
+  }
+}
+
+/**
+ * Reset password using OTP code
+ * POST /auth/reset-password
+ */
+export async function resetPassword(
+  data: ResetPasswordRequest
+): Promise<GenericAuthResponse> {
+  try {
+    const response = await api.post<GenericAuthResponse>(
+      "/auth/reset-password",
+      data
+    );
+    return response.data;
+  } catch (error: unknown) {
+    const err = error as {
+      response?: { data?: unknown; status?: number };
+      message?: string;
+    };
+    console.error("Reset password error:", err);
+    if (err.response?.data) {
+      throw err.response.data;
+    }
+    throw {
+      success: false,
+      message:
+        "Unable to reset password. Please check your verification code and try again.",
+      statusCode: err.response?.status || 500,
+    };
   }
 }
