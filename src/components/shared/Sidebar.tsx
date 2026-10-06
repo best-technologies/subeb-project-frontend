@@ -13,6 +13,7 @@ import {
   UserPlus,
   FileText,
   GraduationCap,
+  Laptop,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -81,6 +82,12 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         label: "Results",
         icon: <ClipboardList size={20} />,
         href: "/officer/results",
+      },
+      {
+        id: "school-it",
+        label: "School IT",
+        icon: <Laptop size={20} />,
+        href: "/officer/school-it",
       },
       {
         id: "audit-logs",

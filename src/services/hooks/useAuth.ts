@@ -171,7 +171,19 @@ export function getRoleBasedRedirect(
       "/academic-settings",
       "/audit-logs",
     ],
-    subeb_officer: ["/enter-grades"],
+    subeb_officer: [
+      "/officer/dashboard",
+      "/officer/results",
+      "/officer/school-it",
+      "/officer/profile",
+      "/officer/audit-logs",
+    ],
+    school_it: [
+      "/school-it/dashboard",
+      "/school-it/students",
+      "/school-it/results",
+      "/school-it/audit-logs",
+    ],
   };
 
   // If there's an intended path, validate user has access to it
@@ -183,14 +195,12 @@ export function getRoleBasedRedirect(
   ) {
     // Check if user has access to the intended path
     if (normalizedRole === "super_admin") {
-      // Check if trying to access officer dynamic routes
-      const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
-      if (dynamicRoutePattern.test(intendedPath)) {
-        return "/dashboard"; // Redirect to dashboard instead
-      }
-      // Check if trying to access /enter-grades
-      if (intendedPath.startsWith("/enter-grades")) {
-        return "/dashboard"; // Redirect to dashboard instead
+      // Prevent access to officer and school-it routes
+      if (
+        intendedPath.startsWith("/officer") ||
+        intendedPath.startsWith("/school-it")
+      ) {
+        return "/dashboard";
       }
       // SUPER_ADMIN has access to dashboard routes
       const hasAccess = roleAccess.super_admin.some((route) =>
@@ -200,13 +210,27 @@ export function getRoleBasedRedirect(
         return intendedPath;
       }
     } else if (normalizedRole === "subeb_officer") {
-      // Check dynamic routes: /:id/profile and /:id/grade-record
-      const dynamicRoutePattern = /^\/[^/]+\/(profile|grade-record)$/;
-      if (dynamicRoutePattern.test(intendedPath)) {
-        return intendedPath;
+      if (
+        intendedPath.startsWith("/dashboard") ||
+        intendedPath.startsWith("/school-it")
+      ) {
+        return "/officer/dashboard";
       }
       // Check if SUBEB_OFFICER has access
       const hasAccess = roleAccess.subeb_officer.some((route) =>
+        intendedPath.startsWith(route)
+      );
+      if (hasAccess) {
+        return intendedPath;
+      }
+    } else if (normalizedRole === "school_it") {
+      if (
+        intendedPath.startsWith("/dashboard") ||
+        intendedPath.startsWith("/officer")
+      ) {
+        return "/school-it/dashboard";
+      }
+      const hasAccess = roleAccess.school_it.some((route) =>
         intendedPath.startsWith(route)
       );
       if (hasAccess) {
@@ -218,7 +242,10 @@ export function getRoleBasedRedirect(
 
   // Role-based default redirects
   if (normalizedRole === "subeb_officer") {
-    return "/enter-grades";
+    return "/officer/dashboard";
+  }
+  if (normalizedRole === "school_it") {
+    return "/school-it/dashboard";
   }
 
   // SUPER_ADMIN or default fallback

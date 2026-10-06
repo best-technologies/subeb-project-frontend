@@ -8,6 +8,8 @@ export const examOfficerKeys = {
   results: (status?: string) => [...examOfficerKeys.all, 'results', status] as const,
   profile: () => [...examOfficerKeys.all, 'profile'] as const,
   auditLogs: (params?: any) => [...examOfficerKeys.all, 'audit-logs', params] as const,
+  schools: () => [...examOfficerKeys.all, 'schools'] as const,
+  schoolItList: (params?: any) => [...examOfficerKeys.all, 'school-it', params] as const,
 };
 
 export function useExamOfficerDashboard() {
@@ -92,3 +94,75 @@ export function useExamOfficerAuditLogs(params?: { page?: number; limit?: number
     queryFn: () => examOfficerApi.getAuditLogs(params).then((res) => res.data.data),
   });
 }
+
+export function useExamOfficerSchools() {
+  return useQuery({
+    queryKey: examOfficerKeys.schools(),
+    queryFn: () => examOfficerApi.getSchoolsInLga().then((res) => res.data.data),
+  });
+}
+
+export function useExamOfficerSchoolItList(params?: { search?: string; schoolId?: string; status?: string }) {
+  return useQuery({
+    queryKey: examOfficerKeys.schoolItList(params),
+    queryFn: () => examOfficerApi.getSchoolItList(params).then((res) => res.data.data),
+  });
+}
+
+export function useCreateSchoolIt() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
+      schoolId: string;
+      profilePicture?: string;
+    }) => examOfficerApi.createSchoolIt(data).then((res) => res.data.data),
+    onSuccess: () => {
+      toast.success('School IT personnel created successfully');
+      queryClient.invalidateQueries({ queryKey: ['exam-officer', 'school-it'] });
+      queryClient.invalidateQueries({ queryKey: examOfficerKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: examOfficerKeys.schools() });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to create School IT personnel');
+    },
+  });
+}
+
+export function useUpdateSchoolIt() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      examOfficerApi.updateSchoolIt(id, data).then((res) => res.data.data),
+    onSuccess: () => {
+      toast.success('School IT personnel updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['exam-officer', 'school-it'] });
+      queryClient.invalidateQueries({ queryKey: examOfficerKeys.dashboard() });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update School IT personnel');
+    },
+  });
+}
+
+export function useToggleSchoolItStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => examOfficerApi.toggleSchoolItStatus(id).then((res) => res.data.data),
+    onSuccess: (data) => {
+      toast.success(`Personnel account ${data.isActive ? 'activated' : 'deactivated'} successfully`);
+      queryClient.invalidateQueries({ queryKey: ['exam-officer', 'school-it'] });
+      queryClient.invalidateQueries({ queryKey: examOfficerKeys.dashboard() });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to toggle personnel status');
+    },
+  });
+}
+

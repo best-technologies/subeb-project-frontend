@@ -14,4 +14,24 @@ export const examOfficerApi = {
   updateProfile: (data: any) => api.patch('/exam-officer/profile', data),
   getAuditLogs: (params?: { page?: number; limit?: number }) => 
     api.get('/exam-officer/audit-logs', { params }),
+  getSchoolsInLga: () => api.get('/exam-officer/schools'),
+  getSchoolItList: (params?: { search?: string; schoolId?: string; status?: string }) => 
+    api.get('/exam-officer/school-it', { params }),
+  createSchoolIt: (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    schoolId: string;
+    profilePicture?: string;
+  }) => api.post('/exam-officer/school-it', data),
+  updateSchoolIt: (id: string, data: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    schoolId?: string;
+    isActive?: boolean;
+  }) => api.patch(`/exam-officer/school-it/${id}`, data),
+  toggleSchoolItStatus: (id: string) => 
+    api.patch(`/exam-officer/school-it/${id}/toggle-status`),
 };

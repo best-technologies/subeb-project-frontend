@@ -13,6 +13,7 @@ import {
   User,
   LogOut,
   FileText,
+  Laptop,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
@@ -85,6 +86,11 @@ export default function Header() {
           label: "Manage Results",
           href: "/officer/results",
           icon: <ClipboardList className="w-4 h-4" />,
+        },
+        {
+          label: "School IT",
+          href: "/officer/school-it",
+          icon: <Laptop className="w-4 h-4" />,
         },
         {
           label: "Audit Logs",

@@ -34,6 +34,7 @@ const roleRoutes = {
   SUBEB_OFFICER: [
     "/officer/dashboard",
     "/officer/results",
+    "/officer/school-it",
     "/officer/profile",
     "/officer/audit-logs",
   ],
