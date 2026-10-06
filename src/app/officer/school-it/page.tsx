@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import CreateSchoolItModal from "@/components/officer/CreateSchoolItModal";
 import EditSchoolItModal from "@/components/officer/EditSchoolItModal";
+import { capitalizeWords } from "@/utils/formatters";
 
 export interface SchoolItRecord {
   id: string;
@@ -332,12 +333,12 @@ export default function ExamOfficerSchoolItPage() {
               <select
                 value={selectedSchoolFilter}
                 onChange={(e) => setSelectedSchoolFilter(e.target.value)}
-                className="w-full h-9 text-xs border border-gray-200 rounded-xl px-2.5 bg-white text-gray-700 focus:outline-none focus:border-brand-primary cursor-pointer"
+                className="w-full h-9 text-xs border border-gray-200 rounded-xl px-2.5 bg-white text-gray-700 focus:outline-none focus:border-brand-primary cursor-pointer capitalize"
               >
                 <option value="ALL">All Schools ({totalSchoolsCount})</option>
                 {typedSchools.map((school: SchoolOption) => (
-                  <option key={school.id} value={school.id}>
-                    {school.name}
+                  <option key={school.id} value={school.id} className="capitalize">
+                    {capitalizeWords(school.name)}
                   </option>
                 ))}
               </select>
@@ -440,15 +441,15 @@ export default function ExamOfficerSchoolItPage() {
                       <TableCell className="py-3.5">
                         {personnel.school ? (
                           <div>
-                            <div className="text-xs font-semibold text-gray-900 leading-snug">
-                              {personnel.school.name}
+                            <div className="text-xs font-semibold text-gray-900 leading-snug capitalize">
+                              {capitalizeWords(personnel.school.name)}
                             </div>
                             <div className="flex items-center gap-1.5 mt-1">
-                              <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.2 rounded font-medium">
+                              <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.2 rounded font-medium uppercase">
                                 {personnel.school.code}
                               </span>
-                              <span className="text-[10px] text-gray-500">
-                                {personnel.school.level}
+                              <span className="text-[10px] text-gray-500 capitalize">
+                                {personnel.school.level?.toLowerCase()}
                               </span>
                             </div>
                           </div>

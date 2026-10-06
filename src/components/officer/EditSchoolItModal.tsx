@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,13 +20,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import SearchableSelect, {
+  SearchableSelectOption,
+} from "@/components/ui/searchable-select";
 import {
   useUpdateSchoolIt,
   useExamOfficerSchools,
@@ -38,6 +34,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { SchoolItRecord, SchoolOption } from "@/app/officer/school-it/page";
+import { capitalizeWords } from "@/utils/formatters";
 
 const editSchoolItSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -67,6 +64,15 @@ export default function EditSchoolItModal({
 }: EditSchoolItModalProps) {
   const { data: schools = [], isLoading: loadingSchools } = useExamOfficerSchools();
   const updateMutation = useUpdateSchoolIt();
+
+  const schoolOptions: SearchableSelectOption[] = useMemo(() => {
+    return (schools as SchoolOption[]).map((school: SchoolOption) => ({
+      value: school.id,
+      label: capitalizeWords(school.name),
+      description: `${school.code} • ${school.level}${school.lgaName ? ` • ${school.lgaName}` : ""}`,
+      disabled: false,
+    }));
+  }, [schools]);
 
   const form = useForm<EditSchoolItFormValues>({
     resolver: zodResolver(editSchoolItSchema),
@@ -208,23 +214,37 @@ export default function EditSchoolItModal({
                     Assigned School (LGA Jurisdiction)
                   </FormLabel>
                   <FormControl>
-                    <Select
-                      disabled={loadingSchools}
+                    <SearchableSelect
+                      options={schoolOptions}
                       value={field.value}
                       onValueChange={field.onChange}
-                    >
-                      <SelectTrigger className="w-full text-sm rounded-xl border-gray-200">
-                        <SelectValue placeholder="Select assigned school" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60 rounded-xl">
-                        {(schools as SchoolOption[]).map((school: SchoolOption) => (
-                          <SelectItem key={school.id} value={school.id} className="text-xs">
-                            <span className="font-medium text-gray-900">{school.name}</span>
-                            <span className="text-gray-500 text-[10px] ml-2">({school.code})</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      disabled={loadingSchools}
+                      isLoading={loadingSchools}
+                      placeholder="Select assigned school"
+                      loadingText="Loading schools in your LGA..."
+                      searchPlaceholder="Search school by name, code..."
+                      emptyText="No matching schools found in your LGA"
+                      triggerClassName="h-11 text-sm rounded-xl border-gray-200 capitalize"
+                      contentClassName="z-[60]"
+                      renderOption={(option) => {
+                        const school = (schools as SchoolOption[]).find((s) => s.id === option.value);
+                        return (
+                          <div className="flex items-center justify-between w-full min-w-0 gap-2">
+                            <div className="truncate flex-1">
+                              <span className="capitalize block truncate font-medium text-gray-900 text-xs">
+                                {option.label}
+                              </span>
+                              <span className="text-[10px] text-gray-500 block truncate">
+                                {school?.lgaName ? `${school.lgaName} • ` : ""}{school?.code}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded font-normal uppercase shrink-0">
+                              {school?.code} • {school?.level}
+                            </span>
+                          </div>
+                        );
+                      }}
+                    />
                   </FormControl>
                   <FormMessage className="text-[11px]" />
                 </FormItem>

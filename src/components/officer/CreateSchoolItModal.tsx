@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,13 +20,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import SearchableSelect, {
+  SearchableSelectOption,
+} from "@/components/ui/searchable-select";
 import {
   useCreateSchoolIt,
   useExamOfficerSchools,
@@ -39,10 +35,10 @@ import {
   Mail,
   Phone,
   User,
-  ShieldCheck,
   Loader2,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { capitalizeWords } from "@/utils/formatters";
 
 export interface SchoolOption {
   id: string;
@@ -107,6 +103,15 @@ export default function CreateSchoolItModal({
   const createMutation = useCreateSchoolIt();
   const [createdCredentials, setCreatedCredentials] = useState<CreatedCredentials | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const schoolOptions: SearchableSelectOption[] = useMemo(() => {
+    return (schools as SchoolOption[]).map((school: SchoolOption) => ({
+      value: school.id,
+      label: capitalizeWords(school.name),
+      description: `${school.code} • ${school.level}${school.hasAssignedIt ? " • Has IT assigned" : ""}`,
+      disabled: false,
+    }));
+  }, [schools]);
 
   const form = useForm<CreateSchoolItFormValues>({
     resolver: zodResolver(createSchoolItSchema),
@@ -215,8 +220,8 @@ export default function CreateSchoolItModal({
                 </div>
                 <div>
                   <span className="text-gray-500 block">Assigned School</span>
-                  <span className="font-medium text-gray-900 truncate block">
-                    {createdCredentials.schoolName}
+                  <span className="font-medium text-gray-900 truncate block capitalize">
+                    {capitalizeWords(createdCredentials.schoolName)}
                   </span>
                 </div>
               </div>
@@ -414,54 +419,56 @@ export default function CreateSchoolItModal({
                         Assigned School (LGA Jurisdiction) <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Select
-                          disabled={loadingSchools}
+                        <SearchableSelect
+                          options={schoolOptions}
                           value={field.value}
                           onValueChange={field.onChange}
-                        >
-                          <SelectTrigger className="w-full text-sm rounded-xl border-gray-200 focus:border-brand-primary">
-                            <SelectValue
-                              placeholder={
-                                loadingSchools
-                                  ? "Loading schools in your LGA..."
-                                  : "Select a school to assign"
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-60 rounded-xl">
-                            {(schools as SchoolOption[]).map((school: SchoolOption) => (
-                              <SelectItem key={school.id} value={school.id} className="text-xs">
-                                <div className="flex items-center justify-between gap-3 w-full">
-                                  <span className="font-medium text-gray-900">{school.name}</span>
-                                  <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-                                    {school.code} • {school.level}
+                          disabled={loadingSchools}
+                          isLoading={loadingSchools}
+                          placeholder={
+                            loadingSchools
+                              ? "Loading schools in your LGA..."
+                              : "Select a school to assign"
+                          }
+                          loadingText="Loading schools in your LGA..."
+                          searchPlaceholder="Search school by name, code (e.g. AGG703)..."
+                          emptyText="No matching schools found in your LGA"
+                          triggerClassName="h-11 text-sm rounded-xl border-gray-200 focus:border-brand-primary capitalize"
+                          contentClassName="z-[60]"
+                          renderOption={(option) => {
+                            const school = (schools as SchoolOption[]).find((s) => s.id === option.value);
+                            return (
+                              <div className="flex items-center justify-between w-full min-w-0 gap-2">
+                                <div className="truncate flex-1">
+                                  <span className="capitalize block truncate font-medium text-gray-900 text-xs">
+                                    {option.label}
                                   </span>
-                                  {school.hasAssignedIt && (
-                                    <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/50">
+                                  <span className="text-[10px] text-gray-500 block truncate">
+                                    {school?.lgaName ? `${school.lgaName} • ` : ""}{school?.code}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded font-normal uppercase">
+                                    {school?.code} • {school?.level}
+                                  </span>
+                                  {school?.hasAssignedIt && (
+                                    <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/50 font-normal">
                                       Has IT
                                     </span>
                                   )}
                                 </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                              </div>
+                            );
+                          }}
+                        />
                       </FormControl>
                       <p className="text-[11px] text-gray-500 mt-1">
-                        Only schools within your assigned LGA(s) are listed.
+                        Search and select any school within your assigned LGA jurisdiction.
                       </p>
                       <FormMessage className="text-[11px]" />
                     </FormItem>
                   )}
                 />
-
-                {/* Notice Box */}
-                <div className="bg-emerald-50/70 border border-emerald-200/70 rounded-xl p-3 flex items-start gap-2.5 text-xs text-emerald-900">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                  <p className="leading-relaxed">
-                    <strong>Permanent Attribution:</strong> You will be attached as the creator of this personnel. If administrative LGA reassignments occur, the personnel creation and audit trail will remain linked.
-                  </p>
-                </div>
 
                 {/* Action Buttons */}
                 <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
