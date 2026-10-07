@@ -258,6 +258,8 @@ export function getRoleBasedRedirect(
 export function getAuthErrorMessage(error: unknown): string {
   if (!error) return "Something went wrong. Please try again.";
 
+  if (typeof error === "string") return error;
+
   // Type guard for error objects
   if (typeof error === "object" && error !== null) {
     const errorObj = error as Record<string, unknown>;
@@ -265,23 +267,44 @@ export function getAuthErrorMessage(error: unknown): string {
     // Log the technical error for debugging
     console.error("Auth error details:", errorObj);
 
-    // Handle backend error response
+    // 1. Direct message property
     if ("message" in errorObj && errorObj.message) {
-      // If message is an array (validation errors), join them
       if (Array.isArray(errorObj.message)) {
         return errorObj.message.join(", ");
       }
       if (typeof errorObj.message === "string") {
-        // Return the message as-is if it's already user-friendly
-        // Backend should send user-friendly messages
         return errorObj.message;
       }
     }
 
+    // 2. Nested response.data.message (Axios error structure)
+    const respData = (errorObj as any)?.response?.data;
+    if (respData) {
+      if (Array.isArray(respData.message)) {
+        return respData.message.join(", ");
+      }
+      if (typeof respData.message === "string") {
+        return respData.message;
+      }
+      if (typeof respData.error === "string") {
+        return respData.error;
+      }
+    }
+
+    // 3. Direct data.message
+    const data = (errorObj as any)?.data;
+    if (data) {
+      if (Array.isArray(data.message)) {
+        return data.message.join(", ");
+      }
+      if (typeof data.message === "string") {
+        return data.message;
+      }
+    }
+
     // Handle network errors
-    if ("error" in errorObj && errorObj.error) {
-      console.error("Network error:", errorObj.error);
-      return "Unable to connect to the server. Please check your internet connection.";
+    if ("error" in errorObj && typeof errorObj.error === "string") {
+      return errorObj.error;
     }
   }
 

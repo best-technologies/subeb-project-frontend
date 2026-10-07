@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { LoadingModal } from "@/components/ui/LoadingModal";
-import { Dialog } from "@/components/ui/custom-dialog";
+import { Badge } from "@/components/ui/badge";
 import { useLogin, getAuthErrorMessage } from "@/services/hooks/useAuth";
 import { useAuthStore } from "@/store/authStore";
 import {
@@ -33,7 +33,6 @@ const LoginContent = () => {
   const searchParams = useSearchParams();
   const loginMutation = useLogin();
   const { isAuthenticated } = useAuthStore();
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -43,7 +42,7 @@ const LoginContent = () => {
   // Redirect if already authenticated with valid tokens
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
-      if (isAuthenticated) {
+      if (isAuthenticated && !errorMessage) {
         // Verify we actually have tokens before redirecting
         const tokens = localStorage.getItem("asubeb_access_token");
         if (tokens) {
@@ -53,7 +52,7 @@ const LoginContent = () => {
     };
 
     checkAuthAndRedirect();
-  }, [isAuthenticated, router, redirectTo]);
+  }, [isAuthenticated, errorMessage, router, redirectTo]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -64,6 +63,7 @@ const LoginContent = () => {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
+    setErrorMessage("");
     try {
       const response = await loginMutation.mutateAsync(values);
 
@@ -89,11 +89,15 @@ const LoginContent = () => {
         router.push(target);
       } else {
         setErrorMessage(getAuthErrorMessage(response));
-        setShowErrorDialog(true);
       }
     } catch (error: unknown) {
-      setErrorMessage(getAuthErrorMessage(error));
-      setShowErrorDialog(true);
+      const errorMsg = getAuthErrorMessage(error);
+      setErrorMessage(errorMsg);
+      // Clean up any stale tokens in storage upon failed authentication
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("asubeb_access_token");
+        localStorage.removeItem("asubeb_refresh_token");
+      }
     }
   };
 
@@ -105,28 +109,6 @@ const LoginContent = () => {
         title="Signing In..."
         message="Please wait while we verify your credentials."
       />
-
-      {/* Error Dialog */}
-      <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <div className="p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-              <ExclamationCircleIcon className="w-10 h-10 text-red-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Login Failed
-            </h3>
-            <p className="text-gray-600 mb-6">{errorMessage}</p>
-            <Button
-              onClick={() => setShowErrorDialog(false)}
-              variant="outline"
-              className="w-full"
-            >
-              Try Again
-            </Button>
-          </div>
-        </div>
-      </Dialog>
 
       {/* Main Form */}
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -167,7 +149,7 @@ const LoginContent = () => {
               )}
             </div>
 
-            <div className="relative">
+            <div>
               <Label
                 htmlFor="password"
                 className="text-sm font-medium text-brand-heading"
@@ -199,6 +181,39 @@ const LoginContent = () => {
                 <p className="text-xs text-red-600 mt-1">
                   {form.formState.errors.password.message}
                 </p>
+              )}
+
+              {/* Warning badge below password input field */}
+              {errorMessage && (
+                <div className="mt-3">
+                  {errorMessage.toLowerCase().includes("deactivat") ? (
+                    <div className="flex items-start gap-2.5 p-3 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 text-xs shadow-xs">
+                      <ExclamationCircleIcon className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="flex-1 leading-relaxed">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Badge variant="warning" className="font-semibold uppercase tracking-wider text-[10px] px-1.5 py-0.5">
+                            Warning
+                          </Badge>
+                          <span className="font-semibold text-amber-950">Account Deactivated</span>
+                        </div>
+                        <p className="text-amber-900/90 leading-normal">{errorMessage}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2.5 p-3 rounded-lg border border-red-200 bg-red-50 text-red-900 text-xs shadow-xs">
+                      <ExclamationCircleIcon className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                      <div className="flex-1 leading-relaxed">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Badge variant="destructive" className="font-semibold uppercase tracking-wider text-[10px] px-1.5 py-0.5">
+                            Error
+                          </Badge>
+                          <span className="font-semibold text-red-950">Sign In Failed</span>
+                        </div>
+                        <p className="text-red-900/90 leading-normal">{errorMessage}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
