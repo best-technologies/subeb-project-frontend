@@ -8,7 +8,8 @@ export const examOfficerKeys = {
   results: (status?: string) => [...examOfficerKeys.all, 'results', status] as const,
   profile: () => [...examOfficerKeys.all, 'profile'] as const,
   auditLogs: (params?: any) => [...examOfficerKeys.all, 'audit-logs', params] as const,
-  schools: () => [...examOfficerKeys.all, 'schools'] as const,
+  lgas: () => [...examOfficerKeys.all, 'lgas'] as const,
+  schools: (lgaId?: string) => [...examOfficerKeys.all, 'schools', lgaId] as const,
   schoolItList: (params?: any) => [...examOfficerKeys.all, 'school-it', params] as const,
 };
 
@@ -95,14 +96,21 @@ export function useExamOfficerAuditLogs(params?: { page?: number; limit?: number
   });
 }
 
-export function useExamOfficerSchools() {
+export function useExamOfficerLgas() {
   return useQuery({
-    queryKey: examOfficerKeys.schools(),
-    queryFn: () => examOfficerApi.getSchoolsInLga().then((res) => res.data.data),
+    queryKey: examOfficerKeys.lgas(),
+    queryFn: () => examOfficerApi.getOfficerLgas().then((res) => res.data.data),
   });
 }
 
-export function useExamOfficerSchoolItList(params?: { search?: string; schoolId?: string; status?: string }) {
+export function useExamOfficerSchools(lgaId?: string) {
+  return useQuery({
+    queryKey: examOfficerKeys.schools(lgaId),
+    queryFn: () => examOfficerApi.getSchoolsInLga(lgaId).then((res) => res.data.data),
+  });
+}
+
+export function useExamOfficerSchoolItList(params?: { search?: string; schoolId?: string; status?: string; lgaId?: string }) {
   return useQuery({
     queryKey: examOfficerKeys.schoolItList(params),
     queryFn: () => examOfficerApi.getSchoolItList(params).then((res) => res.data.data),

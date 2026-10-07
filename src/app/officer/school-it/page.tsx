@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import {
   useExamOfficerSchoolItList,
   useExamOfficerSchools,
+  useExamOfficerLgas,
   useToggleSchoolItStatus,
 } from "@/services/hooks/useExamOfficer";
 import { Button } from "@/components/ui/Button";
@@ -36,9 +37,16 @@ import {
   UserCheck,
   AlertCircle,
   RefreshCw,
+  MapPin,
+  History,
+  ChevronDown,
+  FileSpreadsheet,
 } from "lucide-react";
 import CreateSchoolItModal from "@/components/officer/CreateSchoolItModal";
 import EditSchoolItModal from "@/components/officer/EditSchoolItModal";
+import SearchableSelect, {
+  SearchableSelectOption,
+} from "@/components/ui/searchable-select";
 import { capitalizeWords } from "@/utils/formatters";
 
 export interface SchoolItRecord {
@@ -53,6 +61,7 @@ export interface SchoolItRecord {
   isActive: boolean;
   profilePicture?: string | null;
   createdAt: string;
+  resultsUploadedCount?: number;
   school?: {
     id: string;
     name: string;
@@ -94,14 +103,41 @@ export default function ExamOfficerSchoolItPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingPersonnel, setEditingPersonnel] = useState<SchoolItRecord | null>(null);
 
+  // LGA jurisdictions (Current assigned + Past activity LGAs)
+  const { data: officerLgasData } = useExamOfficerLgas();
+  const [selectedLgaId, setSelectedLgaId] = useState<string>("");
+
+  const currentLga = officerLgasData?.currentLga;
+  const pastLgas = (officerLgasData?.pastLgas as any[]) || [];
+  const effectiveLgaId = selectedLgaId || currentLga?.id || "";
+
+  const isViewingPastLga = useMemo(() => {
+    if (!currentLga?.id || !effectiveLgaId) return false;
+    return effectiveLgaId !== currentLga.id;
+  }, [effectiveLgaId, currentLga]);
+
+  const currentViewingLgaName = useMemo(() => {
+    if (!effectiveLgaId) return currentLga?.name || "Loading LGA...";
+    if (currentLga?.id === effectiveLgaId) return currentLga.name;
+    const past = pastLgas.find((l: any) => l.id === effectiveLgaId);
+    if (past) return past.name;
+    const anyState = ((officerLgasData?.allStateLgas as any[]) || []).find((l: any) => l.id === effectiveLgaId);
+    return anyState?.name || currentLga?.name || "LGA Jurisdiction";
+  }, [effectiveLgaId, currentLga, pastLgas, officerLgasData]);
+
+  const handleSelectLga = (lgaId: string) => {
+    setSelectedLgaId(lgaId);
+    setSelectedSchoolFilter("ALL");
+  };
+
   const {
     data: personnelList = [],
     isLoading,
     refetch,
     isRefetching,
-  } = useExamOfficerSchoolItList();
+  } = useExamOfficerSchoolItList({ lgaId: effectiveLgaId });
 
-  const { data: schools = [] } = useExamOfficerSchools();
+  const { data: schools = [] } = useExamOfficerSchools(effectiveLgaId);
   const toggleStatusMutation = useToggleSchoolItStatus();
 
   // Filter client-side
@@ -152,6 +188,22 @@ export default function ExamOfficerSchoolItPage() {
   const totalSchoolsCount = typedSchools.length;
   const unassignedSchoolsCount = Math.max(0, totalSchoolsCount - schoolsWithItCount);
 
+  // Searchable Filter Options for Schools
+  const schoolFilterOptions: SearchableSelectOption[] = useMemo(() => {
+    return [
+      {
+        value: "ALL",
+        label: `All Schools (${totalSchoolsCount})`,
+        description: `View personnel from all schools in ${currentViewingLgaName}`,
+      },
+      ...typedSchools.map((school: SchoolOption) => ({
+        value: school.id,
+        label: capitalizeWords(school.name),
+        description: `${school.code} • ${school.level}${school.lgaName ? ` • ${school.lgaName}` : ""}`,
+      })),
+    ];
+  }, [typedSchools, totalSchoolsCount, currentViewingLgaName]);
+
   return (
     <div className="space-y-6">
       {/* Header Banner */}
@@ -166,16 +218,98 @@ export default function ExamOfficerSchoolItPage() {
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => refetch()}
-            disabled={isRefetching}
-            className="rounded-xl text-xs font-medium px-3.5 py-2.5 flex items-center gap-2 border-gray-200"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefetching ? "animate-spin" : ""}`} />
-            <span>Refresh</span>
-          </Button>
+          {/* LGA Filter Dropdown (Replaces generic Refresh button) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl text-xs font-medium px-3.5 py-2.5 flex items-center gap-2 border-gray-200 bg-white hover:bg-gray-50 shadow-2xs"
+              >
+                <MapPin className="w-3.5 h-3.5 text-brand-primary shrink-0" />
+                <span className="font-semibold text-gray-900 truncate max-w-[130px] sm:max-w-[180px]">
+                  {currentViewingLgaName}
+                </span>
+                {isViewingPastLga ? (
+                  <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-semibold uppercase shrink-0">
+                    Past
+                  </span>
+                ) : (
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-semibold uppercase shrink-0">
+                    Current
+                  </span>
+                )}
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400 ml-0.5 shrink-0" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-72 p-2 rounded-2xl shadow-lg border border-gray-100">
+              <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                <p className="text-xs font-bold text-gray-900">LGA Jurisdiction</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  Filter personnel records by your current or past operating LGAs
+                </p>
+              </div>
+
+              {/* Current Assignment */}
+              <div className="px-2.5 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                Current Assignment
+              </div>
+              <DropdownMenuItem
+                onClick={() => handleSelectLga(currentLga?.id || "")}
+                className={`cursor-pointer rounded-xl p-2.5 flex items-center justify-between text-xs ${
+                  !isViewingPastLga
+                    ? "bg-brand-primary/10 text-brand-primary font-semibold"
+                    : "hover:bg-gray-50 text-gray-700"
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="truncate">
+                    <div className="font-semibold truncate">{currentLga?.name || "Current LGA"}</div>
+                    <div className="text-[10px] text-gray-500 truncate">Official Assigned Jurisdiction</div>
+                  </div>
+                </div>
+                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-medium shrink-0">
+                  Active
+                </span>
+              </DropdownMenuItem>
+
+              {/* Past Activity LGAs */}
+              {pastLgas.length > 0 && (
+                <>
+                  <div className="px-2.5 pt-3 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    Past Activity Jurisdictions
+                  </div>
+                  {pastLgas.map((pastLga: any) => (
+                    <DropdownMenuItem
+                      key={pastLga.id}
+                      onClick={() => handleSelectLga(pastLga.id)}
+                      className={`cursor-pointer rounded-xl p-2.5 flex items-center justify-between text-xs ${
+                        effectiveLgaId === pastLga.id
+                          ? "bg-amber-50 text-amber-900 font-semibold border border-amber-200/60"
+                          : "hover:bg-gray-50 text-gray-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <History className="w-4 h-4 text-amber-600 shrink-0" />
+                        <div className="truncate">
+                          <div className="font-semibold truncate">{pastLga.name}</div>
+                          <div className="text-[10px] text-gray-500 truncate">
+                            {pastLga.itCount > 0
+                              ? `${pastLga.itCount} personnel created previously`
+                              : "Previous assigned activities"}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded font-medium shrink-0">
+                        Past
+                      </span>
+                    </DropdownMenuItem>
+                  ))}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Button
             type="button"
@@ -187,6 +321,35 @@ export default function ExamOfficerSchoolItPage() {
           </Button>
         </div>
       </div>
+
+      {/* Historical Context Notice Banner (Shown when viewing a past LGA) */}
+      {isViewingPastLga && (
+        <div className="bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-amber-900 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 text-amber-700">
+              <History className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900">
+                Viewing Historical Records for {currentViewingLgaName}
+              </p>
+              <p className="text-amber-800 text-[11px] mt-0.5">
+                Showing schools and personnel for your past activities in this jurisdiction. Your official assigned jurisdiction is{" "}
+                <strong className="text-amber-950 font-semibold">{currentLga?.name || "Current LGA"}</strong>.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => handleSelectLga(currentLga?.id || "")}
+            className="bg-white border-amber-300 text-amber-900 hover:bg-amber-100 rounded-xl text-xs font-semibold shrink-0"
+          >
+            Switch to Current LGA
+          </Button>
+        </div>
+      )}
 
       {/* Metrics Row (Compact, proportionate cards) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -204,7 +367,9 @@ export default function ExamOfficerSchoolItPage() {
             <div className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
               {totalCount}
             </div>
-            <p className="text-[11px] text-gray-500 mt-1">Registered in your LGA</p>
+            <p className="text-[11px] text-gray-500 mt-1">
+              Registered in {isViewingPastLga ? "past jurisdiction" : "your LGA"}
+            </p>
           </div>
         </div>
 
@@ -328,20 +493,46 @@ export default function ExamOfficerSchoolItPage() {
               />
             </div>
 
-            {/* School Filter Dropdown */}
-            <div className="w-full sm:w-48">
-              <select
+            {/* School Filter Dropdown (Searchable ShadCN Component) */}
+            <div className="w-full sm:w-60">
+              <SearchableSelect
+                options={schoolFilterOptions}
                 value={selectedSchoolFilter}
-                onChange={(e) => setSelectedSchoolFilter(e.target.value)}
-                className="w-full h-9 text-xs border border-gray-200 rounded-xl px-2.5 bg-white text-gray-700 focus:outline-none focus:border-brand-primary cursor-pointer capitalize"
-              >
-                <option value="ALL">All Schools ({totalSchoolsCount})</option>
-                {typedSchools.map((school: SchoolOption) => (
-                  <option key={school.id} value={school.id} className="capitalize">
-                    {capitalizeWords(school.name)}
-                  </option>
-                ))}
-              </select>
+                onValueChange={(val) => setSelectedSchoolFilter(val || "ALL")}
+                placeholder="Filter by school..."
+                searchPlaceholder="Search school by name, code..."
+                emptyText="No matching schools found"
+                triggerClassName="h-9 text-xs rounded-xl border-gray-200 capitalize bg-white"
+                contentClassName="z-50 min-w-[280px]"
+                renderOption={(option) => {
+                  if (option.value === "ALL") {
+                    return (
+                      <div className="flex items-center justify-between w-full min-w-0">
+                        <span className="font-medium text-gray-900 text-xs">All Schools</span>
+                        <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded font-medium">
+                          {totalSchoolsCount} Total
+                        </span>
+                      </div>
+                    );
+                  }
+                  const school = typedSchools.find((s) => s.id === option.value);
+                  return (
+                    <div className="flex items-center justify-between w-full min-w-0 gap-2">
+                      <div className="truncate flex-1">
+                        <span className="capitalize block truncate font-medium text-gray-900 text-xs">
+                          {option.label}
+                        </span>
+                        <span className="text-[10px] text-gray-500 block truncate">
+                          {school?.code} • {school?.lgaName || "LGA"}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded font-normal uppercase shrink-0">
+                        {school?.level}
+                      </span>
+                    </div>
+                  );
+                }}
+              />
             </div>
           </div>
         </div>
@@ -361,7 +552,7 @@ export default function ExamOfficerSchoolItPage() {
                   Contact Information
                 </TableHead>
                 <TableHead className="text-xs font-semibold text-gray-600 py-3.5">
-                  Attribution
+                  Uploaded Results
                 </TableHead>
                 <TableHead className="text-xs font-semibold text-gray-600 py-3.5 text-center">
                   Status
@@ -481,25 +672,21 @@ export default function ExamOfficerSchoolItPage() {
                         </div>
                       </TableCell>
 
-                      {/* 4. Creator / Attribution */}
+                      {/* 4. Results Uploaded */}
                       <TableCell className="py-3.5">
-                        {personnel.isCreatedByCurrentOfficer ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/70">
-                            <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                            <span>Created by You</span>
-                          </span>
-                        ) : personnel.creatorOfficer ? (
-                          <div className="text-xs text-gray-600">
-                            <span className="text-[11px] text-gray-500 block">Created by:</span>
-                            <span className="font-medium text-gray-800">
-                              {personnel.creatorOfficer.name}
-                            </span>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200/50">
+                            <FileSpreadsheet className="w-3.5 h-3.5" />
                           </div>
-                        ) : (
-                          <span className="text-[11px] text-gray-400 italic">
-                            Admin Enrollment
-                          </span>
-                        )}
+                          <div>
+                            <div className="text-xs font-bold text-gray-900 leading-tight">
+                              {(personnel.resultsUploadedCount ?? 0).toLocaleString()}
+                            </div>
+                            <div className="text-[10px] text-gray-500 font-normal leading-tight mt-0.5">
+                              Across terms & sessions
+                            </div>
+                          </div>
+                        </div>
                       </TableCell>
 
                       {/* 5. Status */}
