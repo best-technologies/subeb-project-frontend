@@ -26,7 +26,13 @@ export function useSchoolItSubjects() {
   });
 }
 
-export function useSchoolItStudents(params?: { page?: number; limit?: number; search?: string }) {
+export function useSchoolItStudents(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  classId?: string;
+  status?: string;
+}) {
   return useQuery({
     queryKey: schoolItKeys.students(params),
     queryFn: () => schoolItApi.getStudents(params).then((res) => res.data),
@@ -60,6 +66,24 @@ export function useUpdateSchoolItStudent() {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to update student');
+    },
+  });
+}
+
+export function useUpdateSchoolItStudentStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { isActive: boolean; reason?: string } }) =>
+      schoolItApi.updateStudentStatus(id, data),
+    onSuccess: (_, variables) => {
+      const msg = variables.data.isActive ? 'Student reactivated successfully' : 'Student status updated successfully';
+      toast.success(msg);
+      queryClient.invalidateQueries({ queryKey: schoolItKeys.students() });
+      queryClient.invalidateQueries({ queryKey: schoolItKeys.dashboard() });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update student status');
     },
   });
 }

@@ -5,12 +5,15 @@ export const schoolItApi = {
   getDashboardAnalytics: () => api.get('/school-it/dashboard'),
 
   // Students
-  getStudents: (params?: { page?: number; limit?: number; search?: string }) =>
+  getStudents: (params?: { page?: number; limit?: number; search?: string; classId?: string; status?: string }) =>
     api.get('/school-it/students', { params }),
   
   enrolStudent: (data: any) => api.post('/school-it/students', data),
   
   updateStudent: (id: string, data: any) => api.put(`/school-it/students/${id}`, data),
+
+  updateStudentStatus: (id: string, data: { isActive: boolean; reason?: string }) =>
+    api.patch(`/school-it/students/${id}/status`, data),
 
   // Results
   getSubjects: () => api.get('/school-it/results/subjects'),

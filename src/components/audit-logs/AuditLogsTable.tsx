@@ -27,6 +27,8 @@ export function formatAction(action: string) {
   if (action === "SUBMITTED_RESULTS" || (action.includes("school-it/results/submit"))) return "Submitted Results";
   if (action === "ENROLLED_STUDENT" || (action.includes("school-it/students") && action.startsWith("POST"))) return "Enrolled Student";
   if (action === "UPDATED_STUDENT" || (action.includes("school-it/students") && (action.startsWith("PUT") || action.startsWith("PATCH")))) return "Updated Student";
+  if (action === "SUSPENDED_STUDENT") return "Suspended Student";
+  if (action === "UNSUSPENDED_STUDENT") return "Reactivated Student";
   if (action === "CREATE_SCHOOL_IT" || (action.includes("exam-officer/school-it") && action.startsWith("POST"))) return "Created School IT";
   if (action === "UPDATE_SCHOOL_IT" || (action.includes("exam-officer/school-it") && (action.startsWith("PUT") || action.startsWith("PATCH")))) return "Updated School IT";
   
@@ -98,6 +100,10 @@ export function formatDetails(action: string, details: any) {
         return "Enrolled student(s).";
       case "Updated Student":
         return "Updated student record.";
+      case "Suspended Student":
+        return parsed?.name ? `Suspended student: ${parsed.name}${parsed.reason ? ` (${parsed.reason})` : ''}` : "Suspended student.";
+      case "Reactivated Student":
+        return parsed?.name ? `Reactivated student: ${parsed.name}` : "Reactivated student.";
       case "Enrolled SUBEB Officer":
         return "Enrolled SUBEB officer.";
       case "Created Class":
