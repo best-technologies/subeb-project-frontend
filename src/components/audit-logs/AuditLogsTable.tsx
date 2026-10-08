@@ -57,18 +57,77 @@ export function formatAction(action: string) {
   return action;
 }
 
+export function formatUserName(userName?: string, fallbackId?: string) {
+  if (!userName && !fallbackId) return "System";
+  const raw = (userName || fallbackId || "System").trim();
+  // Strip parenthesized email pattern e.g., "Full Name (email@domain.com)" -> "Full Name"
+  const stripped = raw.replace(/\s*\([^)]*@[^)]*\)/g, "").trim();
+  return stripped || raw;
+}
+
 export function formatDetails(action: string, details: any) {
   const formattedAction = formatAction(action);
   
-  if (formattedAction === "Submitted Results") {
-    return "Submitted results for approval.";
+  const isEmpty =
+    !details ||
+    details === "{}" ||
+    (typeof details === "object" && Object.keys(details).length === 0);
+
+  if (isEmpty) {
+    switch (formattedAction) {
+      case "User Signed In":
+        return "User signed in.";
+      case "User Signed Out":
+        return "User signed out.";
+      case "Approved Results":
+        return "Approved results for a school.";
+      case "Rejected Results":
+        return "Rejected results for a school.";
+      case "Uploaded Results":
+        return "Uploaded results for student(s).";
+      case "Submitted Results":
+        return "Submitted results for approval.";
+      case "Created School IT":
+        return "Created School IT personnel.";
+      case "Updated School IT":
+        return "Updated School IT personnel records.";
+      case "Updated Profile":
+        return "Updated profile information.";
+      case "Enrolled Student":
+      case "Enrolled Student(s)":
+        return "Enrolled student(s).";
+      case "Updated Student":
+        return "Updated student record.";
+      case "Enrolled SUBEB Officer":
+        return "Enrolled SUBEB officer.";
+      case "Created Class":
+        return "Created new academic class.";
+      case "Updated Class":
+        return "Updated academic class.";
+      case "Deleted Class":
+        return "Deleted academic class.";
+      case "Created Session":
+        return "Created academic session.";
+      case "Updated Session":
+        return "Updated academic session.";
+      case "Deleted Session":
+        return "Deleted academic session.";
+      case "Created Term":
+        return "Created academic term.";
+      case "Updated Term":
+        return "Updated academic term.";
+      case "Deleted Term":
+        return "Deleted academic term.";
+      case "Added School":
+        return "Added new school.";
+      case "Updated School":
+        return "Updated school information.";
+      case "Deleted School":
+        return "Deleted school.";
+      default:
+        return `${formattedAction}.`;
+    }
   }
-  
-  if (formattedAction === "Approved Results" && (!details || details === "{}" || (typeof details === "object" && Object.keys(details).length === 0))) {
-    return "Approved results for a school.";
-  }
-  
-  if (!details || details === "{}" || (typeof details === "object" && Object.keys(details).length === 0)) return "N/A";
   
   try {
     let parsed: any = details;
@@ -82,22 +141,22 @@ export function formatDetails(action: string, details: any) {
         parsed = JSON.parse(parsed);
       } catch {}
     }
-    if (!parsed || typeof parsed !== "object") {
-      parsed = {};
+    if (!parsed || typeof parsed !== "object" || Object.keys(parsed).length === 0) {
+      return `${formattedAction}.`;
     }
 
     if (formattedAction === "User Signed In") {
       const roleStr = parsed.role ? ` (${parsed.role.replace(/_/g, " ")})` : "";
-      return parsed.email
-        ? `${parsed.name ? `${parsed.name} (${parsed.email})` : parsed.email}${roleStr} signed in.`
-        : "User signed in.";
+      const rawName = parsed.name || (parsed.email ? parsed.email.split("@")[0] : "User");
+      const cleanName = rawName.replace(/\s*\([^)]*@[^)]*\)/g, "").trim();
+      return `${cleanName}${roleStr} signed in.`;
     }
 
     if (formattedAction === "User Signed Out") {
       const roleStr = parsed.role ? ` (${parsed.role.replace(/_/g, " ")})` : "";
-      return parsed.email
-        ? `${parsed.name ? `${parsed.name} (${parsed.email})` : parsed.email}${roleStr} signed out.`
-        : "User signed out.";
+      const rawName = parsed.name || (parsed.email ? parsed.email.split("@")[0] : "User");
+      const cleanName = rawName.replace(/\s*\([^)]*@[^)]*\)/g, "").trim();
+      return `${cleanName}${roleStr} signed out.`;
     }
     
     if (formattedAction === "Approved Results" || formattedAction === "Rejected Results") {
@@ -111,21 +170,22 @@ export function formatDetails(action: string, details: any) {
     }
     
     if (formattedAction === "Enrolled Student" || formattedAction === "Updated Student") {
-      const name = parsed.name || (parsed.firstName ? `${parsed.firstName} ${parsed.lastName || ''}` : "Unknown");
-      return `Student: ${name.trim()}, ID: ${parsed.studentId || "N/A"}`;
+      const name = parsed.name || (parsed.firstName ? `${parsed.firstName} ${parsed.lastName || ''}` : "");
+      return `Student: ${name.trim() || 'Record'}${parsed.studentId ? `, ID: ${parsed.studentId}` : ""}`;
     }
 
     if (formattedAction === "Enrolled Student(s)") {
       if (parsed.students && Array.isArray(parsed.students)) {
         const count = parsed.students.length;
         const sample = parsed.students[0];
-        const name = sample ? (sample.firstName || sample?.student?.firstName || "Unknown") : undefined;
-        return `Enrolled ${count} student(s)${name && name !== "Unknown" ? ` (e.g., ${name})` : ""}`;
+        const name = sample ? (sample.firstName || sample?.student?.firstName || "") : "";
+        return `Enrolled ${count} student(s)${name ? ` (e.g., ${name})` : ""}`;
       }
     }
     
     if (formattedAction === "Enrolled SUBEB Officer") {
-      return `Name: ${parsed.firstName || 'Unknown'} ${parsed.lastName || ''}, Email: ${parsed.email || "N/A"}`;
+      const name = `${parsed.firstName || ''} ${parsed.lastName || ''}`.trim();
+      return `Enrolled SUBEB officer${name ? `: ${name}` : ""}.`;
     }
 
     if (formattedAction === "Created School IT") {
@@ -143,11 +203,11 @@ export function formatDetails(action: string, details: any) {
     }
 
     if (formattedAction === "Created Session" || formattedAction === "Updated Session" || formattedAction === "Deleted Session") {
-      if (parsed.name || parsed.status) return `Session: ${parsed.name || "N/A"}${parsed.status ? `, Status: ${parsed.status}` : ""}`;
+      if (parsed.name || parsed.status) return `Session: ${parsed.name || "Academic Session"}${parsed.status ? `, Status: ${parsed.status}` : ""}`;
     }
 
     if (formattedAction === "Created Term" || formattedAction === "Updated Term" || formattedAction === "Deleted Term") {
-      if (parsed.name || parsed.status) return `Term: ${parsed.name || "N/A"}${parsed.status ? `, Status: ${parsed.status}` : ""}`;
+      if (parsed.name || parsed.status) return `Term: ${parsed.name || "Academic Term"}${parsed.status ? `, Status: ${parsed.status}` : ""}`;
     }
 
     if (formattedAction === "Added School" || formattedAction === "Updated School" || formattedAction === "Deleted School") {
@@ -162,15 +222,15 @@ export function formatDetails(action: string, details: any) {
     // Generic fallback for JSON
     const parts = [];
     for (const [key, value] of Object.entries(parsed)) {
-       if (typeof value === 'string' || typeof value === 'number') {
+       if (key !== "password" && key !== "token" && (typeof value === 'string' || typeof value === 'number')) {
            parts.push(`${key}: ${value}`);
        }
     }
     if (parts.length > 0) return parts.join(", ");
     
-    return typeof details === "string" ? details : JSON.stringify(details);
+    return `${formattedAction}.`;
   } catch {
-    return typeof details === "string" ? details : JSON.stringify(details);
+    return `${formattedAction}.`;
   }
 }
 
@@ -246,7 +306,7 @@ export function AuditLogsTable({
                       {new Date(log.createdAt).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-gray-900 font-medium">
-                      {log.userName || log.userId}
+                      {formatUserName(log.userName, log.userId)}
                     </TableCell>
                     <TableCell>
                       <span
@@ -270,7 +330,7 @@ export function AuditLogsTable({
                     <TableCell className="max-w-md">
                       <div
                         className="text-sm text-gray-600 truncate"
-                        title={typeof log.details === "string" ? log.details : JSON.stringify(log.details)}
+                        title={formatDetails(log.action, log.details)}
                       >
                         {formatDetails(log.action, log.details)}
                       </div>

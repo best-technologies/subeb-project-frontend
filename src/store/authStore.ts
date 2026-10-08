@@ -54,21 +54,6 @@ export const useAuthStore = create<AuthStore>()(
 
       // Clear authentication state on logout
       logout: () => {
-        try {
-          const token = getTokens()?.accessToken;
-          if (token && typeof window !== "undefined") {
-            const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:2000";
-            const version = process.env.NEXT_PUBLIC_API_VERSION || "v1";
-            fetch(`${baseUrl}/api/${version}/auth/logout`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }).catch(() => {});
-          }
-        } catch (e) {}
-
         clearTokens();
         clearTokenCookies();
         clearAccessCache();
