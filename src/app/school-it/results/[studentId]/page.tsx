@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { ChevronLeft, Save } from "lucide-react";
+import { capitalizeInitials } from "@/utils/formatters";
 
 export default function StudentResultsPage() {
   const params = useParams();
@@ -108,8 +109,8 @@ export default function StudentResultsPage() {
             <ChevronLeft size={18} />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {student.firstName} {student.lastName}
+            <h1 className="text-2xl font-bold text-gray-900 capitalize">
+              {capitalizeInitials(`${student.firstName || ''} ${student.lastName || ''}`.trim())}
             </h1>
             <p className="text-gray-600">ID: {student.studentId} • Class: {student.class?.name}</p>
           </div>

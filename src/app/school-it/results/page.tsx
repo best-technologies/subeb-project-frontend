@@ -16,6 +16,7 @@ import { useSchoolItSubjects } from '@/services/hooks/useSchoolIt';
 import { schoolItApi } from '@/services/api/school-it';
 import { toast } from 'react-hot-toast';
 import { Send } from 'lucide-react';
+import { capitalizeInitials } from '@/utils/formatters';
 
 export default function SchoolItResultsPage() {
   const [page, setPage] = useState(1);
@@ -170,8 +171,8 @@ export default function SchoolItResultsPage() {
                   return (
                     <TableRow key={student.id} className="hover:bg-gray-50 transition-colors">
                       <TableCell className="font-medium text-gray-900">{student.studentId}</TableCell>
-                      <TableCell className="text-gray-900">
-                        {student.firstName} {student.lastName}
+                      <TableCell className="text-gray-900 capitalize">
+                        {capitalizeInitials(`${student.firstName || ''} ${student.lastName || ''}`.trim())}
                       </TableCell>
                       <TableCell className="text-gray-600">{student.class?.name}</TableCell>
                       <TableCell className="text-gray-600">

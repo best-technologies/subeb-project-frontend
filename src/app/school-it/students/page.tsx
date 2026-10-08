@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ChevronLeft, ChevronRight, Search, Plus, Edit2 } from "lucide-react";
 import { SchoolItStudentModal } from "@/components/school-it/SchoolItStudentModal";
+import { capitalizeInitials } from "@/utils/formatters";
 
 export default function SchoolItStudentsPage() {
   const [page, setPage] = useState(1);
@@ -110,13 +111,15 @@ export default function SchoolItStudentsPage() {
                       {student.profilePicture ? (
                         <img src={student.profilePicture} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center font-bold">
-                          {student.firstName[0]}{student.lastName[0]}
+                        <div className="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center font-bold uppercase">
+                          {(student.firstName?.[0] || '')}{(student.lastName?.[0] || '')}
                         </div>
                       )}
                     </TableCell>
                     <TableCell className="font-mono text-sm text-gray-600">{student.studentId}</TableCell>
-                    <TableCell className="font-medium text-gray-900">{student.firstName} {student.lastName}</TableCell>
+                    <TableCell className="font-medium text-gray-900 capitalize">
+                      {capitalizeInitials(`${student.firstName || ''} ${student.lastName || ''}`.trim())}
+                    </TableCell>
                     <TableCell>{student.gender}</TableCell>
                     <TableCell className="text-sm text-gray-500">{new Date(student.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">

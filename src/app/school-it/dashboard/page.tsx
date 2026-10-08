@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, School, BookOpen, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { formatEducationalText } from "@/utils/formatters";
+import { formatEducationalText, capitalizeInitials } from "@/utils/formatters";
 
 export default function SchoolItDashboardPage() {
   const { data, isLoading } = useSchoolItDashboard();
@@ -119,11 +119,13 @@ export default function SchoolItDashboardPage() {
                 {recentStudents.map((student: any) => (
                   <div key={student.id} className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold">
-                        {student.firstName[0]}{student.lastName[0]}
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold uppercase">
+                        {(student.firstName?.[0] || '')}{(student.lastName?.[0] || '')}
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">{student.firstName} {student.lastName}</p>
+                        <p className="font-semibold text-gray-900 capitalize">
+                          {capitalizeInitials(`${student.firstName || ''} ${student.lastName || ''}`.trim())}
+                        </p>
                         <p className="text-xs text-gray-500">Gender: {student.gender}</p>
                       </div>
                     </div>
