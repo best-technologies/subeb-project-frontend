@@ -53,6 +53,7 @@ import {
   UserCheck,
   UserX,
   Loader2,
+  X,
 } from "lucide-react";
 import { SchoolItStudentModal } from "@/components/school-it/SchoolItStudentModal";
 import { capitalizeInitials, cn } from "@/utils/formatters";
@@ -60,18 +61,81 @@ import { toast } from "react-hot-toast";
 
 export default function SchoolItStudentsPage() {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [classId, setClassId] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "SUSPENDED">("ALL");
   const limit = 20;
 
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const applySearch = React.useCallback((query: string) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    const trimmed = query.trim();
+    setDebouncedSearch(trimmed);
+    if (trimmed) {
+      setStatusFilter("ALL");
+      setClassId("ALL");
+    }
+    setPage(1);
+  }, []);
+
+  // 3-second debounce while typing
+  React.useEffect(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    timerRef.current = setTimeout(() => {
+      applySearch(searchInput);
+    }, 3000);
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [searchInput, applySearch]);
+
+  const handleBlur = () => {
+    // Immediate search on unfocus (no need to wait for 3s if user clicks out)
+    if (searchInput.trim() !== debouncedSearch) {
+      applySearch(searchInput);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      applySearch(searchInput);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput("");
+    applySearch("");
+  };
+
+  const isSearching = Boolean(debouncedSearch);
+
   const { data, isLoading } = useSchoolItStudents({
     page,
     limit,
-    search,
-    classId: classId === "ALL" ? undefined : classId,
-    status: statusFilter,
+    search: isSearching ? debouncedSearch : undefined,
+    classId: isSearching ? undefined : (classId === "ALL" ? undefined : classId),
+    status: isSearching ? undefined : statusFilter,
   });
+
+  // When search results return from backend, ensure status tab is switched back to All
+  React.useEffect(() => {
+    if (debouncedSearch && data) {
+      setStatusFilter("ALL");
+      setClassId("ALL");
+    }
+  }, [debouncedSearch, data]);
 
   const dashboardQuery = useSchoolItDashboard();
   const enrolMutation = useEnrolSchoolItStudent();
@@ -228,13 +292,22 @@ export default function SchoolItStudentsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
             <Input
               placeholder="Search by name or ID..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="pl-9 w-full sm:w-[260px] rounded-xl text-sm border-gray-200 focus:border-brand-primary h-10 py-0"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              className="pl-9 pr-8 w-full sm:w-[260px] rounded-xl text-sm border-gray-200 focus:border-brand-primary h-10 py-0"
             />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-100 transition-colors"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
           <Button
             onClick={handleOpenEnrol}
