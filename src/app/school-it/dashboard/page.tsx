@@ -3,9 +3,10 @@
 import React from "react";
 import { useSchoolItDashboard } from "@/services/hooks/useSchoolIt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, GraduationCap, School, BookOpen, UserPlus } from "lucide-react";
+import { Users, School, BookOpen, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { formatEducationalText } from "@/utils/formatters";
 
 export default function SchoolItDashboardPage() {
   const { data, isLoading } = useSchoolItDashboard();
@@ -23,7 +24,6 @@ export default function SchoolItDashboardPage() {
     totalStudents: 0,
     maleStudents: 0,
     femaleStudents: 0,
-    totalTeachers: 0,
     totalClasses: 0,
   };
   const recentStudents = data?.recentStudents || [];
@@ -32,41 +32,37 @@ export default function SchoolItDashboardPage() {
     {
       title: "Total Students",
       value: analytics.totalStudents,
-      icon: <Users size={24} className="text-blue-500" />,
-      bgColor: "bg-blue-50",
+      icon: <Users className="w-4 h-4" />,
+      colorClass: "bg-blue-50 text-blue-600",
     },
     {
       title: "Classes",
       value: analytics.totalClasses,
-      icon: <School size={24} className="text-indigo-500" />,
-      bgColor: "bg-indigo-50",
-    },
-    {
-      title: "Teachers",
-      value: analytics.totalTeachers,
-      icon: <GraduationCap size={24} className="text-emerald-500" />,
-      bgColor: "bg-emerald-50",
+      icon: <School className="w-4 h-4" />,
+      colorClass: "bg-indigo-50 text-indigo-600",
     },
     {
       title: "Male Students",
       value: analytics.maleStudents,
-      icon: <Users size={24} className="text-cyan-500" />,
-      bgColor: "bg-cyan-50",
+      icon: <Users className="w-4 h-4" />,
+      colorClass: "bg-cyan-50 text-cyan-600",
     },
     {
       title: "Female Students",
       value: analytics.femaleStudents,
-      icon: <Users size={24} className="text-pink-500" />,
-      bgColor: "bg-pink-50",
+      icon: <Users className="w-4 h-4" />,
+      colorClass: "bg-pink-50 text-pink-600",
     },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome to {school.name}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Welcome to <span className="capitalize">{formatEducationalText(school.name)}</span>
+          </h1>
           <p className="text-gray-600 mt-1">School Code: <span className="font-mono text-brand-primary">{school.code}</span></p>
           {(data?.activeSession || data?.activeTerm) && (
             <p className="text-sm text-gray-500 mt-2 flex items-center gap-2">
@@ -84,19 +80,26 @@ export default function SchoolItDashboardPage() {
       </div>
 
       {/* Analytics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, idx) => (
-          <Card key={idx} className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-6 flex flex-col gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bgColor}`}>
+          <div
+            key={idx}
+            className="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                {stat.title}
+              </span>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${stat.colorClass}`}>
                 {stat.icon}
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">{stat.title}</p>
-                <h3 className="text-3xl font-bold text-gray-900">{stat.value}</h3>
+            </div>
+            <div className="mt-2.5">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+                {stat.value}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
 
