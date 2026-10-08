@@ -18,7 +18,7 @@ export const schoolItApi = {
   // Results
   getSubjects: () => api.get('/school-it/results/subjects'),
 
-  getResults: (params?: { classId?: string; page?: number; limit?: number }) =>
+  getResults: (params?: { classId?: string; status?: string; page?: number; limit?: number; search?: string }) =>
     api.get('/school-it/results', { params }),
   
   getStudentResults: (studentId: string) => api.get(`/school-it/results/${studentId}`),

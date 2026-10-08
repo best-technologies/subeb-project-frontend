@@ -88,7 +88,13 @@ export function useUpdateSchoolItStudentStatus() {
   });
 }
 
-export function useSchoolItResults(params?: { classId?: string; page?: number; limit?: number }) {
+export function useSchoolItResults(params?: {
+  classId?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+}) {
   return useQuery({
     queryKey: schoolItKeys.results(params),
     queryFn: () => schoolItApi.getResults(params).then((res) => res.data),
