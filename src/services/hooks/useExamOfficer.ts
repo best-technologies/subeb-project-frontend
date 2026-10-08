@@ -89,10 +89,18 @@ export function useUpdateExamOfficerProfile() {
   });
 }
 
-export function useExamOfficerAuditLogs(params?: { page?: number; limit?: number }) {
+export function useExamOfficerAuditLogs(
+  pageOrParams: number | { page?: number; limit?: number } = 1,
+  limitParam = 20
+) {
+  const page = typeof pageOrParams === 'number' ? pageOrParams : (pageOrParams?.page ?? 1);
+  const limit = typeof pageOrParams === 'number' ? limitParam : (pageOrParams?.limit ?? 20);
+
   return useQuery({
-    queryKey: examOfficerKeys.auditLogs(params),
-    queryFn: () => examOfficerApi.getAuditLogs(params).then((res) => res.data.data),
+    queryKey: [...examOfficerKeys.all, 'audit-logs', page, limit] as const,
+    queryFn: () => examOfficerApi.getAuditLogs({ page, limit }).then((res) => res.data?.data ?? res.data),
+    staleTime: 0,
+    refetchOnMount: true,
   });
 }
 

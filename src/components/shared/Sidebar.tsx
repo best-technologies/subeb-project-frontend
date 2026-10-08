@@ -90,16 +90,16 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         href: "/officer/school-it",
       },
       {
-        id: "audit-logs",
-        label: "Audit Logs",
-        icon: <ClipboardList size={20} />,
-        href: "/officer/audit-logs",
-      },
-      {
         id: "profile",
-        label: "My Profile",
+        label: "Profile",
         icon: <UserRound size={20} />,
         href: "/officer/profile",
+      },
+      {
+        id: "audit-logs",
+        label: "Audit Logs",
+        icon: <FileText size={20} />,
+        href: "/officer/audit-logs",
       },
     ];
   } else if (variant === "school-it") {

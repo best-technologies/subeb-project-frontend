@@ -93,14 +93,14 @@ export default function Header() {
           icon: <Laptop className="w-4 h-4" />,
         },
         {
+          label: "Profile",
+          href: "/officer/profile",
+          icon: <User className="w-4 h-4" />,
+        },
+        {
           label: "Audit Logs",
           href: "/officer/audit-logs",
           icon: <FileText className="w-4 h-4" />,
-        },
-        {
-          label: "My Profile",
-          href: "/officer/profile",
-          icon: <User className="w-4 h-4" />,
         },
       ];
     } else if (normalizedRole === "school_it") {

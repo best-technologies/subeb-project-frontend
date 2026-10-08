@@ -27,6 +27,8 @@ export function formatAction(action: string) {
   if (action === "SUBMITTED_RESULTS" || (action.includes("school-it/results/submit"))) return "Submitted Results";
   if (action === "ENROLLED_STUDENT" || (action.includes("school-it/students") && action.startsWith("POST"))) return "Enrolled Student";
   if (action === "UPDATED_STUDENT" || (action.includes("school-it/students") && (action.startsWith("PUT") || action.startsWith("PATCH")))) return "Updated Student";
+  if (action === "CREATE_SCHOOL_IT" || (action.includes("exam-officer/school-it") && action.startsWith("POST"))) return "Created School IT";
+  if (action === "UPDATE_SCHOOL_IT" || (action.includes("exam-officer/school-it") && (action.startsWith("PUT") || action.startsWith("PATCH")))) return "Updated School IT";
   
   if (action.includes("subeb-officers/enroll") || action.includes("subeb-officers")) return "Enrolled SUBEB Officer";
   if (action.includes("students/enrollsingleorbulkstudents") || action.includes("enrollment/students") || action.includes("admin/enrollment")) return "Enrolled Student(s)";
@@ -124,6 +126,16 @@ export function formatDetails(action: string, details: any) {
     
     if (formattedAction === "Enrolled SUBEB Officer") {
       return `Name: ${parsed.firstName || 'Unknown'} ${parsed.lastName || ''}, Email: ${parsed.email || "N/A"}`;
+    }
+
+    if (formattedAction === "Created School IT") {
+      const itName = parsed.personnelName || (parsed.firstName ? `${parsed.firstName} ${parsed.lastName || ''}`.trim() : '');
+      return `Created School IT personnel${itName ? `: ${itName}` : ""}${parsed.schoolName ? ` at ${parsed.schoolName}` : ""}.`;
+    }
+
+    if (formattedAction === "Updated School IT") {
+      const itId = parsed.schoolItId || parsed.id;
+      return `Updated School IT personnel${itId ? ` (${itId})` : ""}.`;
     }
 
     if (formattedAction === "Created Class" || formattedAction === "Updated Class" || formattedAction === "Deleted Class") {
@@ -272,29 +284,76 @@ export function AuditLogsTable({
       </Card>
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-gray-100 shadow-sm">
+      {(totalPages > 1 || total > 0) && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl border border-gray-100 shadow-sm">
           <div className="text-sm text-gray-700">
-            Showing page <span className="font-medium">{page}</span> of{" "}
-            <span className="font-medium">{totalPages}</span>
+            Showing page <span className="font-semibold text-gray-900">{page}</span> of{" "}
+            <span className="font-semibold text-gray-900">{Math.max(1, totalPages)}</span>
+            {total > 0 && (
+              <span className="text-gray-500 ml-1">
+                ({total.toLocaleString()} {total === 1 ? 'record' : 'records'})
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <Button
               variant="outline"
               size="sm"
               onClick={() => onPageChange(Math.max(1, page - 1))}
-              disabled={page === 1 || isLoading}
-              className="h-9 px-3"
+              disabled={page <= 1 || isLoading}
+              className="h-9 px-3 text-xs"
             >
               <ChevronLeft size={16} className="mr-1" />
               Previous
             </Button>
+
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1 mx-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((pNum) => {
+                    return (
+                      pNum === 1 ||
+                      pNum === totalPages ||
+                      Math.abs(pNum - page) <= 1
+                    );
+                  })
+                  .reduce<(number | string)[]>((acc, pNum, idx, arr) => {
+                    if (idx > 0 && (pNum as number) - (arr[idx - 1] as number) > 1) {
+                      acc.push("...");
+                    }
+                    acc.push(pNum);
+                    return acc;
+                  }, [])
+                  .map((pItem, idx) =>
+                    pItem === "..." ? (
+                      <span key={`ellipsis-${idx}`} className="px-2 text-gray-400 text-xs">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={pItem}
+                        type="button"
+                        onClick={() => onPageChange(pItem as number)}
+                        disabled={isLoading}
+                        className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                          page === pItem
+                            ? "bg-brand-primary text-white shadow-xs"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        {pItem}
+                      </button>
+                    )
+                  )}
+              </div>
+            )}
+
             <Button
               variant="outline"
               size="sm"
               onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-              disabled={page === totalPages || isLoading}
-              className="h-9 px-3"
+              disabled={page >= totalPages || isLoading}
+              className="h-9 px-3 text-xs"
             >
               Next
               <ChevronRight size={16} className="ml-1" />

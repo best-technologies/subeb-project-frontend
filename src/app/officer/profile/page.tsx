@@ -86,7 +86,7 @@ export default function ExamOfficerProfile() {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">My Profile</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Profile</h1>
           <p className="text-sm text-gray-500 mt-1">Manage your personal information and account settings.</p>
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function ExamOfficerProfile() {
               </div>
               <div className="text-center sm:text-left">
                 <h3 className="text-lg font-bold text-gray-900">{profile?.firstName} {profile?.lastName}</h3>
-                <p className="text-brand-primary font-medium text-sm">{profile?.designation || 'LGA Exam Officer'}</p>
+                <p className="text-brand-primary font-medium text-sm">Exam Officer</p>
                 <p className="text-xs text-gray-500 mt-1">{profile?.lga?.name} LGA, {profile?.stateRef?.name} State</p>
               </div>
             </div>
