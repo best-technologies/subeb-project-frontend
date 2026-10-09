@@ -13,6 +13,7 @@ import { useAuthStore } from "@/store/authStore";
 import { logout as logoutApi } from "@/services/api/auth";
 import { useState } from "react";
 import Link from "next/link";
+import { isRouteActive } from "@/utils/navigation";
 
 export default function PageHeader() {
   const router = useRouter();
@@ -155,7 +156,7 @@ export default function PageHeader() {
                       href={`/${user.id}/profile`}
                       onClick={handleMenuItemClick}
                       className={`flex items-center space-x-3 px-4 py-3 transition-all duration-200 ${
-                        pathname === `/${user.id}/profile`
+                        isRouteActive(pathname, `/${user.id}/profile`)
                           ? "bg-[#F5FAF8] text-brand-green border-l-4 border-brand-green rounded-r-lg"
                           : "text-gray-700 hover:bg-gray-100 rounded-lg"
                       }`}
@@ -169,7 +170,7 @@ export default function PageHeader() {
                       href={`/${user.id}/grade-record`}
                       onClick={handleMenuItemClick}
                       className={`flex items-center space-x-3 px-4 py-3 transition-all duration-200 ${
-                        pathname === `/${user.id}/grade-record`
+                        isRouteActive(pathname, `/${user.id}/grade-record`)
                           ? "bg-[#F5FAF8] text-brand-green border-l-4 border-brand-green rounded-r-lg"
                           : "text-gray-700 hover:bg-gray-100 rounded-lg"
                       }`}

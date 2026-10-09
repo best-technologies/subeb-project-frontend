@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
 import { logout as logoutApi } from "@/services/api/auth";
 import { SchoolNameText } from "@/utils/truncateText";
+import { SidebarNavItem } from "@/components/shared/SidebarNavItem";
 
 interface BaseSidebarProps {
   onNavigate?: () => void;
@@ -273,33 +274,15 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
           <nav className="flex-1 p-4">
             <ul className="space-y-2">
               {navigationItems.map((item) => (
-                <li key={item.id}>
-                  <Link
-                    href={item.href}
-                    onClick={() => onNavigate?.()}
-                    className={`
-                      flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-                      ${
-                        pathname === item.href
-                          ? "bg-brand-secondary text-brand-secondary-contrast shadow-lg"
-                          : "text-brand-primary-contrast/80 hover:bg-brand-secondary hover:text-brand-secondary-contrast"
-                      }
-                      ${
-                        item.disabled
-                          ? "opacity-50 cursor-not-allowed"
-                          : "cursor-pointer"
-                      }
-                    `}
-                  >
-                    <span className="text-lg">{item.icon}</span>
-                    <span className="font-medium">{item.label}</span>
-                    {item.disabled && (
-                      <span className="ml-auto text-xs bg-gray-600 text-gray-300 px-2 py-1 rounded">
-                        Soon
-                      </span>
-                    )}
-                  </Link>
-                </li>
+                <SidebarNavItem
+                  key={item.id}
+                  id={item.id}
+                  href={item.href}
+                  label={item.label}
+                  icon={item.icon}
+                  disabled={item.disabled}
+                  onNavigate={onNavigate}
+                />
               ))}
             </ul>
           </nav>
