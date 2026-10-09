@@ -46,6 +46,8 @@ interface PreviewRow {
   scores: Record<string, number | null>;
   errors: string[];
   isValid: boolean;
+  isSuspended?: boolean;
+  suspendedReason?: string;
 }
 
 interface PreviewData {
@@ -57,6 +59,7 @@ interface PreviewData {
     total: number;
     valid: number;
     invalid: number;
+    suspended?: number;
   };
   hasErrors: boolean;
 }
@@ -150,18 +153,27 @@ export function BulkResultUpload({
     );
   };
 
-  // Recompute overall validity
+  // Suspended students count
+  const suspendedCount = useMemo(() => {
+    return editedRows.filter((r) => r.isSuspended).length;
+  }, [editedRows]);
+
+  // Invalid count for active students only
   const currentInvalidCount = useMemo(() => {
-    return editedRows.filter((r) => !r.isValid).length;
+    return editedRows.filter((r) => !r.isSuspended && !r.isValid).length;
+  }, [editedRows]);
+
+  const activeValidCount = useMemo(() => {
+    return editedRows.filter((r) => !r.isSuspended && r.isValid).length;
   }, [editedRows]);
 
   const canSubmit = useMemo(() => {
     return (
-      editedRows.length > 0 &&
+      activeValidCount > 0 &&
       currentInvalidCount === 0 &&
       !uploadMutation.isPending
     );
-  }, [editedRows, currentInvalidCount, uploadMutation.isPending]);
+  }, [activeValidCount, currentInvalidCount, uploadMutation.isPending]);
 
   // Final submission handler
   const handleConfirmSubmit = () => {
@@ -182,7 +194,7 @@ export function BulkResultUpload({
       schoolId: dashboardData.school.id,
       classId,
       students: editedRows
-        .filter((r) => r.studentDbId)
+        .filter((r) => r.studentDbId && !r.isSuspended)
         .map((r) => ({
           studentId: r.studentDbId!,
           subjects: Object.entries(r.scores)
@@ -307,8 +319,14 @@ export function BulkResultUpload({
               </span>
               <span className="text-emerald-700 flex items-center gap-1">
                 <CheckCircle2 size={13} />
-                Valid: <strong>{editedRows.length - currentInvalidCount}</strong>
+                Valid Active: <strong>{activeValidCount}</strong>
               </span>
+              {suspendedCount > 0 && (
+                <span className="text-amber-700 flex items-center gap-1 font-semibold">
+                  <AlertTriangle size={13} />
+                  Suspended (Skipped): <strong>{suspendedCount}</strong>
+                </span>
+              )}
               {currentInvalidCount > 0 && (
                 <span className="text-red-600 flex items-center gap-1 font-semibold">
                   <AlertTriangle size={13} />
@@ -318,18 +336,34 @@ export function BulkResultUpload({
             </div>
           </div>
 
+          {/* Suspended Students Alert Banner */}
+          {suspendedCount > 0 && (
+            <div className="bg-amber-50 p-3.5 rounded-xl border border-amber-200/80 flex items-start gap-3">
+              <AlertTriangle className="text-amber-600 mt-0.5 shrink-0" size={18} />
+              <div className="text-xs text-amber-900 leading-relaxed">
+                <strong className="font-semibold">Suspended Student(s) Detected:</strong>{" "}
+                {suspendedCount} student(s) in this sheet are currently suspended. Their results{" "}
+                <strong>will not be saved to awaiting approval</strong> and will be skipped. Only active students will be saved. To record results for these students, unsuspend them in the Student Directory first and try again.
+              </div>
+            </div>
+          )}
+
           {/* Validation Banner */}
           {currentInvalidCount > 0 ? (
             <div className="bg-red-50 p-3.5 rounded-xl border border-red-200/80 flex items-start gap-3">
               <AlertTriangle className="text-red-600 mt-0.5 shrink-0" size={18} />
               <div className="text-xs text-red-900">
-                <strong className="font-semibold">Submission Locked:</strong> {currentInvalidCount} row(s) contain validation errors (e.g. unrecognized student ID or scores outside 0–100). Please edit the highlighted cells directly below before submitting.
+                <strong className="font-semibold">Submission Locked:</strong> {currentInvalidCount} active row(s) contain validation errors (e.g. unrecognized student ID or scores outside 0–100). Please edit the highlighted cells directly below before submitting.
               </div>
             </div>
           ) : (
             <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200/80 flex items-center gap-2 text-xs text-emerald-900 font-medium">
               <CheckCircle2 size={16} className="text-emerald-600" />
-              <span>All student records and scores passed validation! Review entries and click &quot;Submit Results&quot; below.</span>
+              <span>
+                {suspendedCount > 0
+                  ? `All ${activeValidCount} active student records passed validation! Suspended students will be skipped.`
+                  : "All student records and scores passed validation! Review entries and click \"Submit Results\" below."}
+              </span>
             </div>
           )}
 
@@ -346,14 +380,20 @@ export function BulkResultUpload({
                       {s.name}
                     </TableHead>
                   ))}
-                  <TableHead className="w-[120px] text-xs text-right">Status</TableHead>
+                  <TableHead className="w-[140px] text-xs text-right">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {editedRows.map((row) => (
                   <TableRow
                     key={row.rowIndex}
-                    className={!row.isValid ? "bg-red-50/40 hover:bg-red-50/60" : "hover:bg-gray-50/50"}
+                    className={
+                      row.isSuspended
+                        ? "bg-amber-50/40 text-gray-500 hover:bg-amber-50/60"
+                        : !row.isValid
+                        ? "bg-red-50/40 hover:bg-red-50/60"
+                        : "hover:bg-gray-50/50"
+                    }
                   >
                     {/* Row Index */}
                     <TableCell className="font-mono text-xs text-gray-500">
@@ -369,7 +409,14 @@ export function BulkResultUpload({
 
                     {/* Student Name */}
                     <TableCell className="text-xs font-medium text-gray-800">
-                      {row.studentName}
+                      <div className="flex items-center gap-1.5">
+                        <span>{row.studentName}</span>
+                        {row.isSuspended && (
+                          <span className="text-[10px] font-semibold text-amber-800 bg-amber-100 border border-amber-200 px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                            Suspended
+                          </span>
+                        )}
+                      </div>
                     </TableCell>
 
                     {/* Subject Scores (Editable inputs) */}
@@ -387,9 +434,13 @@ export function BulkResultUpload({
                             onChange={(e) =>
                               handleScoreChange(row.rowIndex, subj.id, e.target.value)
                             }
+                            disabled={row.isSuspended}
+                            title={row.isSuspended ? "Cannot edit score for suspended student" : undefined}
                             className={
                               "h-7 w-20 text-xs text-center mx-auto rounded-lg " +
-                              (isOutOfRange
+                              (row.isSuspended
+                                ? "bg-gray-100/80 border-gray-200 opacity-60 cursor-not-allowed text-gray-400"
+                                : isOutOfRange
                                 ? "border-red-500 bg-red-50 text-red-900 focus:border-red-600 font-bold"
                                 : "border-gray-200")
                             }
@@ -400,7 +451,15 @@ export function BulkResultUpload({
 
                     {/* Status / Errors */}
                     <TableCell className="text-right">
-                      {row.isValid ? (
+                      {row.isSuspended ? (
+                        <span
+                          title={row.suspendedReason || "Student is currently suspended. This result will be skipped upon upload."}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-100/90 px-2.5 py-0.5 rounded-full border border-amber-300 shadow-2xs whitespace-nowrap"
+                        >
+                          <AlertTriangle size={11} className="text-amber-600" />
+                          Suspended (Skipped)
+                        </span>
+                      ) : row.isValid ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
                           <CheckCircle2 size={11} />
                           Valid
@@ -426,7 +485,9 @@ export function BulkResultUpload({
             <span className="text-xs text-gray-500">
               {currentInvalidCount > 0
                 ? "Resolve all " + currentInvalidCount + " errors to enable upload"
-                : "Ready to upload results to active term"}
+                : activeValidCount > 0
+                ? `Ready to upload results for ${activeValidCount} active student(s)`
+                : "No valid active students to upload"}
             </span>
             <div className="flex items-center gap-2">
               <Button
@@ -449,7 +510,9 @@ export function BulkResultUpload({
                     <span>Submitting Results...</span>
                   </>
                 ) : (
-                  <span>Submit Results ({editedRows.length} students)</span>
+                  <span>
+                    Submit Results ({activeValidCount} active student{activeValidCount !== 1 ? "s" : ""})
+                  </span>
                 )}
               </Button>
             </div>

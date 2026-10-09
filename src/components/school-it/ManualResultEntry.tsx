@@ -28,8 +28,9 @@ export function ManualResultEntry({ onSuccess, onCancel, dashboardData, existing
   const subjects = subjectsData || [];
 
   const availableStudents = useMemo(() => {
-    if (!existingResults || existingResults.length === 0) return students;
-    return students.filter((s: any) => {
+    const activeStudents = students.filter((s: any) => s.isActive !== false);
+    if (!existingResults || existingResults.length === 0) return activeStudents;
+    return activeStudents.filter((s: any) => {
       const existingStudent = existingResults.find((r: any) => r.id === s.id);
       return !existingStudent || !existingStudent.assessments || existingStudent.assessments.length === 0;
     });

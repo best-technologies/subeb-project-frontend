@@ -361,11 +361,15 @@ export default function SchoolItResultsPage() {
                 results.map((student: any) => {
                   const assessments = student.assessments || [];
                   const totalSubjects = subjectsData?.length || 0;
+                  const isSuspended = student.isActive === false;
 
                   let status = "Not Graded";
                   let statusBadgeClass = "bg-gray-100 text-gray-700 border border-gray-200/60";
 
-                  if (assessments.length > 0) {
+                  if (isSuspended) {
+                    status = "Suspended";
+                    statusBadgeClass = "bg-rose-50 text-rose-700 border border-rose-200/60";
+                  } else if (assessments.length > 0) {
                     if (assessments.some((a: any) => a.status === "REJECTED")) {
                       status = "Rejected";
                       statusBadgeClass = "bg-red-50 text-red-700 border border-red-200/60";
@@ -382,7 +386,14 @@ export default function SchoolItResultsPage() {
                   }
 
                   return (
-                    <TableRow key={student.id} className="hover:bg-gray-50/80 transition-colors">
+                    <TableRow
+                      key={student.id}
+                      className={cn(
+                        isSuspended
+                          ? "opacity-60 bg-gray-50/80 hover:bg-gray-100/70"
+                          : "hover:bg-gray-50/80 transition-colors"
+                      )}
+                    >
                       {/* Student ID */}
                       <TableCell>
                         <span className="font-mono text-xs font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded border border-gray-200/60">
@@ -392,9 +403,18 @@ export default function SchoolItResultsPage() {
 
                       {/* Student Name */}
                       <TableCell className="font-semibold text-gray-900 capitalize">
-                        {capitalizeInitials(
-                          `${student.firstName || ""} ${student.lastName || ""}`.trim()
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          <span>
+                            {capitalizeInitials(
+                              `${student.firstName || ""} ${student.lastName || ""}`.trim()
+                            )}
+                          </span>
+                          {isSuspended && (
+                            <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                              Suspended
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
 
                       {/* Class */}
@@ -451,7 +471,12 @@ export default function SchoolItResultsPage() {
                                   <span>View Results</span>
                                 </DropdownMenuItem>
                               </Link>
-                              {status === "Approved" ? (
+                              {isSuspended ? (
+                                <DropdownMenuItem disabled className="flex items-center gap-2 text-xs font-medium rounded-lg px-2.5 py-2 text-rose-700 bg-rose-50/60 cursor-not-allowed opacity-80">
+                                  <Lock className="w-3.5 h-3.5 text-rose-600" />
+                                  <span>Suspended (Cannot edit)</span>
+                                </DropdownMenuItem>
+                              ) : status === "Approved" ? (
                                 <DropdownMenuItem disabled className="flex items-center gap-2 text-xs font-medium rounded-lg px-2.5 py-2 text-emerald-700 bg-emerald-50/50 cursor-default opacity-80">
                                   <Lock className="w-3.5 h-3.5 text-emerald-600" />
                                   <span>Approved (Closed)</span>

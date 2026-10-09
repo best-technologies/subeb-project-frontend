@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, Save, Send } from "lucide-react";
+import { ChevronLeft, Save, Send, AlertCircle } from "lucide-react";
 import { capitalizeInitials } from "@/utils/formatters";
 import { SubmitSingleStudentModal } from "@/components/school-it/SubmitSingleStudentModal";
 import { useQueryClient } from "@tanstack/react-query";
@@ -102,6 +102,7 @@ export default function StudentResultsPage() {
   }
 
   const assessments = student.assessments || [];
+  const isSuspended = student.isActive === false;
   const isAllApproved = assessments.length > 0 && assessments.every((a: any) => a.status === 'APPROVED');
 
   return (
@@ -113,14 +114,21 @@ export default function StudentResultsPage() {
             <ChevronLeft size={18} />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 capitalize">
-              {capitalizeInitials(`${student.firstName || ''} ${student.lastName || ''}`.trim())}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-gray-900 capitalize">
+                {capitalizeInitials(`${student.firstName || ''} ${student.lastName || ''}`.trim())}
+              </h1>
+              {isSuspended && (
+                <span className="text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Suspended
+                </span>
+              )}
+            </div>
             <p className="text-gray-600">ID: {student.studentId} • Class: {student.class?.name}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {!isAllApproved && assessments.length > 0 && assessments.some((a: any) => a.status === 'PENDING_SUBMISSION' || a.status === 'REJECTED') && (
+          {!isSuspended && !isAllApproved && assessments.length > 0 && assessments.some((a: any) => a.status === 'PENDING_SUBMISSION' || a.status === 'REJECTED') && (
             <Button
               type="button"
               variant="outline"
@@ -131,12 +139,25 @@ export default function StudentResultsPage() {
               Submit for Approval
             </Button>
           )}
-          <Button onClick={handleSave} disabled={uploadMutation.isPending || isAllApproved || Object.keys(scores).length === 0} className="flex items-center gap-2">
+          <Button
+            onClick={handleSave}
+            disabled={uploadMutation.isPending || isAllApproved || isSuspended || Object.keys(scores).length === 0}
+            className="flex items-center gap-2"
+          >
             <Save size={18} />
             {uploadMutation.isPending ? 'Saving...' : 'Save Results'}
           </Button>
         </div>
       </div>
+
+      {isSuspended && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-900 p-4 rounded-xl flex items-start gap-3">
+          <AlertCircle className="mt-0.5 shrink-0 text-rose-600" size={18} />
+          <div className="text-sm">
+            <strong className="font-semibold">Student is Suspended:</strong> This student is currently marked as suspended in the Student Directory. Result entry and submission are disabled. To upload or submit results for this student, please unsuspend them in the Student Directory first.
+          </div>
+        </div>
+      )}
 
       {isAllApproved && (
         <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg">
@@ -171,8 +192,8 @@ export default function StudentResultsPage() {
                         placeholder="Not graded"
                         value={scores[subject.id] === undefined ? "" : scores[subject.id]}
                         onChange={(e) => handleScoreChange(subject.id, e.target.value)}
-                        disabled={isApproved || isAllApproved}
-                        className={`bg-white ${isApproved ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        disabled={isApproved || isAllApproved || isSuspended}
+                        className={`bg-white ${(isApproved || isSuspended) ? 'opacity-70 cursor-not-allowed' : ''}`}
                       />
                     </div>
                     {existingAssessment && (
