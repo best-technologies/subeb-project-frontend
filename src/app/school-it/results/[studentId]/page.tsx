@@ -7,8 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, Save } from "lucide-react";
+import { ChevronLeft, Save, Send } from "lucide-react";
 import { capitalizeInitials } from "@/utils/formatters";
+import { SubmitSingleStudentModal } from "@/components/school-it/SubmitSingleStudentModal";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function StudentResultsPage() {
   const params = useParams();
@@ -19,6 +21,8 @@ export default function StudentResultsPage() {
   const { data: student, isLoading: isLoadingStudent } = useSchoolItStudentResults(studentId);
   const { data: subjects, isLoading: isLoadingSubjects } = useSchoolItSubjects();
   const uploadMutation = useUploadSchoolItResults();
+  const queryClient = useQueryClient();
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
   const [scores, setScores] = useState<Record<string, number>>({});
   const [initialLoadDone, setInitialLoadDone] = useState(false);
@@ -115,10 +119,23 @@ export default function StudentResultsPage() {
             <p className="text-gray-600">ID: {student.studentId} • Class: {student.class?.name}</p>
           </div>
         </div>
-        <Button onClick={handleSave} disabled={uploadMutation.isPending || isAllApproved || Object.keys(scores).length === 0} className="flex items-center gap-2">
-          <Save size={18} />
-          {uploadMutation.isPending ? 'Saving...' : 'Save Results'}
-        </Button>
+        <div className="flex items-center gap-2">
+          {!isAllApproved && assessments.length > 0 && assessments.some((a: any) => a.status === 'PENDING_SUBMISSION' || a.status === 'REJECTED') && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsSubmitModalOpen(true)}
+              className="flex items-center gap-2 text-brand-primary border-brand-primary hover:bg-brand-primary/5"
+            >
+              <Send size={16} />
+              Submit for Approval
+            </Button>
+          )}
+          <Button onClick={handleSave} disabled={uploadMutation.isPending || isAllApproved || Object.keys(scores).length === 0} className="flex items-center gap-2">
+            <Save size={18} />
+            {uploadMutation.isPending ? 'Saving...' : 'Save Results'}
+          </Button>
+        </div>
       </div>
 
       {isAllApproved && (
@@ -177,6 +194,26 @@ export default function StudentResultsPage() {
           )}
         </CardContent>
       </Card>
+
+      <SubmitSingleStudentModal
+        isOpen={isSubmitModalOpen}
+        onOpenChange={setIsSubmitModalOpen}
+        student={
+          student
+            ? {
+                id: student.id,
+                name: `${student.firstName || ""} ${student.lastName || ""}`.trim(),
+                studentId: student.studentId,
+                className: student.class?.name || "",
+              }
+            : null
+        }
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["school-it", "results"] });
+          queryClient.invalidateQueries({ queryKey: ["school-it", "dashboard"] });
+          queryClient.invalidateQueries({ queryKey: ["school-it", "student-results", studentId] });
+        }}
+      />
     </div>
   );
 }

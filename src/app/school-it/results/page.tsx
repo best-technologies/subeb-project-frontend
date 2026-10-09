@@ -28,6 +28,7 @@ import {
   Eye,
   Send,
   Loader2,
+  Lock,
 } from "lucide-react";
 import {
   Dialog,
@@ -53,6 +54,9 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { ManualResultEntry } from "@/components/school-it/ManualResultEntry";
 import { BulkResultUpload } from "@/components/school-it/BulkResultUpload";
+import { SubmitClassResultsModal } from "@/components/school-it/SubmitClassResultsModal";
+import { SubmitSingleStudentModal } from "@/components/school-it/SubmitSingleStudentModal";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { schoolItApi } from "@/services/api/school-it";
 import { toast } from "react-hot-toast";
@@ -134,14 +138,16 @@ export default function SchoolItResultsPage() {
   const uploadMutation = useUploadSchoolItResults();
   const submitMutation = useSubmitSchoolItResults();
 
+  const queryClient = useQueryClient();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [missingResultsData, setMissingResultsData] = useState<{
-    hasMissing: boolean;
-    missingCount: number;
-    message: string;
+  const [selectedStudentForSubmit, setSelectedStudentForSubmit] = useState<{
+    id: string;
+    name: string;
+    studentId: string;
+    className: string;
   } | null>(null);
-  const [isCheckingMissing, setIsCheckingMissing] = useState(false);
+  const [isSingleStudentModalOpen, setIsSingleStudentModalOpen] = useState(false);
   const [isCsvMode, setIsCsvMode] = useState(true);
 
   const results = data?.data || [];
@@ -177,23 +183,8 @@ export default function SchoolItResultsPage() {
     });
   };
 
-  const handleOpenSubmitModal = async () => {
-    setIsCheckingMissing(true);
-    try {
-      const res = await schoolItApi.checkMissingResults();
-      setMissingResultsData(res.data);
-      setIsSubmitModalOpen(true);
-    } catch (err) {
-      toast.error("Failed to check missing results");
-    } finally {
-      setIsCheckingMissing(false);
-    }
-  };
-
-  const handleConfirmSubmit = () => {
-    submitMutation.mutate(undefined, {
-      onSuccess: () => setIsSubmitModalOpen(false),
-    });
+  const handleOpenSubmitModal = () => {
+    setIsSubmitModalOpen(true);
   };
 
   const fromRecord = total > 0 ? (page - 1) * limit + 1 : 0;
@@ -217,11 +208,11 @@ export default function SchoolItResultsPage() {
           <Button
             variant="outline"
             onClick={handleOpenSubmitModal}
-            disabled={isCheckingMissing || results.length === 0}
+            disabled={sortedClasses.length === 0}
             className="flex items-center justify-center gap-2 rounded-xl px-5 h-10 py-0 text-sm font-medium border-brand-primary text-brand-primary hover:bg-brand-primary/5 transition-colors shadow-xs"
           >
             <Send size={16} />
-            <span>{isCheckingMissing ? "Checking..." : "Submit for Approval"}</span>
+            <span>Submit for Approval</span>
           </Button>
           <Button
             onClick={() => setIsUploadModalOpen(true)}
@@ -452,7 +443,7 @@ export default function SchoolItResultsPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="w-44 rounded-xl p-1.5 shadow-lg border border-gray-100 bg-white"
+                              className="w-48 rounded-xl p-1.5 shadow-lg border border-gray-100 bg-white"
                             >
                               <Link href={`/school-it/results/${student.id}`}>
                                 <DropdownMenuItem className="flex items-center gap-2 text-xs font-medium cursor-pointer rounded-lg px-2.5 py-2 text-gray-700 hover:bg-gray-100">
@@ -460,12 +451,38 @@ export default function SchoolItResultsPage() {
                                   <span>View Results</span>
                                 </DropdownMenuItem>
                               </Link>
-                              <Link href={`/school-it/results/${student.id}`}>
-                                <DropdownMenuItem className="flex items-center gap-2 text-xs font-medium cursor-pointer rounded-lg px-2.5 py-2 text-gray-700 hover:bg-gray-100">
-                                  <Edit2 className="w-3.5 h-3.5 text-gray-500" />
-                                  <span>Edit Results</span>
+                              {status === "Approved" ? (
+                                <DropdownMenuItem disabled className="flex items-center gap-2 text-xs font-medium rounded-lg px-2.5 py-2 text-emerald-700 bg-emerald-50/50 cursor-default opacity-80">
+                                  <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>Approved (Closed)</span>
                                 </DropdownMenuItem>
-                              </Link>
+                              ) : (
+                                <>
+                                  <Link href={`/school-it/results/${student.id}`}>
+                                    <DropdownMenuItem className="flex items-center gap-2 text-xs font-medium cursor-pointer rounded-lg px-2.5 py-2 text-gray-700 hover:bg-gray-100">
+                                      <Edit2 className="w-3.5 h-3.5 text-gray-500" />
+                                      <span>Edit Results</span>
+                                    </DropdownMenuItem>
+                                  </Link>
+                                  {(status === "Pending Submission" || status === "Rejected") && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setSelectedStudentForSubmit({
+                                          id: student.id,
+                                          name: `${student.firstName || ""} ${student.lastName || ""}`.trim(),
+                                          studentId: student.studentId,
+                                          className: student.class?.name || selectedClassName,
+                                        });
+                                        setIsSingleStudentModalOpen(true);
+                                      }}
+                                      className="flex items-center gap-2 text-xs font-medium cursor-pointer rounded-lg px-2.5 py-2 text-brand-primary hover:bg-brand-primary/10"
+                                    >
+                                      <Send className="w-3.5 h-3.5 text-brand-primary" />
+                                      <span>Submit for Approval</span>
+                                    </DropdownMenuItem>
+                                  )}
+                                </>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -557,54 +574,28 @@ export default function SchoolItResultsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Submit Confirmation Dialog */}
-      <Dialog open={isSubmitModalOpen} onOpenChange={setIsSubmitModalOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-2xl bg-white border border-gray-100 shadow-xl p-6">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-gray-900">
-              Submit Results for Approval
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            {missingResultsData?.hasMissing ? (
-              <div className="bg-amber-50 border border-amber-200/80 text-amber-900 p-4 rounded-xl flex flex-col gap-2">
-                <div className="flex items-center gap-2 font-semibold text-xs">
-                  <AlertCircle size={16} />
-                  <span>Missing Results Detected</span>
-                </div>
-                <p className="text-xs leading-relaxed">{missingResultsData.message}</p>
-                <p className="text-xs mt-2 text-amber-800">
-                  Are you sure you want to proceed with submission anyway? The Exam Officer will be able to review these results.
-                </p>
-              </div>
-            ) : (
-              <p className="text-xs text-gray-600 leading-relaxed">
-                You are about to submit all draft results for the current term to the LGA Exam Officer for approval. Are you sure you want to proceed?
-              </p>
-            )}
-          </div>
-          <DialogFooter className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
-            <Button
-              variant="outline"
-              onClick={() => setIsSubmitModalOpen(false)}
-              className="rounded-xl text-xs px-4 py-2 h-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmSubmit}
-              disabled={submitMutation.isPending}
-              className="rounded-xl text-xs font-semibold px-4 py-2 h-auto"
-            >
-              {submitMutation.isPending
-                ? "Submitting..."
-                : missingResultsData?.hasMissing
-                ? "Submit Anyway"
-                : "Submit Results"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Submit by Classes Dialog */}
+      <SubmitClassResultsModal
+        isOpen={isSubmitModalOpen}
+        onOpenChange={setIsSubmitModalOpen}
+        currentClassId={activeClassId}
+        classes={sortedClasses}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["school-it", "results"] });
+          queryClient.invalidateQueries({ queryKey: ["school-it", "dashboard"] });
+        }}
+      />
+
+      {/* Submit Single Student Dialog */}
+      <SubmitSingleStudentModal
+        isOpen={isSingleStudentModalOpen}
+        onOpenChange={setIsSingleStudentModalOpen}
+        student={selectedStudentForSubmit}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["school-it", "results"] });
+          queryClient.invalidateQueries({ queryKey: ["school-it", "dashboard"] });
+        }}
+      />
     </div>
   );
 }

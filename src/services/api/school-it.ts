@@ -24,7 +24,10 @@ export const schoolItApi = {
   getStudentResults: (studentId: string) => api.get(`/school-it/results/${studentId}`),
   
   checkMissingResults: () => api.get('/school-it/results/check/missing'),
-  submitResultsForApproval: () => api.post('/school-it/results/submit'),
+  checkSubmission: (data?: { classIds?: string[]; studentId?: string }) =>
+    api.post('/school-it/results/check-submission', data || {}),
+  submitResultsForApproval: (data?: { classIds?: string[]; studentId?: string }) =>
+    api.post('/school-it/results/submit', data || {}),
   
   uploadResultsAtomic: (data: any) => api.post('/school-it/results/upload', data),
 

@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import { useExamOfficerSchoolResults, useApproveSchoolResults, useRejectSchoolResults } from "@/services/hooks/useExamOfficer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/Button";
-import { ArrowLeft, CheckCircle, XCircle, Clock, ShieldCheck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, CheckCircle, XCircle, Clock, ShieldCheck, Check, X, Search, Filter } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+type StatusFilter = "ALL" | "AWAITING_APPROVAL" | "APPROVED" | "REJECTED";
 
 export default function ExamOffierSchoolResultsView({ params }: { params: Promise<{ schoolId: string }> }) {
   const router = useRouter();
@@ -16,31 +19,87 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
   const approveMutation = useApproveSchoolResults();
   const rejectMutation = useRejectSchoolResults();
 
-  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean, type: 'APPROVE' | 'REJECT' }>({
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    type: "APPROVE" | "REJECT";
+    target: "ALL" | "SELECTED" | "SINGLE";
+    student?: { id: string; name: string };
+  }>({
     isOpen: false,
-    type: 'APPROVE'
+    type: "APPROVE",
+    target: "ALL",
   });
 
-  const handleAction = (type: 'APPROVE' | 'REJECT') => {
-    setConfirmDialog({ isOpen: true, type });
+  const students = details?.students || [];
+  const awaitingStudents = students.filter((s: any) => s.status === "AWAITING_APPROVAL");
+  const approvedStudents = students.filter((s: any) => s.status === "APPROVED");
+  const rejectedStudents = students.filter((s: any) => s.status === "REJECTED");
+
+  const filteredStudents = students.filter((item: any) => {
+    const matchesFilter =
+      statusFilter === "ALL" || item.status === statusFilter;
+    const fullName = `${item.student.firstName || ""} ${item.student.lastName || ""}`.toLowerCase();
+    const admNo = (item.student.admissionNumber || "").toLowerCase();
+    const className = (item.class?.name || "").toLowerCase();
+    const query = searchTerm.toLowerCase();
+    const matchesSearch = fullName.includes(query) || admNo.includes(query) || className.includes(query);
+    return matchesFilter && matchesSearch;
+  });
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const awaitingIds = filteredStudents
+        .filter((s: any) => s.status === "AWAITING_APPROVAL")
+        .map((s: any) => s.student.id);
+      setSelectedStudentIds(awaitingIds);
+    } else {
+      setSelectedStudentIds([]);
+    }
+  };
+
+  const handleToggleStudent = (studentId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedStudentIds((prev) => [...prev, studentId]);
+    } else {
+      setSelectedStudentIds((prev) => prev.filter((id) => id !== studentId));
+    }
+  };
+
+  const openConfirmDialog = (
+    type: "APPROVE" | "REJECT",
+    target: "ALL" | "SELECTED" | "SINGLE",
+    student?: { id: string; name: string }
+  ) => {
+    setConfirmDialog({
+      isOpen: true,
+      type,
+      target,
+      student,
+    });
   };
 
   const confirmAction = () => {
-    if (confirmDialog.type === 'APPROVE') {
-      approveMutation.mutate(schoolId, {
-        onSuccess: () => {
-          setConfirmDialog({ isOpen: false, type: 'APPROVE' });
-          router.push('/officer/results');
-        }
-      });
+    const isApprove = confirmDialog.type === "APPROVE";
+    const mutation = isApprove ? approveMutation : rejectMutation;
+
+    let payload: { schoolId: string; studentIds?: string[] };
+    if (confirmDialog.target === "SINGLE" && confirmDialog.student) {
+      payload = { schoolId, studentIds: [confirmDialog.student.id] };
+    } else if (confirmDialog.target === "SELECTED") {
+      payload = { schoolId, studentIds: selectedStudentIds };
     } else {
-      rejectMutation.mutate(schoolId, {
-        onSuccess: () => {
-          setConfirmDialog({ isOpen: false, type: 'REJECT' });
-          router.push('/officer/results');
-        }
-      });
+      payload = { schoolId };
     }
+
+    mutation.mutate(payload, {
+      onSuccess: () => {
+        setSelectedStudentIds([]);
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
   };
 
   if (isLoading) {
@@ -61,101 +120,279 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
     );
   }
 
-  const { school, term, students } = details;
-
-  // Determine if we show approve/reject buttons based on whether any student is AWAITING_APPROVAL
-  const hasAwaiting = students.some((s: any) => s.status === 'AWAITING_APPROVAL');
+  const { school, term } = details;
+  const isBusy = approveMutation.isPending || rejectMutation.isPending;
+  const hasAwaiting = awaitingStudents.length > 0;
+  const awaitingCountInFiltered = filteredStudents.filter((s: any) => s.status === "AWAITING_APPROVAL").length;
+  const allAwaitingSelected =
+    awaitingCountInFiltered > 0 &&
+    filteredStudents
+      .filter((s: any) => s.status === "AWAITING_APPROVAL")
+      .every((s: any) => selectedStudentIds.includes(s.student.id));
 
   return (
     <div className="space-y-6">
       {/* Header Section */}
       <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <Button variant="ghost" onClick={() => router.push('/officer/results')} className="p-2 h-auto hover:bg-gray-100 rounded-lg">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/officer/results")}
+          className="p-2 h-auto hover:bg-gray-100 rounded-lg"
+        >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </Button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{school.name} - Results</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Session: {term.session.name} | Term: {term.name.replace("_", " ")}
+            Session: {term.session?.name || "Active Session"} | Term: {term.name?.replace("_", " ") || "Active Term"}
           </p>
         </div>
       </div>
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <button
+          type="button"
+          onClick={() => setStatusFilter("ALL")}
+          className={`p-4 rounded-xl border text-left transition-all ${
+            statusFilter === "ALL"
+              ? "bg-brand-primary/5 border-brand-primary shadow-sm"
+              : "bg-white border-gray-100 hover:border-gray-200"
+          }`}
+        >
+          <p className="text-xs text-gray-500 font-medium">Total Students</p>
+          <p className="text-xl font-bold text-gray-900 mt-1">{students.length}</p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter("AWAITING_APPROVAL")}
+          className={`p-4 rounded-xl border text-left transition-all ${
+            statusFilter === "AWAITING_APPROVAL"
+              ? "bg-amber-50 border-amber-400 shadow-sm"
+              : "bg-white border-gray-100 hover:border-gray-200"
+          }`}
+        >
+          <p className="text-xs text-amber-700 font-medium">Awaiting Approval</p>
+          <p className="text-xl font-bold text-amber-800 mt-1">{awaitingStudents.length}</p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter("APPROVED")}
+          className={`p-4 rounded-xl border text-left transition-all ${
+            statusFilter === "APPROVED"
+              ? "bg-emerald-50 border-emerald-400 shadow-sm"
+              : "bg-white border-gray-100 hover:border-gray-200"
+          }`}
+        >
+          <p className="text-xs text-emerald-700 font-medium">Approved (Closed)</p>
+          <p className="text-xl font-bold text-emerald-800 mt-1">{approvedStudents.length}</p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter("REJECTED")}
+          className={`p-4 rounded-xl border text-left transition-all ${
+            statusFilter === "REJECTED"
+              ? "bg-rose-50 border-rose-400 shadow-sm"
+              : "bg-white border-gray-100 hover:border-gray-200"
+          }`}
+        >
+          <p className="text-xs text-rose-700 font-medium">Rejected</p>
+          <p className="text-xl font-bold text-rose-800 mt-1">{rejectedStudents.length}</p>
+        </button>
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50/50">
-          <div>
-            <h2 className="font-semibold text-gray-900">Submitted Students ({students.length})</h2>
-            <p className="text-sm text-gray-500">List of students who have results submitted.</p>
-          </div>
-          
-          {hasAwaiting && (
-            <div className="flex gap-3">
-              <Button 
-                onClick={() => handleAction('REJECT')}
-                variant="outline"
-                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-                disabled={approveMutation.isPending || rejectMutation.isPending}
-              >
-                <XCircle className="w-4 h-4 mr-2" />
-                Reject All
-              </Button>
-              <Button 
-                onClick={() => handleAction('APPROVE')}
-                className="bg-green-600 hover:bg-green-700 text-white"
-                disabled={approveMutation.isPending || rejectMutation.isPending}
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Approve All
-              </Button>
+        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-50/50">
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search student or class..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 pr-4 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary w-full bg-white"
+              />
             </div>
-          )}
+            {selectedStudentIds.length > 0 && (
+              <span className="text-xs text-brand-primary font-medium bg-brand-primary/10 px-2.5 py-1.5 rounded-lg whitespace-nowrap">
+                {selectedStudentIds.length} selected
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+            {selectedStudentIds.length > 0 ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedStudentIds([])}
+                  className="text-xs text-gray-600 rounded-lg h-9"
+                >
+                  Clear Selection
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openConfirmDialog("REJECT", "SELECTED")}
+                  className="text-xs text-red-600 border-red-200 hover:bg-red-50 rounded-lg h-9"
+                  disabled={isBusy}
+                >
+                  <XCircle className="w-3.5 h-3.5 mr-1.5" />
+                  Reject Selected ({selectedStudentIds.length})
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => openConfirmDialog("APPROVE", "SELECTED")}
+                  className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-9"
+                  disabled={isBusy}
+                >
+                  <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                  Approve Selected ({selectedStudentIds.length})
+                </Button>
+              </>
+            ) : hasAwaiting ? (
+              <>
+                <Button
+                  size="sm"
+                  onClick={() => openConfirmDialog("REJECT", "ALL")}
+                  variant="outline"
+                  className="text-xs text-red-600 border-red-200 hover:bg-red-50 rounded-lg h-9"
+                  disabled={isBusy}
+                >
+                  <XCircle className="w-3.5 h-3.5 mr-1.5" />
+                  Reject All Awaiting ({awaitingStudents.length})
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => openConfirmDialog("APPROVE", "ALL")}
+                  className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-9"
+                  disabled={isBusy}
+                >
+                  <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                  Approve All Awaiting ({awaitingStudents.length})
+                </Button>
+              </>
+            ) : null}
+          </div>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-brand-accent-background">
+            <TableHeader className="bg-gray-50/70">
               <TableRow>
-                <TableHead>Student Name</TableHead>
-                <TableHead>Admission No</TableHead>
-                <TableHead>Class</TableHead>
-                <TableHead>Assessments</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="w-12 text-center">
+                  <Checkbox
+                    checked={allAwaitingSelected}
+                    disabled={awaitingCountInFiltered === 0}
+                    onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                    aria-label="Select all awaiting students"
+                  />
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-gray-700">Student Name</TableHead>
+                <TableHead className="text-xs font-semibold text-gray-700">Admission No</TableHead>
+                <TableHead className="text-xs font-semibold text-gray-700">Class</TableHead>
+                <TableHead className="text-xs font-semibold text-gray-700">Assessments</TableHead>
+                <TableHead className="text-xs font-semibold text-gray-700">Status</TableHead>
+                <TableHead className="text-xs font-semibold text-gray-700 text-right pr-6">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {students.length === 0 ? (
+              {filteredStudents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                    No results found for this school.
+                  <TableCell colSpan={7} className="text-center py-10 text-xs text-gray-500">
+                    No students match the current filter.
                   </TableCell>
                 </TableRow>
               ) : (
-                students.map((data: any) => (
-                  <TableRow key={data.student.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium text-gray-900">
-                      {data.student.firstName} {data.student.lastName}
-                    </TableCell>
-                    <TableCell className="text-gray-500">{data.student.admissionNumber}</TableCell>
-                    <TableCell>{data.class.name}</TableCell>
-                    <TableCell>{data.assessmentCount} subjects</TableCell>
-                    <TableCell>
-                      {data.status === "AWAITING_APPROVAL" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          <Clock className="w-3.5 h-3.5" />
-                          Awaiting
-                        </span>
-                      )}
-                      {data.status === "APPROVED" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          Approved
-                        </span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
+                filteredStudents.map((data: any) => {
+                  const studentId = data.student.id;
+                  const isAwaiting = data.status === "AWAITING_APPROVAL";
+                  const isSelected = selectedStudentIds.includes(studentId);
+                  const studentName = `${data.student.firstName || ""} ${data.student.lastName || ""}`.trim();
+
+                  return (
+                    <TableRow key={studentId} className="hover:bg-gray-50/70 transition-colors">
+                      <TableCell className="text-center">
+                        <Checkbox
+                          checked={isSelected}
+                          disabled={!isAwaiting}
+                          onCheckedChange={(checked) => handleToggleStudent(studentId, !!checked)}
+                          aria-label={`Select student ${studentName}`}
+                        />
+                      </TableCell>
+                      <TableCell className="font-semibold text-xs text-gray-900">
+                        {studentName}
+                      </TableCell>
+                      <TableCell className="text-xs text-gray-500 font-mono">
+                        {data.student.admissionNumber || data.student.studentId || "—"}
+                      </TableCell>
+                      <TableCell className="text-xs text-gray-700">{data.class?.name || "—"}</TableCell>
+                      <TableCell className="text-xs text-gray-700">{data.assessmentCount} subjects</TableCell>
+                      <TableCell>
+                        {data.status === "AWAITING_APPROVAL" && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                            <Clock className="w-3.5 h-3.5" />
+                            Awaiting
+                          </span>
+                        )}
+                        {data.status === "APPROVED" && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                            Approved (Closed)
+                          </span>
+                        )}
+                        {data.status === "REJECTED" && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+                            <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                            Rejected
+                          </span>
+                        )}
+                        {data.status !== "AWAITING_APPROVAL" &&
+                          data.status !== "APPROVED" &&
+                          data.status !== "REJECTED" && (
+                            <span className="text-xs text-gray-400 font-medium">Pending Submission</span>
+                          )}
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        {isAwaiting ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openConfirmDialog("APPROVE", "SINGLE", { id: studentId, name: studentName })}
+                              className="h-7 px-2.5 text-xs text-emerald-700 border-emerald-300 hover:bg-emerald-50 rounded-lg font-medium"
+                              disabled={isBusy}
+                            >
+                              <Check className="w-3.5 h-3.5 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openConfirmDialog("REJECT", "SINGLE", { id: studentId, name: studentName })}
+                              className="h-7 px-2.5 text-xs text-rose-700 border-rose-300 hover:bg-rose-50 rounded-lg font-medium"
+                              disabled={isBusy}
+                            >
+                              <X className="w-3.5 h-3.5 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        ) : data.status === "APPROVED" ? (
+                          <span className="text-xs text-emerald-600 font-medium">Closed</span>
+                        ) : data.status === "REJECTED" ? (
+                          <span className="text-xs text-rose-600 font-medium">Awaiting Re-upload</span>
+                        ) : null}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
@@ -163,33 +400,52 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
       </div>
 
       {/* Confirmation Dialog */}
-      <Dialog open={confirmDialog.isOpen} onOpenChange={(isOpen) => !isOpen && setConfirmDialog({ ...confirmDialog, isOpen })}>
-        <DialogContent>
+      <Dialog
+        open={confirmDialog.isOpen}
+        onOpenChange={(isOpen) => !isOpen && setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
+      >
+        <DialogContent className="sm:max-w-[425px] rounded-2xl bg-white border border-gray-100 shadow-xl p-6">
           <DialogHeader>
-            <DialogTitle>
-              {confirmDialog.type === 'APPROVE' ? 'Approve Results' : 'Reject Results'}
+            <DialogTitle className="text-lg font-bold text-gray-900">
+              {confirmDialog.type === "APPROVE" ? "Approve Results" : "Reject Results"}
             </DialogTitle>
-            <DialogDescription>
-              {confirmDialog.type === 'APPROVE' 
-                ? `Are you sure you want to approve all submitted results for ${school.name}?`
-                : `Are you sure you want to reject the results for ${school.name}?`
-              }
+            <DialogDescription className="text-xs text-gray-600 leading-relaxed pt-2">
+              {confirmDialog.target === "SINGLE"
+                ? `Are you sure you want to ${
+                    confirmDialog.type === "APPROVE" ? "approve" : "reject"
+                  } the results for ${confirmDialog.student?.name || "this student"}?`
+                : confirmDialog.target === "SELECTED"
+                ? `Are you sure you want to ${
+                    confirmDialog.type === "APPROVE" ? "approve" : "reject"
+                  } results for the ${selectedStudentIds.length} selected students?`
+                : `Are you sure you want to ${
+                    confirmDialog.type === "APPROVE" ? "approve" : "reject"
+                  } all awaiting results for ${school.name}?`}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
-              disabled={approveMutation.isPending || rejectMutation.isPending}
+          <DialogFooter className="mt-4 flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
+              disabled={isBusy}
+              className="rounded-xl text-xs px-4 py-2 h-auto"
             >
               Cancel
             </Button>
             <Button
-              className={confirmDialog.type === 'APPROVE' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
+              className={`rounded-xl text-xs font-semibold px-4 py-2 h-auto ${
+                confirmDialog.type === "APPROVE"
+                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                  : "bg-red-600 hover:bg-red-700 text-white"
+              }`}
               onClick={confirmAction}
-              disabled={approveMutation.isPending || rejectMutation.isPending}
+              disabled={isBusy}
             >
-              {(approveMutation.isPending || rejectMutation.isPending) ? 'Processing...' : (confirmDialog.type === 'APPROVE' ? 'Yes, Approve' : 'Yes, Reject')}
+              {isBusy
+                ? "Processing..."
+                : confirmDialog.type === "APPROVE"
+                ? "Yes, Approve"
+                : "Yes, Reject"}
             </Button>
           </DialogFooter>
         </DialogContent>

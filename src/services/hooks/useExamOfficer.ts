@@ -39,10 +39,16 @@ export function useApproveSchoolResults() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (schoolId: string) => examOfficerApi.approveSchoolResults(schoolId),
-    onSuccess: (res) => {
+    mutationFn: (args: string | { schoolId: string; studentIds?: string[] }) => {
+      const schoolId = typeof args === 'string' ? args : args.schoolId;
+      const studentIds = typeof args === 'string' ? undefined : args.studentIds;
+      return examOfficerApi.approveSchoolResults(schoolId, studentIds);
+    },
+    onSuccess: (res, args) => {
+      const schoolId = typeof args === 'string' ? args : args.schoolId;
       toast.success(res.data?.message || 'Results approved successfully');
       queryClient.invalidateQueries({ queryKey: ['exam-officer', 'results'] });
+      queryClient.invalidateQueries({ queryKey: ['exam-officer', 'results', schoolId] });
       queryClient.invalidateQueries({ queryKey: examOfficerKeys.dashboard() });
     },
     onError: (error: any) => {
@@ -55,10 +61,16 @@ export function useRejectSchoolResults() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (schoolId: string) => examOfficerApi.rejectSchoolResults(schoolId),
-    onSuccess: (res) => {
+    mutationFn: (args: string | { schoolId: string; studentIds?: string[] }) => {
+      const schoolId = typeof args === 'string' ? args : args.schoolId;
+      const studentIds = typeof args === 'string' ? undefined : args.studentIds;
+      return examOfficerApi.rejectSchoolResults(schoolId, studentIds);
+    },
+    onSuccess: (res, args) => {
+      const schoolId = typeof args === 'string' ? args : args.schoolId;
       toast.success(res.data?.message || 'Results rejected successfully');
       queryClient.invalidateQueries({ queryKey: ['exam-officer', 'results'] });
+      queryClient.invalidateQueries({ queryKey: ['exam-officer', 'results', schoolId] });
       queryClient.invalidateQueries({ queryKey: examOfficerKeys.dashboard() });
     },
     onError: (error: any) => {

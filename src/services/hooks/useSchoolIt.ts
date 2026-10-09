@@ -128,7 +128,8 @@ export function useSubmitSchoolItResults() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => schoolItApi.submitResultsForApproval(),
+    mutationFn: (data?: { classIds?: string[]; studentId?: string }) =>
+      schoolItApi.submitResultsForApproval(data),
     onSuccess: (res) => {
       toast.success(res.data?.message || 'Results submitted for approval successfully');
       queryClient.invalidateQueries({ queryKey: ['school-it', 'results'] });

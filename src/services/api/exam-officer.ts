@@ -6,10 +6,10 @@ export const examOfficerApi = {
     api.get('/exam-officer/results', { params: { status } }),
   getSchoolResultsDetails: (schoolId: string) => 
     api.get(`/exam-officer/results/${schoolId}`),
-  approveSchoolResults: (schoolId: string) => 
-    api.post(`/exam-officer/results/${schoolId}/approve`),
-  rejectSchoolResults: (schoolId: string) => 
-    api.post(`/exam-officer/results/${schoolId}/reject`),
+  approveSchoolResults: (schoolId: string, studentIds?: string[]) => 
+    api.post(`/exam-officer/results/${schoolId}/approve`, { studentIds }),
+  rejectSchoolResults: (schoolId: string, studentIds?: string[]) => 
+    api.post(`/exam-officer/results/${schoolId}/reject`, { studentIds }),
   getProfile: () => api.get('/exam-officer/profile'),
   updateProfile: (data: any) => api.patch('/exam-officer/profile', data),
   getAuditLogs: (params?: { page?: number; limit?: number }) => 
