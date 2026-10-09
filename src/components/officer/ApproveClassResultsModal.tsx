@@ -113,14 +113,21 @@ export function ApproveClassResultsModal({
   const schoolName =
     initialSchoolName || details?.school?.name || "School";
 
-  // When modal opens, auto-select all classes that have pending awaiting approvals
+  // Track whether we've initialized the default selected classes for the current open session
+  const hasInitializedRef = React.useRef(false);
+
+  // When modal opens, auto-select all classes that have pending awaiting approvals once
   useEffect(() => {
-    if (isOpen && classesList.length > 0) {
-      const classesWithPending = classesList
-        .filter((c) => c.awaitingCount > 0)
-        .map((c) => c.id);
-      setSelectedClassIds(classesWithPending);
-    } else if (!isOpen) {
+    if (isOpen) {
+      if (!hasInitializedRef.current && classesList.length > 0) {
+        const classesWithPending = classesList
+          .filter((c) => c.awaitingCount > 0)
+          .map((c) => c.id);
+        setSelectedClassIds(classesWithPending);
+        hasInitializedRef.current = true;
+      }
+    } else {
+      hasInitializedRef.current = false;
       setSelectedClassIds([]);
       setConfirmState({ isOpen: false, type: "APPROVE" });
     }
@@ -132,17 +139,6 @@ export function ApproveClassResultsModal({
         ? prev.filter((id) => id !== classId)
         : [...prev, classId]
     );
-  };
-
-  const handleSelectAllPending = () => {
-    const pendingIds = classesList
-      .filter((c) => c.awaitingCount > 0)
-      .map((c) => c.id);
-    setSelectedClassIds(pendingIds);
-  };
-
-  const handleClearSelection = () => {
-    setSelectedClassIds([]);
   };
 
   const selectedClasses = classesList.filter((c) =>
@@ -177,7 +173,7 @@ export function ApproveClassResultsModal({
   return (
     <>
       <Dialog open={isOpen && !confirmState.isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
           {/* Header */}
           <DialogHeader className="p-6 pb-4 border-b border-gray-100 bg-gray-50/50">
             <div className="flex items-center gap-3">
@@ -216,34 +212,15 @@ export function ApproveClassResultsModal({
               </div>
             ) : (
               <>
-                {/* Controls Bar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-gray-700">
-                      {classesList.length} total classes
-                    </span>
-                    <span className="text-gray-300">•</span>
-                    <span className="text-amber-700 font-medium">
-                      {classesList.filter((c) => c.awaitingCount > 0).length} with pending submissions
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleSelectAllPending}
-                      className="text-brand-primary hover:text-brand-primary/80 font-medium transition-colors"
-                    >
-                      Select all pending
-                    </button>
-                    <span className="text-gray-300">|</span>
-                    <button
-                      type="button"
-                      onClick={handleClearSelection}
-                      className="text-gray-500 hover:text-gray-700 font-medium transition-colors"
-                    >
-                      Clear selection
-                    </button>
-                  </div>
+                {/* Classes Summary Header */}
+                <div className="flex items-center gap-2.5 bg-gray-50 px-3.5 py-2.5 rounded-xl border border-gray-100 text-xs">
+                  <span className="font-semibold text-gray-700">
+                    {classesList.length} total classes
+                  </span>
+                  <span className="text-gray-300 font-light">|</span>
+                  <span className="text-amber-700 font-medium">
+                    {classesList.filter((c) => c.awaitingCount > 0).length} with pending submissions
+                  </span>
                 </div>
 
                 {/* Class List */}
@@ -268,12 +245,18 @@ export function ApproveClassResultsModal({
                         )}
                       >
                         <div className="flex items-center gap-3.5">
-                          <Checkbox
-                            checked={isSelected}
-                            disabled={!hasPending}
-                            onCheckedChange={() => toggleClass(cls.id)}
-                            aria-label={`Select ${cls.name}`}
-                          />
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center"
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              disabled={!hasPending}
+                              onCheckedChange={() => toggleClass(cls.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label={`Select ${cls.name}`}
+                            />
+                          </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-semibold text-sm text-gray-900">
@@ -325,7 +308,7 @@ export function ApproveClassResultsModal({
           </div>
 
           {/* Footer */}
-          <DialogFooter className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <DialogFooter className="p-4 sm:p-5 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-xs text-gray-600 text-center sm:text-left">
               {selectedClassIds.length > 0 ? (
                 <span>
@@ -339,13 +322,13 @@ export function ApproveClassResultsModal({
               )}
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onOpenChange(false)}
                 disabled={isBusy}
-                className="text-xs h-9"
+                className="text-xs h-9 px-3.5"
               >
                 Cancel
               </Button>
@@ -355,20 +338,20 @@ export function ApproveClassResultsModal({
                 variant="outline"
                 onClick={() => setConfirmState({ isOpen: true, type: "REJECT" })}
                 disabled={isBusy || selectedClassIds.length === 0 || totalSelectedPending === 0}
-                className="text-xs text-red-600 border-red-200 hover:bg-red-50 h-9"
+                className="text-xs text-red-600 border-red-200 hover:bg-red-50 h-9 px-3.5"
               >
                 <XCircle className="w-3.5 h-3.5 mr-1.5" />
-                Reject Selected Classes
+                Reject
               </Button>
 
               <Button
                 size="sm"
                 onClick={() => setConfirmState({ isOpen: true, type: "APPROVE" })}
                 disabled={isBusy || selectedClassIds.length === 0 || totalSelectedPending === 0}
-                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white h-9"
+                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white h-9 px-3.5"
               >
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-                Approve Selected Classes
+                Approve
               </Button>
             </div>
           </DialogFooter>
@@ -413,7 +396,7 @@ export function ApproveClassResultsModal({
                   {selectedClassIds.length > 1 ? "es" : ""} (
                   <strong>{totalSelectedPending}</strong> students) in{" "}
                   <strong className="capitalize">{formatEducationalText(schoolName)}</strong>? Once approved, they will be
-                  marked as Closed and visible to students.
+                  marked as Closed.
                 </>
               ) : (
                 <>
@@ -467,8 +450,8 @@ export function ApproveClassResultsModal({
               {isBusy
                 ? "Processing..."
                 : confirmState.type === "APPROVE"
-                ? `Confirm Approval (${totalSelectedPending})`
-                : `Confirm Rejection (${totalSelectedPending})`}
+                  ? `Confirm Approval (${totalSelectedPending})`
+                  : `Confirm Rejection (${totalSelectedPending})`}
             </Button>
           </DialogFooter>
         </DialogContent>

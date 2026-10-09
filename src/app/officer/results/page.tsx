@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  useExamOfficerResults, 
-  useApproveSchoolResults, 
-  useRejectSchoolResults 
+import {
+  useExamOfficerResults,
+  useApproveSchoolResults,
+  useRejectSchoolResults
 } from "@/services/hooks/useExamOfficer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/Button";
@@ -36,7 +36,7 @@ export default function ExamOfficerResults() {
 
   const confirmAction = () => {
     if (!confirmDialog.school) return;
-    
+
     if (confirmDialog.type === 'APPROVE') {
       approveMutation.mutate(confirmDialog.school.id, {
         onSuccess: () => setConfirmDialog({ isOpen: false, type: 'APPROVE', school: null })
@@ -48,8 +48,8 @@ export default function ExamOfficerResults() {
     }
   };
 
-  const filteredSchools = schools?.filter((school: any) => 
-    school.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredSchools = schools?.filter((school: any) =>
+    school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     school.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -66,7 +66,7 @@ export default function ExamOfficerResults() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Toolbar */}
         <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row justify-between gap-4 bg-gray-50/50">
-          
+
           {/* Pill Tabs */}
           <div className="flex bg-gray-100 p-1 rounded-lg space-x-1">
             {[
@@ -77,11 +77,10 @@ export default function ExamOfficerResults() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as StatusTab)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === tab.id
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === tab.id
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -164,21 +163,21 @@ export default function ExamOfficerResults() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => router.push(`/officer/results/${school.id}`)}
                               className="cursor-pointer"
                             >
                               <Eye className="mr-2 h-4 w-4" />
                               View Results
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleAction('APPROVE', school)}
                               className="text-green-600 focus:text-green-700 cursor-pointer"
                             >
                               <CheckCircle className="mr-2 h-4 w-4" />
                               Approve Results
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleAction('REJECT', school)}
                               className="text-red-600 focus:text-red-700 cursor-pointer"
                             >
@@ -209,15 +208,15 @@ export default function ExamOfficerResults() {
               {confirmDialog.type === 'APPROVE' ? 'Approve Results' : 'Reject Results'}
             </DialogTitle>
             <DialogDescription>
-              {confirmDialog.type === 'APPROVE' 
-                ? `Are you sure you want to approve all submitted results for ${formatEducationalText(confirmDialog.school?.name)}? They will be marked as Approved and visible to students.`
+              {confirmDialog.type === 'APPROVE'
+                ? `Are you sure you want to approve all submitted results for ${formatEducationalText(confirmDialog.school?.name)}? They will be marked as Approved.`
                 : `Are you sure you want to reject the results for ${formatEducationalText(confirmDialog.school?.name)}? They will be sent back to the School IT for correction.`
               }
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
               disabled={approveMutation.isPending || rejectMutation.isPending}
             >
