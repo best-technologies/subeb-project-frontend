@@ -52,6 +52,7 @@ import {
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { ManualResultEntry } from "@/components/school-it/ManualResultEntry";
+import { BulkResultUpload } from "@/components/school-it/BulkResultUpload";
 import Link from "next/link";
 import { schoolItApi } from "@/services/api/school-it";
 import { toast } from "react-hot-toast";
@@ -514,7 +515,7 @@ export default function SchoolItResultsPage() {
 
       {/* Upload Results Modal */}
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto rounded-2xl bg-white border border-gray-100 shadow-xl p-6">
+        <DialogContent className={cn("max-h-[90vh] overflow-y-auto rounded-2xl bg-white border border-gray-100 shadow-xl p-6 transition-all duration-300", isCsvMode ? "sm:max-w-[920px]" : "sm:max-w-[500px]")}>
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-gray-900">Upload Results</DialogTitle>
           </DialogHeader>
@@ -539,43 +540,12 @@ export default function SchoolItResultsPage() {
           </div>
 
           {isCsvMode ? (
-            <form onSubmit={handleUploadSubmit} className="space-y-4">
-              <div className="bg-amber-50 p-3 rounded-xl border border-amber-200/70 flex items-start gap-3 mb-4">
-                <AlertCircle className="text-amber-600 mt-0.5 shrink-0" size={16} />
-                <div className="text-xs text-amber-800">
-                  If any single result in your batch fails validation, the entire batch will be rejected to prevent partial uploads. You will need to correct the file and try again.
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="csvFile" className="text-xs font-semibold text-gray-700">
-                  Upload CSV/Excel File
-                </Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center bg-gray-50/60">
-                  <Upload size={32} className="text-gray-400 mb-2" />
-                  <p className="text-xs text-gray-600 mb-4">Drag and drop or click to select</p>
-                  <Input id="csvFile" type="file" accept=".csv, .xlsx" className="w-[240px] text-xs h-9 py-1" />
-                </div>
-              </div>
-
-              <DialogFooter className="mt-6 flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsUploadModalOpen(false)}
-                  className="rounded-xl text-xs px-4 py-2 h-auto"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={uploadMutation.isPending}
-                  className="rounded-xl text-xs font-semibold px-4 py-2 h-auto"
-                >
-                  {uploadMutation.isPending ? "Uploading..." : "Submit Results"}
-                </Button>
-              </DialogFooter>
-            </form>
+            <BulkResultUpload
+              classId={activeClassId}
+              dashboardData={dashboardQuery.data}
+              onSuccess={() => setIsUploadModalOpen(false)}
+              onCancel={() => setIsUploadModalOpen(false)}
+            />
           ) : (
             <ManualResultEntry
               dashboardData={dashboardQuery.data}

@@ -28,6 +28,11 @@ export const schoolItApi = {
   
   uploadResultsAtomic: (data: any) => api.post('/school-it/results/upload', data),
 
+  previewBulkResults: (formData: FormData) =>
+    api.post('/school-it/results/preview-bulk', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
   getAuditLogs: (params?: { page?: number; limit?: number }) =>
     api.get('/school-it/audit-logs', { params }),
 };
