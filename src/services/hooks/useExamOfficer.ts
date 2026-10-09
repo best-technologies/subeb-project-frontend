@@ -39,10 +39,10 @@ export function useApproveSchoolResults() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (args: string | { schoolId: string; studentIds?: string[] }) => {
+    mutationFn: (args: string | { schoolId: string; studentIds?: string[]; classIds?: string[] }) => {
       const schoolId = typeof args === 'string' ? args : args.schoolId;
-      const studentIds = typeof args === 'string' ? undefined : args.studentIds;
-      return examOfficerApi.approveSchoolResults(schoolId, studentIds);
+      const payload = typeof args === 'string' ? undefined : { studentIds: args.studentIds, classIds: args.classIds };
+      return examOfficerApi.approveSchoolResults(schoolId, payload);
     },
     onSuccess: (res, args) => {
       const schoolId = typeof args === 'string' ? args : args.schoolId;
@@ -61,10 +61,10 @@ export function useRejectSchoolResults() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (args: string | { schoolId: string; studentIds?: string[] }) => {
+    mutationFn: (args: string | { schoolId: string; studentIds?: string[]; classIds?: string[] }) => {
       const schoolId = typeof args === 'string' ? args : args.schoolId;
-      const studentIds = typeof args === 'string' ? undefined : args.studentIds;
-      return examOfficerApi.rejectSchoolResults(schoolId, studentIds);
+      const payload = typeof args === 'string' ? undefined : { studentIds: args.studentIds, classIds: args.classIds };
+      return examOfficerApi.rejectSchoolResults(schoolId, payload);
     },
     onSuccess: (res, args) => {
       const schoolId = typeof args === 'string' ? args : args.schoolId;

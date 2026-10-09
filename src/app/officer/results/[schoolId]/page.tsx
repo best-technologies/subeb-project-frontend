@@ -6,8 +6,10 @@ import { useExamOfficerSchoolResults, useApproveSchoolResults, useRejectSchoolRe
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, CheckCircle, XCircle, Clock, ShieldCheck, Check, X, Search, Filter } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Clock, ShieldCheck, Check, X, Search, Filter, Layers } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ApproveClassResultsModal } from "@/components/officer/ApproveClassResultsModal";
+import { formatEducationalText } from "@/utils/formatters";
 
 type StatusFilter = "ALL" | "AWAITING_APPROVAL" | "APPROVED" | "REJECTED";
 
@@ -20,6 +22,8 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
   const rejectMutation = useRejectSchoolResults();
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [selectedClassFilter, setSelectedClassFilter] = useState<string>("ALL");
+  const [isClassModalOpen, setIsClassModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -34,6 +38,7 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
   });
 
   const students = details?.students || [];
+  const classesList = details?.classes || [];
   const awaitingStudents = students.filter((s: any) => s.status === "AWAITING_APPROVAL");
   const approvedStudents = students.filter((s: any) => s.status === "APPROVED");
   const rejectedStudents = students.filter((s: any) => s.status === "REJECTED");
@@ -41,12 +46,14 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
   const filteredStudents = students.filter((item: any) => {
     const matchesFilter =
       statusFilter === "ALL" || item.status === statusFilter;
+    const matchesClass =
+      selectedClassFilter === "ALL" || item.class?.id === selectedClassFilter;
     const fullName = `${item.student.firstName || ""} ${item.student.lastName || ""}`.toLowerCase();
     const admNo = (item.student.admissionNumber || "").toLowerCase();
     const className = (item.class?.name || "").toLowerCase();
     const query = searchTerm.toLowerCase();
     const matchesSearch = fullName.includes(query) || admNo.includes(query) || className.includes(query);
-    return matchesFilter && matchesSearch;
+    return matchesFilter && matchesClass && matchesSearch;
   });
 
   const handleSelectAll = (checked: boolean) => {
@@ -142,7 +149,9 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{school.name} - Results</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight capitalize">
+            {formatEducationalText(school.name)} - Results
+          </h1>
           <p className="text-sm text-gray-500 mt-1">
             Session: {term.session?.name || "Active Session"} | Term: {term.name?.replace("_", " ") || "Active Term"}
           </p>
@@ -207,17 +216,36 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Toolbar */}
         <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-50/50">
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-64">
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:w-60">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search student or class..."
+                placeholder="Search student or admission no..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9 pr-4 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary w-full bg-white"
               />
             </div>
+
+            {classesList.length > 0 && (
+              <div className="flex items-center gap-1.5">
+                <Filter className="w-3.5 h-3.5 text-gray-400" />
+                <select
+                  value={selectedClassFilter}
+                  onChange={(e) => setSelectedClassFilter(e.target.value)}
+                  className="py-2 px-3 text-xs border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary font-medium"
+                >
+                  <option value="ALL">All Classes ({classesList.length})</option>
+                  {classesList.map((c: any) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.awaitingCount || 0} pending)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {selectedStudentIds.length > 0 && (
               <span className="text-xs text-brand-primary font-medium bg-brand-primary/10 px-2.5 py-1.5 rounded-lg whitespace-nowrap">
                 {selectedStudentIds.length} selected
@@ -225,7 +253,19 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
             )}
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+            {classesList.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsClassModalOpen(true)}
+                className="text-xs text-brand-primary border-brand-primary/30 hover:bg-brand-primary/5 rounded-lg h-9 font-medium"
+              >
+                <Layers className="w-3.5 h-3.5 mr-1.5 text-brand-primary" />
+                Approve / Reject by Class
+              </Button>
+            )}
+
             {selectedStudentIds.length > 0 ? (
               <>
                 <Button
@@ -420,7 +460,7 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
                   } results for the ${selectedStudentIds.length} selected students?`
                 : `Are you sure you want to ${
                     confirmDialog.type === "APPROVE" ? "approve" : "reject"
-                  } all awaiting results for ${school.name}?`}
+                  } all awaiting results for ${formatEducationalText(school.name)}?`}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4 flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
@@ -450,6 +490,15 @@ export default function ExamOffierSchoolResultsView({ params }: { params: Promis
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Class Level Actions Modal */}
+      <ApproveClassResultsModal
+        isOpen={isClassModalOpen}
+        onOpenChange={setIsClassModalOpen}
+        schoolId={schoolId}
+        schoolName={formatEducationalText(school.name)}
+        classes={classesList}
+      />
     </div>
   );
 }

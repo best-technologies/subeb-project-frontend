@@ -12,6 +12,7 @@ import { CheckCircle, XCircle, Search, Clock, ShieldCheck, MoreVertical, Eye } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import { formatEducationalText } from "@/utils/formatters";
 
 type StatusTab = "ALL" | "AWAITING_APPROVAL" | "APPROVED";
 
@@ -128,7 +129,9 @@ export default function ExamOfficerResults() {
               ) : (
                 filteredSchools?.map((school: any) => (
                   <TableRow key={school.id} className="hover:bg-gray-50 transition-colors">
-                    <TableCell className="font-medium text-gray-900">{school.name}</TableCell>
+                    <TableCell className="font-medium text-gray-900 capitalize">
+                      {formatEducationalText(school.name)}
+                    </TableCell>
                     <TableCell className="text-gray-500">{school.code}</TableCell>
                     <TableCell>
                       <span className="font-semibold">{school.stats.total}/{school.stats.totalEnrolled}</span> students
@@ -207,8 +210,8 @@ export default function ExamOfficerResults() {
             </DialogTitle>
             <DialogDescription>
               {confirmDialog.type === 'APPROVE' 
-                ? `Are you sure you want to approve all submitted results for ${confirmDialog.school?.name}? They will be marked as Approved and visible to students.`
-                : `Are you sure you want to reject the results for ${confirmDialog.school?.name}? They will be sent back to the School IT for correction.`
+                ? `Are you sure you want to approve all submitted results for ${formatEducationalText(confirmDialog.school?.name)}? They will be marked as Approved and visible to students.`
+                : `Are you sure you want to reject the results for ${formatEducationalText(confirmDialog.school?.name)}? They will be sent back to the School IT for correction.`
               }
             </DialogDescription>
           </DialogHeader>
